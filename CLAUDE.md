@@ -52,6 +52,8 @@ Entry point: `form(verb, tenseKey, person)` returns a string or `null`.
 - `si` (imperfect subjunctive) → ellos pretérito minus `-ron` + `-ra…`; nosotros gets an accent on the last vowel of the stem. Only the -ra form is accepted, not -se.
 - `impa` (affirmative imperative) → tú: él presente or `IMP_TU`; Ud./Uds./nosotros: present subjunctive (ir → `vamos`); vosotros: infinitive minus `-r` + `d`.
 
+**Explanations.** `explain(verb, tenseKey, person)` returns HTML lines with the rule and the steps from the infinitive to the form. It follows the same branches and helper lists as `form()` (`whyBasic` for presente/pretérito, which classifies the irregularity by comparing with the regular form; `whySp` for the subjunctive). It is shown in the feedback after a mistake. When you change the engine or add a helper list, update `explain` too. Check that every form gets a non-empty explanation that mentions the form itself.
+
 Russian prompts (`ruPhrase`) and full translations in feedback exist only for `pres` and `pret`. Other tenses always prompt in Spanish, and the feedback shows the infinitive's translation.
 
 ## Adding a verb

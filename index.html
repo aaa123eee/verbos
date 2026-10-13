@@ -101,6 +101,8 @@ button.primary{background:var(--cobalt);border-color:var(--cobalt);color:var(--s
 .feedback.idle{color:var(--muted);background:var(--bg)}
 .feedback .row{font-family:var(--f-mono);font-size:17px;color:var(--ink)}
 .feedback mark{background:var(--saffron-soft);color:var(--saffron);border-radius:3px;padding:0 1px;font-weight:600}
+.feedback .why{margin-top:8px;padding-top:10px;border-top:1px solid var(--line);color:var(--ink);font-size:14px;display:flex;flex-direction:column;gap:5px}
+.feedback .why b.f{color:var(--tc);font-weight:600;white-space:nowrap}
 .feedback del{color:var(--bad);text-decoration-thickness:2px}
 .stats{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .stats b{color:var(--ink);font-weight:600}
@@ -547,6 +549,106 @@ function form(v,t,p){
   }
   return null;
 }
+// ---- explanation: the rule and the steps from the infinitive to the form; mirrors form() ----
+const F=s=>'<b class="f">'+s+'</b>';
+const PN=["yo","tú","él","nosotros","vosotros","ellos"];
+const ACC={"á":"a","é":"e","í":"i","ó":"o","ú":"u"};
+const plain=s=>s.replace(/[áéíóú]/g,c=>ACC[c]);
+const listF=(s,p)=>s.split(" ").map((x,i)=>i===p?F(x):x).join(", ");
+const SPELL_RULE=v=>/car$/.test(v)?"c → qu":/gar$/.test(v)?"g → gu":/zar$/.test(v)?"z → c":"";
+function stemChange(a,b){ // which vowel change turns stem a into stem b
+  for(const [x,y] of [["e","ie"],["o","ue"],["u","ue"],["e","i"],["o","u"]])
+    for(let i=a.indexOf(x);i>=0;i=a.indexOf(x,i+1)) if(a.slice(0,i)+y+a.slice(i+1)===b) return x+" → "+y;
+  return "";
+}
+function whyBasic(v,t,p){
+  const c=basic(v,t,p),st=base(v),g=vt(v),end=REG[g][t][p],reg=st+end,tn=t==="pres"?"presente":"pretérito";
+  const how="основа "+F(st+"-")+" + окончание "+F("-"+end)+" ("+tn+", -"+g+", "+PN[p]+")";
+  if(c===reg) return ["Отрезаем -"+g+": "+how+" = "+F(c)+"."].concat(IRR[v]?["В этой форме "+v+" спрягается по правилу."]:[]);
+  const all=IRR[v][t];
+  if(v==="ser"||v==="ir") return [t==="pres"?"Полностью неправильный глагол, формы надо запомнить: "+listF(all,p)+".":"ser и ir в pretérito совпадают, формы надо запомнить: "+listF(all,p)+"."];
+  const rule=[];
+  if(t==="pres"){
+    if(p===0&&/zco$/.test(c)) return ["-cer / -cir после гласной → -zco в yo: c превращается в zc: "+F(c)+". Остальные формы обычные."];
+    if(p===0&&/guir$/.test(v)) return ["Смена корня e → i и орфография: перед o пишется g, а не gu (u нужна только перед e и i): "+F(c)+"."];
+    const gs=s=>(s.match(/g/g)||[]).length;
+    if(p===0&&/go$/.test(c)&&gs(c)>gs(st)) return ["Yo на -go: в yo появляется g — "+F(c)+". Так же tengo, pongo, salgo, vengo, hago, digo, traigo, caigo, oigo."];
+    if(p===0&&/oy$/.test(c)) return ["Yo на -oy: "+F(c)+". Так же soy, estoy, voy, doy."];
+    if(plain(c)===plain(reg)) return ["По общему правилу: "+how+" = "+reg+", но пишется "+F(c)+(c===plain(c)?" без ударения: в форме один слог.":" с ударением.")];
+    if(c.endsWith(end)&&p!==3&&p!==4){
+      const st2=c.slice(0,-end.length),ch=stemChange(st,st2);
+      if(ch) return ["Смена корня "+ch+": "+F(st+"-")+" → "+F(st2+"-")+" + "+F("-"+end)+" = "+F(c)+".","Корень меняется во всех формах, кроме nosotros и vosotros: там ударение уходит на окончание."];
+      if(st2===st+"y") return ["Между гласными появляется y: "+F(st2+"-")+" + "+F("-"+end)+" = "+F(c)+"."];
+    }
+  }else{
+    const P=all.split(" ");
+    if(v==="dar"||v==="ver") return ["dar и ver в pretérito: короткие формы без ударений, окончания как у -er/-ir: "+listF(all,p)+"."];
+    if(/[^é]e$/.test(P[0])&&/o$/.test(P[2])){ // strong preterite: new stem + unstressed endings
+      const s2=P[0].slice(0,-1),j=/j$/.test(s2);
+      rule.push("Сильный pretérito: новый корень "+F(s2+"-")+" (вместо "+st+"-) + окончания -e, -iste, -o, -imos, -isteis, -"+(j?"eron":"ieron")+", без ударений: "+F(c)+".");
+      if(v==="hacer"&&p===2) rule.push("В él c → z перед o, чтобы сохранить звук: hizo.");
+      if(j&&p===5) rule.push("После j окончание -eron, без i.");
+      return rule;
+    }
+    if(p===0&&SPELL_RULE(v)) return ["Орфография: "+how+" = "+reg+", но перед é пишется "+SPELL_RULE(v)+", чтобы сохранить звук: "+F(c)+"."];
+    if(plain(c)===plain(reg)) return ["По общему правилу: "+how+" = "+reg+", но i рядом с гласной корня получает ударение: "+F(c)+"."];
+    if(reg.replace("ió","yó").replace("ieron","yeron")===c) return ["i между гласными превращается в y: "+reg+" → "+F(c)+"."];
+    if((p===2||p===5)&&g==="ir"){
+      const st2=c.slice(0,-end.length),ch=stemChange(st,st2);
+      if(ch) return ["У -ir глаголов со сменой корня в pretérito корень меняется только в él и ellos: "+ch+". "+F(st2+"-")+" + "+F("-"+end)+" = "+F(c)+"."];
+    }
+  }
+  return ["Неправильная форма, её надо запомнить: "+listF(all,p)+"."];
+}
+function whySp(v,p){
+  if(SP_OVR[v]) return ["Исключение: subjuntivo от "+v+" надо запомнить: "+listF(SP_OVR[v],p)+"."];
+  const yo=basic(v,"pres",0),out=[]; let st=yo.slice(0,-1);
+  out.push("Берём yo из presente "+F(yo)+" и убираем "+F("-o")+" → "+F(st+"-")+".");
+  if(p===3||p===4){
+    if(SP_NOS_IR[v]){ st=SP_NOS_IR[v]; out.push("У -ir со сменой корня в nosotros и vosotros корень меняется только на одну гласную (e → i, o → u): "+F(st+"-")+"."); }
+    else if(SP_NOS_INF.has(v)){ st=base(v); out.push("Смена корня не идёт в nosotros и vosotros: берём корень инфинитива "+F(st+"-")+"."); }
+  }
+  const sp=spell(v,st);
+  if(sp!==st){ out.push("Орфография: перед e пишется "+SPELL_RULE(v)+", чтобы сохранить звук: "+F(sp+"-")+"."); st=sp; }
+  const e=SP_END[vt(v)][p];
+  out.push("Ставим «чужую» гласную (у -ar → e, у -er/-ir → a): "+F(st+"-")+" + "+F("-"+e)+" = "+F(st+e)+".");
+  return out;
+}
+const HABER_NAME={perf:"presente",plus:"imperfecto",futp:"futuro",condp:"condicional",spf:"presente de subjuntivo",spl:"imperfecto de subjuntivo"};
+function explain(v,t,p){
+  const c=form(v,t,p);
+  switch(t){
+    case "pres": case "pret": return whyBasic(v,t,p);
+    case "imp":
+      if(IMPF_IRR[v]) return ["В imperfecto неправильных всего три: ser, ir, ver. Формы надо запомнить: "+listF(IMPF_IRR[v],p)+"."];
+      return ["Отрезаем -"+vt(v)+": основа "+F(base(v)+"-")+" + окончание "+F("-"+IMPF[vt(v)][p])+" = "+F(c)+".","У -ar окончания на -aba, у -er/-ir на -ía."+(p===3&&vt(v)==="ar"?" В nosotros ударение: -ábamos.":"")];
+    case "fut": case "cond": {
+      const e=(t==="fut"?FUT:COND)[p],nm=t==="fut"?"futuro":"condicional";
+      if(v==="oír") return ["oír теряет ударение: основа "+F("oir-")+" + "+F("-"+e)+" = "+F(c)+"."];
+      if(FUT_STEM[v]) return ["У "+v+" особая основа "+F(FUT_STEM[v]+"-")+" (не "+v+"-), она одна для futuro и condicional: + "+F("-"+e)+" = "+F(c)+"."];
+      return [nm[0].toUpperCase()+nm.slice(1)+": к целому инфинитиву "+F(v)+" добавляем "+F("-"+e)+" = "+F(c)+".","Окончания одинаковые для -ar, -er, -ir."];
+    }
+    case "perf": case "plus": case "futp": case "condp": case "spf": case "spl": {
+      const h=HABER[t].split(" ")[p],pt=part(v),out=["Составное время: haber в "+HABER_NAME[t]+" ("+F(h)+") + participio ("+F(pt)+")."];
+      if(PART_IRR[v]) out.push(/í/.test(pt)?"Participio с ударением: "+F(pt)+" — i стоит после гласной корня.":"Participio неправильный, его надо запомнить: "+F(pt)+".");
+      else out.push("Participio: основа "+F(base(v)+"-")+" + "+F(vt(v)==="ar"?"-ado":"-ido")+" = "+F(pt)+".");
+      return out;
+    }
+    case "sp": return whySp(v,p);
+    case "si": {
+      const ell=basic(v,"pret",5),st=ell.slice(0,-3),e=["ra","ras","ra","ramos","rais","ran"][p];
+      const out=["Берём ellos из pretérito "+F(ell)+", убираем "+F("-ron")+" → "+F(st+"-")+" и добавляем "+F("-"+e)+"."];
+      out.push(p===3?"В nosotros ударение на гласную перед -ramos: "+F(c)+".":"Получается "+F(c)+".");
+      return out;
+    }
+    case "impa":
+      if(p===1) return IMP_TU[v]?["Особая короткая форма tú, её надо запомнить: "+F(c)+". Таких восемь: di, haz, ve, pon, sal, sé, ten, ven."]:["tú = форма él из presente: "+F(c)+"."];
+      if(p===4) return ["vosotros = инфинитив без "+F("-r")+" + d: "+F(v.slice(0,-1)+"-")+" + "+F("d")+" = "+F(c)+"."];
+      if(p===3&&v==="ir") return ["Для ir в nosotros особая форма: "+F("vamos")+"."];
+      return [IMP_PERS[p]+" = subjuntivo presente:"].concat(whySp(v,p));
+  }
+  return [];
+}
 // irregular table
 (function(){
   let out="",voc="";
@@ -664,6 +766,7 @@ function trLine(v,t,p,c){
   const head=v+" · "+persLabel(t,p)+" → "+c;
   return (t==="pres"||t==="pret")? head+" — "+ruPhrase(v,t,p) : head+" — "+RU[v][0]+" ("+TMAP[t].name+")";
 }
+const whyHtml=(v,t,p)=>'<div class="why"><h3>Как получается</h3>'+explain(v,t,p).map(l=>'<div>'+l+'</div>').join("")+'</div>';
 function check(){
   const [v,t,p]=cur.split("|"),c=form(v,t,+p),u=norm($("ans").value);
   if(!u)return false;
@@ -684,7 +787,7 @@ function check(){
     const d=diff(u,c);
     S.review[cur]={need:3,gap:4,due:S.t+4+Math.floor(Math.random()*3)};
     fb.className="feedback bad";
-    fb.innerHTML='<div>'+(accentOnly?"Ошибка в ударении.":"Ошибка.")+'</div><div class="row">ты: '+d.u+'</div><div class="row">надо: '+d.c+'</div><div class="tr">'+esc(trLine(v,t,+p,c))+'</div>';
+    fb.innerHTML='<div>'+(accentOnly?"Ошибка в ударении.":"Ошибка.")+'</div><div class="row">ты: '+d.u+'</div><div class="row">надо: '+d.c+'</div><div class="tr">'+esc(trLine(v,t,+p,c))+'</div>'+whyHtml(v,t,+p);
   }
   save(); render(); answered=true; setGo(true);
   return true;
