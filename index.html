@@ -1,0 +1,766 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>:root{color-scheme:light}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Conjugación española</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇸</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: trainer card on top, cheat-sheet tables below; endings set in mono and tinted like painted tiles */
+:root{
+  --bg:#f6f7fb; --surface:#ffffff; --ink:#18203a; --muted:#5d6580; --line:#dde1ee;
+  --cobalt:#1f47b8; --cobalt-soft:#e6ecfb; --saffron:#c47a00; --saffron-soft:#fdf1da;
+  --ok:#1d7a4a; --ok-soft:#e2f4ea; --bad:#b3261e; --bad-soft:#fbe6e4;
+  --pres-strong:#1f47b8; --pret-strong:#8f5200;
+  --fut-strong:#16705f; --fut-soft:#e0f2ee; --subj-strong:#86297a; --subj-soft:#f6e4f2; --imp-strong:#9c3a14; --imp-soft:#fbe8df;
+  --f-display:"Young Serif",Georgia,"Times New Roman",serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10142a; --surface:#181d38; --ink:#e8ebf7; --muted:#9aa2c2; --line:#2b3256;
+  --cobalt:#8eabff; --cobalt-soft:#222c58; --saffron:#f2b54a; --saffron-soft:#3a2f17;
+  --ok:#6fd49c; --ok-soft:#173a2a; --bad:#ff8a80; --bad-soft:#40201f; --pres-strong:#8eabff; --pret-strong:#f2b54a; --fut-strong:#6fd1bd; --fut-soft:#163a35; --subj-strong:#e39ad3; --subj-soft:#3a2036; --imp-strong:#ff9f7a; --imp-soft:#40261c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10142a; --surface:#181d38; --ink:#e8ebf7; --muted:#9aa2c2; --line:#2b3256;
+  --cobalt:#8eabff; --cobalt-soft:#222c58; --saffron:#f2b54a; --saffron-soft:#3a2f17;
+  --ok:#6fd49c; --ok-soft:#173a2a; --bad:#ff8a80; --bad-soft:#40201f; --pres-strong:#8eabff; --pret-strong:#f2b54a; --fut-strong:#6fd1bd; --fut-soft:#163a35; --subj-strong:#e39ad3; --subj-soft:#3a2036; --imp-strong:#ff9f7a; --imp-soft:#40261c; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:flex;flex-direction:column;gap:36px}
+header{display:flex;flex-direction:column;gap:6px}
+h1{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,5vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+h1 em{font-style:normal;color:var(--cobalt)}
+.lede{color:var(--muted);margin:0;max-width:62ch}
+nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
+nav a{color:var(--cobalt);text-decoration:none;border-bottom:1px solid currentColor}
+h2{font-family:var(--f-display);font-weight:400;font-size:26px;margin:0;text-wrap:balance}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:600}
+section{display:flex;flex-direction:column;gap:18px}
+p{margin:0;max-width:68ch}
+
+/* trainer */
+.trainer{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:flex;flex-direction:column;gap:18px}
+.filters{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.seg{display:inline-flex;flex-wrap:wrap;max-width:100%;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg span{display:block;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--muted)}
+.seg input:checked+span{background:var(--cobalt);color:var(--surface)}
+.seg input:focus-visible+span{outline:2px solid var(--saffron);outline-offset:-2px}
+.check{display:inline-flex;gap:6px;align-items:center;font-size:13px;color:var(--muted)}
+/* tense group colors: presente / прошедшие / будущее+условное / subjuntivo / imperativo */
+.trainer{--tc:var(--pres-strong);--ts:var(--cobalt-soft)}
+.trainer[data-tg="past"]{--tc:var(--pret-strong);--ts:var(--saffron-soft)}
+.trainer[data-tg="fut"]{--tc:var(--fut-strong);--ts:var(--fut-soft)}
+.trainer[data-tg="subj"]{--tc:var(--subj-strong);--ts:var(--subj-soft)}
+.trainer[data-tg="imp"]{--tc:var(--imp-strong);--ts:var(--imp-soft)}
+.prompt{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:12px;background:var(--ts)}
+.prompt .tense{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;background:var(--tc);color:var(--bg)}
+.when{font-size:14px;font-weight:500;color:var(--tc)}
+#ans{border-color:var(--tc)!important}
+.tenses{display:flex;flex-direction:column;gap:8px}
+.mood{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mood>b{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;min-width:96px}
+.tchip{position:relative}
+.tchip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.tchip span{display:block;padding:5px 11px;border:1px solid var(--line);border-radius:999px;font-size:13px;color:var(--muted)}
+.tchip input:checked+span{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.tchip input:focus-visible+span{outline:2px solid var(--saffron);outline-offset:2px}
+.tbtns{display:flex;gap:6px;flex-wrap:wrap}
+.tbtns button{font-size:12px;padding:5px 10px;font-weight:500;color:var(--muted)}
+.prompt .q{font-family:var(--f-display);font-size:clamp(26px,5vw,36px);line-height:1.15}
+.prompt .q .pron{color:var(--muted)}
+.prompt .ru{font-size:15px;color:var(--muted)}
+.feedback .tr{font-size:13.5px;color:var(--muted)}
+.vocab{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:6px 18px;font-size:14px}
+.vocab div{display:flex;gap:8px;align-items:baseline;min-width:0}
+.vocab span:last-child{color:var(--muted)}
+.prompt .tag{font-size:12px;color:var(--bad);font-weight:600;min-height:18px}
+.answer{display:flex;gap:10px;flex-wrap:wrap}
+#ans{flex:1 1 220px;min-width:0;font-family:var(--f-mono);font-size:20px;padding:10px 14px;border:2px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+#ans:focus{outline:none;border-color:var(--cobalt)}
+button{font-family:var(--f-body);font-size:14px;font-weight:600;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:10px 16px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--saffron);outline-offset:2px}
+button{display:inline-flex;align-items:center;justify-content:center;gap:7px}
+button:disabled{opacity:.45;cursor:default}
+.ico{width:16px;height:16px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+kbd{font-family:var(--f-mono);font-size:11px;font-weight:500;line-height:1;padding:3px 5px;border:1px solid currentColor;border-radius:4px;opacity:.7}
+@media (hover:none),(max-width:480px){kbd{display:none}}
+.resets{display:flex;gap:6px;flex-wrap:wrap}
+.acts{display:flex;gap:10px;flex-wrap:wrap}
+button.primary{background:var(--cobalt);border-color:var(--cobalt);color:var(--surface)}
+.keys{display:flex;gap:6px;flex-wrap:wrap}
+.keys button{font-family:var(--f-mono);padding:6px 11px;font-size:16px;font-weight:400}
+.feedback{border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;min-height:24px}
+.feedback.ok{background:var(--ok-soft);color:var(--ok)}
+.feedback.bad{background:var(--bad-soft);color:var(--bad)}
+.feedback.idle{color:var(--muted);background:var(--bg)}
+.feedback .row{font-family:var(--f-mono);font-size:17px;color:var(--ink)}
+.feedback mark{background:var(--saffron-soft);color:var(--saffron);border-radius:3px;padding:0 1px;font-weight:600}
+.feedback del{color:var(--bad);text-decoration-thickness:2px}
+.stats{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.stats b{color:var(--ink);font-weight:600}
+.weak{display:flex;flex-direction:column;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:12.5px;padding:3px 8px;border-radius:999px;background:var(--bad-soft);color:var(--bad)}
+.chip i{font-style:normal;opacity:.7}
+.empty{font-size:13px;color:var(--muted)}
+.foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.foot button{font-size:12px;padding:6px 10px;font-weight:500;color:var(--muted)}
+
+/* tables */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px}
+.block{display:flex;flex-direction:column;gap:10px;min-width:0}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;background:var(--bg)}
+td.p{color:var(--muted);font-size:13px}
+.f{font-family:var(--f-mono)}
+.e{color:var(--cobalt);font-weight:600}
+.x{color:var(--saffron);font-weight:600}
+.note{font-size:13.5px;color:var(--muted);display:flex;flex-direction:column;gap:6px}
+.note b{color:var(--ink);font-weight:600}
+ul.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;max-width:72ch}
+@media (prefers-reduced-motion:no-preference){.feedback{transition:background .15s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Conjugación <em>española</em></h1>
+    <p class="lede">Тренажёр без подсказок: пишешь форму, получаешь «верно» или место ошибки. Ошибки возвращаются через несколько вопросов, пока не ответишь правильно три раза. Времена выбираются галочками, по умолчанию presente и pretérito. Ниже шпаргалка по окончаниям.</p>
+    <nav><a href="#trainer">Тренажёр</a><a href="#regular">Правильные глаголы</a><a href="#irregular">Неправильные</a><a href="#other">Остальные времена</a></nav>
+  </header>
+
+  <section id="trainer">
+    <div class="trainer">
+      <div class="tenses" id="tenses" role="group" aria-label="Времена"></div>
+      <div class="filters">
+        <div class="seg" role="radiogroup" aria-label="Глаголы">
+          <label><input type="radio" name="group" id="g-all" value="all" checked><span>Все</span></label>
+          <label><input type="radio" name="group" id="g-reg" value="reg"><span>Правильные</span></label>
+          <label><input type="radio" name="group" id="g-irr" value="irr"><span>Неправильные</span></label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Набор глаголов">
+          <label><input type="radio" name="tier" id="l-1" value="1" checked><span>Основные</span></label>
+          <label><input type="radio" name="tier" id="l-2" value="2"><span>Частые</span></label>
+          <label><input type="radio" name="tier" id="l-3" value="3"><span>Регулярно используемые</span></label>
+          <label><input type="radio" name="tier" id="l-all" value="all"><span>Все</span></label>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Язык задания">
+          <label><input type="radio" name="mode" id="m-es" value="es" checked><span>yo · hablar</span></label>
+          <label><input type="radio" name="mode" id="m-ru" value="ru"><span>я говорю</span></label>
+          <label><input type="radio" name="mode" id="m-mix" value="mix"><span>Вперемешку</span></label>
+        </div>
+        <label class="check"><input type="checkbox" id="strict" checked> Ударения считаются</label>
+        <label class="check"><input type="checkbox" id="vos" checked> С vosotros</label>
+      </div>
+
+      <div class="prompt" aria-live="polite">
+        <div class="tense"><span class="pill" id="pTense">presente</span><span class="when" id="pWhen">настоящее · сейчас</span></div>
+        <div class="q"><span class="pron" id="pPron">yo</span><span class="pron" id="pSep"> · </span><span id="pVerb">hablar</span></div>
+        <div class="ru" id="pRu">разговаривать</div>
+        <div class="tag" id="pTag"></div>
+      </div>
+
+      <div class="answer">
+        <input id="ans" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Твой ответ" placeholder="форма глагола">
+        <div class="acts"><button class="primary" type="button" id="go"></button>
+        <button type="button" id="undo" disabled title="Отменить ответ и ответить заново (Esc)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg><span>Отменить</span><kbd>Esc</kbd></button></div>
+      </div>
+      <div class="keys" aria-label="Буквы с ударением">
+        <button type="button" data-k="á">á</button><button type="button" data-k="é">é</button><button type="button" data-k="í">í</button><button type="button" data-k="ó">ó</button><button type="button" data-k="ú">ú</button><button type="button" data-k="ñ">ñ</button>
+      </div>
+
+      <div class="feedback idle" id="fb">Enter — проверить, ещё раз Enter — следующий вопрос. Esc — отменить ответ, если ошибся по невнимательности.</div>
+
+      <div class="stats" id="stats"></div>
+      <div class="weak">
+        <h3>Сейчас на повторении</h3>
+        <div class="chips" id="weak"></div>
+      </div>
+      <div class="foot">
+        <span class="empty" id="syncNote">Прогресс хранится в этом браузере.</span>
+        <span class="resets"><button type="button" id="reset" data-label="Сбросить прогресс"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg><span>Сбросить прогресс</span></button><button type="button" id="resetAll" data-label="Сбросить всё"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg><span>Сбросить всё</span></button></span>
+      </div>
+    </div>
+  </section>
+
+  <section id="regular">
+    <h2>Правильные глаголы</h2>
+    <p>Отрезаешь <span class="f">-ar / -er / -ir</span> и добавляешь окончание. У <span class="f">-er</span> и <span class="f">-ir</span> окончания почти совпадают: в presente отличаются только nosotros и vosotros, в pretérito они одинаковые.</p>
+    <div class="grid2">
+      <div class="block">
+        <h3>Presente</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>-ar · hablar</th><th>-er · comer</th><th>-ir · vivir</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">habl<span class="e">o</span></td><td class="f">com<span class="e">o</span></td><td class="f">viv<span class="e">o</span></td></tr>
+            <tr><td class="p">tú</td><td class="f">habl<span class="e">as</span></td><td class="f">com<span class="e">es</span></td><td class="f">viv<span class="e">es</span></td></tr>
+            <tr><td class="p">él / ella / Ud.</td><td class="f">habl<span class="e">a</span></td><td class="f">com<span class="e">e</span></td><td class="f">viv<span class="e">e</span></td></tr>
+            <tr><td class="p">nosotros</td><td class="f">habl<span class="e">amos</span></td><td class="f">com<span class="e">emos</span></td><td class="f">viv<span class="e">imos</span></td></tr>
+            <tr><td class="p">vosotros</td><td class="f">habl<span class="e">áis</span></td><td class="f">com<span class="e">éis</span></td><td class="f">viv<span class="e">ís</span></td></tr>
+            <tr><td class="p">ellos / Uds.</td><td class="f">habl<span class="e">an</span></td><td class="f">com<span class="e">en</span></td><td class="f">viv<span class="e">en</span></td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Гласная окончания «переворачивается»: у <b>-ar</b> везде <b>a</b>, у <b>-er/-ir</b> везде <b>e</b>. Кроме yo — там всегда <b>-o</b>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Pretérito indefinido</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>-ar · hablar</th><th>-er · comer</th><th>-ir · vivir</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">habl<span class="e">é</span></td><td class="f">com<span class="e">í</span></td><td class="f">viv<span class="e">í</span></td></tr>
+            <tr><td class="p">tú</td><td class="f">habl<span class="e">aste</span></td><td class="f">com<span class="e">iste</span></td><td class="f">viv<span class="e">iste</span></td></tr>
+            <tr><td class="p">él / ella / Ud.</td><td class="f">habl<span class="e">ó</span></td><td class="f">com<span class="e">ió</span></td><td class="f">viv<span class="e">ió</span></td></tr>
+            <tr><td class="p">nosotros</td><td class="f">habl<span class="e">amos</span></td><td class="f">com<span class="e">imos</span></td><td class="f">viv<span class="e">imos</span></td></tr>
+            <tr><td class="p">vosotros</td><td class="f">habl<span class="e">asteis</span></td><td class="f">com<span class="e">isteis</span></td><td class="f">viv<span class="e">isteis</span></td></tr>
+            <tr><td class="p">ellos / Uds.</td><td class="f">habl<span class="e">aron</span></td><td class="f">com<span class="e">ieron</span></td><td class="f">viv<span class="e">ieron</span></td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Ударение на yo и él решает смысл: <span class="f">hablo</span> «я говорю» ≠ <span class="f">habló</span> «он сказал».</span><span><span class="f">hablamos</span> и <span class="f">vivimos</span> одинаковы в обоих временах, время понятно из контекста.</span></div>
+      </div>
+    </div>
+    <div class="block" id="vocab"></div>
+  </section>
+
+  <section id="irregular">
+    <h2>Неправильные глаголы</h2>
+    <ul class="rules">
+      <li><b>Yo на -go</b> в presente, остальное обычно: tener → <span class="f">ten<span class="x">go</span></span>, hacer → <span class="f">ha<span class="x">go</span></span>, poner, salir, venir, decir.</li>
+      <li><b>Смена корня в presente</b> во всех формах, кроме nosotros и vosotros: <span class="f">e→ie</span> (qu<span class="x">ie</span>ro), <span class="f">o→ue</span> (p<span class="x">ue</span>do), <span class="f">e→i</span> (d<span class="x">i</span>go).</li>
+      <li><b>«Сильный» pretérito</b>: новый корень + <span class="f e">-e, -iste, -o, -imos, -isteis, -ieron</span>, без ударений. tuv-, estuv-, hic-, pud-, quis-, vin-, pus-, sup-. У hacer в él: <span class="f">hi<span class="x">z</span>o</span>.</li>
+      <li>Корень на <b>-j</b> (dij-) даёт <span class="f">dij<span class="x">eron</span></span>, без i.</li>
+      <li><b>ser и ir</b> в pretérito одинаковые: <span class="f">fui, fuiste, fue…</span></li>
+      <li><b>dar, ver</b>: короткие формы без ударений — <span class="f">di, dio, vi, vio</span>.</li>
+      <li><b>-ir со сменой корня</b> меняются и в pretérito, но только в él и ellos: <span class="f">e→i</span> (p<span class="x">i</span>dió, s<span class="x">i</span>ntieron), <span class="f">o→u</span> (d<span class="x">u</span>rmió, m<span class="x">u</span>rieron). У -ar и -er в pretérito корень не меняется: pensé, volví.</li>
+      <li><b>Орфография в yo pretérito</b>, чтобы сохранить звук: <span class="f">-car → -<span class="x">qu</span>é</span> (busqué), <span class="f">-gar → -<span class="x">gu</span>é</span> (llegué), <span class="f">-zar → -<span class="x">c</span>é</span> (empecé).</li>
+      <li><b>i → y</b> между гласными: le<span class="x">y</span>ó, o<span class="x">y</span>eron, ca<span class="x">y</span>ó, cre<span class="x">y</span>eron.</li>
+      <li><b>-cer, -cir → -zco</b> в yo: cono<span class="x">zc</span>o, condu<span class="x">zc</span>o. У -ducir ещё и pretérito на j: <span class="f">conduje, condujeron</span>.</li>
+    </ul>
+    <div class="block" id="irrTables"></div>
+  </section>
+
+  <section id="other">
+    <h2>Остальные времена</h2>
+    <p>Все эти времена строятся по правилам из нескольких строк. Неправильных глаголов здесь гораздо меньше, чем в presente и pretérito.</p>
+    <div class="grid2">
+      <div class="block">
+        <h3>Pretérito imperfecto · фон, привычка</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>-ar · hablar</th><th>-er / -ir · comer</th><th>ser</th><th>ir</th><th>ver</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">habl<span class="e">aba</span></td><td class="f">com<span class="e">ía</span></td><td class="f">era</td><td class="f">iba</td><td class="f">veía</td></tr>
+            <tr><td class="p">tú</td><td class="f">habl<span class="e">abas</span></td><td class="f">com<span class="e">ías</span></td><td class="f">eras</td><td class="f">ibas</td><td class="f">veías</td></tr>
+            <tr><td class="p">él</td><td class="f">habl<span class="e">aba</span></td><td class="f">com<span class="e">ía</span></td><td class="f">era</td><td class="f">iba</td><td class="f">veía</td></tr>
+            <tr><td class="p">nosotros</td><td class="f">habl<span class="e">ábamos</span></td><td class="f">com<span class="e">íamos</span></td><td class="f">éramos</td><td class="f">íbamos</td><td class="f">veíamos</td></tr>
+            <tr><td class="p">vosotros</td><td class="f">habl<span class="e">abais</span></td><td class="f">com<span class="e">íais</span></td><td class="f">erais</td><td class="f">ibais</td><td class="f">veíais</td></tr>
+            <tr><td class="p">ellos</td><td class="f">habl<span class="e">aban</span></td><td class="f">com<span class="e">ían</span></td><td class="f">eran</td><td class="f">iban</td><td class="f">veían</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Неправильных всего три: <b>ser, ir, ver</b>. Остальные, даже tener и hacer, правильные: tenía, hacía.</span></div>
+      </div>
+      <div class="block">
+        <h3>Futuro y condicional · к инфинитиву</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>futuro</th><th>condicional</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">hablar<span class="e">é</span></td><td class="f">hablar<span class="e">ía</span></td></tr>
+            <tr><td class="p">tú</td><td class="f">hablar<span class="e">ás</span></td><td class="f">hablar<span class="e">ías</span></td></tr>
+            <tr><td class="p">él</td><td class="f">hablar<span class="e">á</span></td><td class="f">hablar<span class="e">ía</span></td></tr>
+            <tr><td class="p">nosotros</td><td class="f">hablar<span class="e">emos</span></td><td class="f">hablar<span class="e">íamos</span></td></tr>
+            <tr><td class="p">vosotros</td><td class="f">hablar<span class="e">éis</span></td><td class="f">hablar<span class="e">íais</span></td></tr>
+            <tr><td class="p">ellos</td><td class="f">hablar<span class="e">án</span></td><td class="f">hablar<span class="e">ían</span></td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Окончания одни для -ar, -er, -ir: они добавляются к целому инфинитиву.</span><span>Особые основы: <span class="f">tendr- pondr- saldr- vendr- podr- sabr- querr- har- dir-</span>. oír → <span class="f">oiré</span> (без ударения на i).</span></div>
+      </div>
+      <div class="block">
+        <h3>Составные · haber + participio</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>perfecto</th><th>pluscuamp.</th><th>futuro perf.</th><th>cond. perf.</th><th>subj. perf.</th><th>subj. pluscuamp.</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">he</td><td class="f">había</td><td class="f">habré</td><td class="f">habría</td><td class="f">haya</td><td class="f">hubiera</td></tr>
+            <tr><td class="p">tú</td><td class="f">has</td><td class="f">habías</td><td class="f">habrás</td><td class="f">habrías</td><td class="f">hayas</td><td class="f">hubieras</td></tr>
+            <tr><td class="p">él</td><td class="f">ha</td><td class="f">había</td><td class="f">habrá</td><td class="f">habría</td><td class="f">haya</td><td class="f">hubiera</td></tr>
+            <tr><td class="p">nosotros</td><td class="f">hemos</td><td class="f">habíamos</td><td class="f">habremos</td><td class="f">habríamos</td><td class="f">hayamos</td><td class="f">hubiéramos</td></tr>
+            <tr><td class="p">vosotros</td><td class="f">habéis</td><td class="f">habíais</td><td class="f">habréis</td><td class="f">habríais</td><td class="f">hayáis</td><td class="f">hubierais</td></tr>
+            <tr><td class="p">ellos</td><td class="f">han</td><td class="f">habían</td><td class="f">habrán</td><td class="f">habrían</td><td class="f">hayan</td><td class="f">hubieran</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Participio: <span class="f">-ar → -<span class="e">ado</span></span>, <span class="f">-er/-ir → -<span class="e">ido</span></span>. Неправильные: <span class="f">hecho, dicho, puesto, visto, escrito, abierto, vuelto, muerto</span>. С ударением: <span class="f">leído, creído, oído, traído, caído</span>.</span><span>Отвечать нужно двумя словами: <span class="f">he hablado</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Subjuntivo presente · que hable</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>-ar · hablar</th><th>-er/-ir · comer</th><th>tener (yo tengo)</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">habl<span class="e">e</span></td><td class="f">com<span class="e">a</span></td><td class="f">teng<span class="e">a</span></td></tr>
+            <tr><td class="p">tú</td><td class="f">habl<span class="e">es</span></td><td class="f">com<span class="e">as</span></td><td class="f">teng<span class="e">as</span></td></tr>
+            <tr><td class="p">él</td><td class="f">habl<span class="e">e</span></td><td class="f">com<span class="e">a</span></td><td class="f">teng<span class="e">a</span></td></tr>
+            <tr><td class="p">nosotros</td><td class="f">habl<span class="e">emos</span></td><td class="f">com<span class="e">amos</span></td><td class="f">teng<span class="e">amos</span></td></tr>
+            <tr><td class="p">vosotros</td><td class="f">habl<span class="e">éis</span></td><td class="f">com<span class="e">áis</span></td><td class="f">teng<span class="e">áis</span></td></tr>
+            <tr><td class="p">ellos</td><td class="f">habl<span class="e">en</span></td><td class="f">com<span class="e">an</span></td><td class="f">teng<span class="e">an</span></td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Берёшь yo из presente, убираешь <b>-o</b> и ставишь «чужую» гласную: у -ar <b>e</b>, у -er/-ir <b>a</b>.</span><span>Смена корня e→ie / o→ue не идёт в nosotros и vosotros (pensemos, volvamos). У -ir там e→i / o→u: sintamos, durmamos.</span><span>Орфография: busque, llegue, empiece. Исключения: <span class="f">sea, esté, vaya, sepa, dé</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Subjuntivo imperfecto · que hablara</h3>
+        <div class="note"><span>Берёшь ellos из pretérito, убираешь <b>-ron</b> и добавляешь <span class="f e">-ra, -ras, -ra, -ramos, -rais, -ran</span>.</span><span><span class="f">hablaron → hablara</span>, <span class="f">tuvieron → tuviera</span>, <span class="f">fueron → fuera</span>, <span class="f">dijeron → dijera</span>.</span><span>В nosotros ударение на гласную перед -ramos: <span class="f">habláramos, tuviéramos, fuéramos</span>.</span><span>Вариант на -se (hablase) тоже правильный, но тренажёр ждёт форму на -ra.</span></div>
+      </div>
+      <div class="block">
+        <h3>Imperativo afirmativo · ¡habla!</h3>
+        <div class="note"><span><b>tú</b> = él из presente: habla, come, piensa. Особые: <span class="f">di, haz, ve, pon, sal, sé, ten, ven</span>.</span><span><b>usted, ustedes, nosotros</b> = subjuntivo presente: hable, hablen, hablemos. Для ir в nosotros — <span class="f">vamos</span>.</span><span><b>vosotros</b> = инфинитив без -r + <b>d</b>: hablad, comed, id.</span><span>Формы для yo нет. Отрицательный приказ — это no + subjuntivo (no hables), поэтому отдельно не тренируется.</span></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const PERS=["yo","tú","él / ella / Ud.","nosotros","vosotros","ellos / Uds."];
+const REG={
+ ar:{pres:["o","as","a","amos","áis","an"],pret:["é","aste","ó","amos","asteis","aron"]},
+ er:{pres:["o","es","e","emos","éis","en"],pret:["í","iste","ió","imos","isteis","ieron"]},
+ ir:{pres:["o","es","e","imos","ís","en"],pret:["í","iste","ió","imos","isteis","ieron"]}
+};
+const REGULAR=["hablar","trabajar","comprar","escuchar","viajar","cantar","comer","beber","aprender","vender","vivir","escribir","abrir","decidir"];
+const IRR={
+ ser:{ru:"быть",pres:"soy eres es somos sois son",pret:"fui fuiste fue fuimos fuisteis fueron"},
+ estar:{ru:"находиться",pres:"estoy estás está estamos estáis están",pret:"estuve estuviste estuvo estuvimos estuvisteis estuvieron"},
+ ir:{ru:"идти",pres:"voy vas va vamos vais van",pret:"fui fuiste fue fuimos fuisteis fueron"},
+ tener:{ru:"иметь",pres:"tengo tienes tiene tenemos tenéis tienen",pret:"tuve tuviste tuvo tuvimos tuvisteis tuvieron"},
+ hacer:{ru:"делать",pres:"hago haces hace hacemos hacéis hacen",pret:"hice hiciste hizo hicimos hicisteis hicieron"},
+ poder:{ru:"мочь",pres:"puedo puedes puede podemos podéis pueden",pret:"pude pudiste pudo pudimos pudisteis pudieron"},
+ querer:{ru:"хотеть",pres:"quiero quieres quiere queremos queréis quieren",pret:"quise quisiste quiso quisimos quisisteis quisieron"},
+ decir:{ru:"сказать",pres:"digo dices dice decimos decís dicen",pret:"dije dijiste dijo dijimos dijisteis dijeron"},
+ venir:{ru:"приходить",pres:"vengo vienes viene venimos venís vienen",pret:"vine viniste vino vinimos vinisteis vinieron"},
+ poner:{ru:"класть",pres:"pongo pones pone ponemos ponéis ponen",pret:"puse pusiste puso pusimos pusisteis pusieron"},
+ saber:{ru:"знать",pres:"sé sabes sabe sabemos sabéis saben",pret:"supe supiste supo supimos supisteis supieron"},
+ dar:{ru:"давать",pres:"doy das da damos dais dan",pret:"di diste dio dimos disteis dieron"},
+ ver:{ru:"видеть",pres:"veo ves ve vemos veis ven",pret:"vi viste vio vimos visteis vieron"},
+ salir:{ru:"выходить",pres:"salgo sales sale salimos salís salen",pret:"salí saliste salió salimos salisteis salieron"}
+};
+// Russian: infinitive, 6 present forms, past [sg, pl], optional hint for ambiguous verbs
+const RU={
+ hablar:["разговаривать","разговариваю разговариваешь разговаривает разговариваем разговариваете разговаривают",["поговорил","поговорили"]],
+ trabajar:["работать","работаю работаешь работает работаем работаете работают",["работал","работали"]],
+ comprar:["покупать","покупаю покупаешь покупает покупаем покупаете покупают",["купил","купили"]],
+ escuchar:["слушать","слушаю слушаешь слушает слушаем слушаете слушают",["послушал","послушали"]],
+ viajar:["путешествовать","путешествую путешествуешь путешествует путешествуем путешествуете путешествуют",["путешествовал","путешествовали"]],
+ cantar:["петь","пою поёшь поёт поём поёте поют",["спел","спели"]],
+ comer:["есть (кушать)","ем ешь ест едим едите едят",["поел","поели"]],
+ beber:["пить","пью пьёшь пьёт пьём пьёте пьют",["выпил","выпили"]],
+ aprender:["учить, изучать","учу учишь учит учим учите учат",["выучил","выучили"]],
+ vender:["продавать","продаю продаёшь продаёт продаём продаёте продают",["продал","продали"]],
+ vivir:["жить","живу живёшь живёт живём живёте живут",["жил","жили"]],
+ escribir:["писать","пишу пишешь пишет пишем пишете пишут",["написал","написали"]],
+ abrir:["открывать","открываю открываешь открывает открываем открываете открывают",["открыл","открыли"]],
+ decidir:["решать","решаю решаешь решает решаем решаете решают",["решил","решили"]],
+ ser:["быть (кто, какой)","есть есть есть есть есть есть",["был","были"],"ser: кто / какой"],
+ estar:["быть, находиться (где, как)","нахожусь находишься находится находимся находитесь находятся",["был","были"],"estar: где / как"],
+ ir:["идти, ехать","иду идёшь идёт идём идёте идут",["сходил","сходили"]],
+ tener:["иметь","имею имеешь имеет имеем имеете имеют",["имел","имели"]],
+ hacer:["делать","делаю делаешь делает делаем делаете делают",["сделал","сделали"]],
+ poder:["мочь","могу можешь может можем можете могут",["смог","смогли"]],
+ querer:["хотеть","хочу хочешь хочет хотим хотите хотят",["захотел","захотели"]],
+ decir:["сказать","говорю говоришь говорит говорим говорите говорят",["сказал","сказали"],"decir: сказать что-то"],
+ venir:["приходить","прихожу приходишь приходит приходим приходите приходят",["пришёл","пришли"]],
+ poner:["класть, ставить","кладу кладёшь кладёт кладём кладёте кладут",["положил","положили"]],
+ saber:["знать","знаю знаешь знает знаем знаете знают",["узнал","узнали"],"в pretérito saber = «узнал»"],
+ dar:["давать","даю даёшь даёт даём даёте дают",["дал","дали"]],
+ ver:["видеть","вижу видишь видит видим видите видят",["увидел","увидели"]],
+ salir:["выходить","выхожу выходишь выходит выходим выходите выходят",["вышел","вышли"]]
+};
+// tiers: 1 = основные (above), 2 = частые, 3 = регулярно используемые
+const TIER={}; REGULAR.concat(Object.keys(IRR)).forEach(v=>TIER[v]=1);
+const TIER_NAME={1:"Основные",2:"Частые",3:"Регулярно используемые"};
+function addTier(n,reg,irr,ru){
+  reg.forEach(v=>{REGULAR.push(v);TIER[v]=n;});
+  for(const v in irr){IRR[v]={pres:irr[v][0],pret:irr[v][1]};TIER[v]=n;}
+  Object.assign(RU,ru);
+}
+addTier(2,["llamar","llevar","pasar","tomar","esperar","mirar","necesitar","deber"],{
+ llegar:["llego llegas llega llegamos llegáis llegan","llegué llegaste llegó llegamos llegasteis llegaron"],
+ buscar:["busco buscas busca buscamos buscáis buscan","busqué buscaste buscó buscamos buscasteis buscaron"],
+ empezar:["empiezo empiezas empieza empezamos empezáis empiezan","empecé empezaste empezó empezamos empezasteis empezaron"],
+ pedir:["pido pides pide pedimos pedís piden","pedí pediste pidió pedimos pedisteis pidieron"],
+ dormir:["duermo duermes duerme dormimos dormís duermen","dormí dormiste durmió dormimos dormisteis durmieron"],
+ sentir:["siento sientes siente sentimos sentís sienten","sentí sentiste sintió sentimos sentisteis sintieron"],
+ conocer:["conozco conoces conoce conocemos conocéis conocen","conocí conociste conoció conocimos conocisteis conocieron"],
+ traer:["traigo traes trae traemos traéis traen","traje trajiste trajo trajimos trajisteis trajeron"],
+ oír:["oigo oyes oye oímos oís oyen","oí oíste oyó oímos oísteis oyeron"],
+ pensar:["pienso piensas piensa pensamos pensáis piensan","pensé pensaste pensó pensamos pensasteis pensaron"],
+ volver:["vuelvo vuelves vuelve volvemos volvéis vuelven","volví volviste volvió volvimos volvisteis volvieron"],
+ encontrar:["encuentro encuentras encuentra encontramos encontráis encuentran","encontré encontraste encontró encontramos encontrasteis encontraron"],
+ jugar:["juego juegas juega jugamos jugáis juegan","jugué jugaste jugó jugamos jugasteis jugaron"],
+ seguir:["sigo sigues sigue seguimos seguís siguen","seguí seguiste siguió seguimos seguisteis siguieron"],
+ leer:["leo lees lee leemos leéis leen","leí leíste leyó leímos leísteis leyeron"],
+ creer:["creo crees cree creemos creéis creen","creí creíste creyó creímos creísteis creyeron"]
+},{
+ llamar:["звонить, звать","звоню звонишь звонит звоним звоните звонят",["позвонил","позвонили"]],
+ llevar:["нести, носить","несу несёшь несёт несём несёте несут",["отнёс","отнесли"]],
+ pasar:["проходить, проводить (время)","прохожу проходишь проходит проходим проходите проходят",["прошёл","прошли"]],
+ tomar:["брать, пить","беру берёшь берёт берём берёте берут",["взял","взяли"]],
+ esperar:["ждать, надеяться","жду ждёшь ждёт ждём ждёте ждут",["подождал","подождали"]],
+ mirar:["смотреть","смотрю смотришь смотрит смотрим смотрите смотрят",["посмотрел","посмотрели"]],
+ necesitar:["нуждаться","нуждаюсь нуждаешься нуждается нуждаемся нуждаетесь нуждаются",["нуждался","нуждались"]],
+ deber:["быть должным","должен должен должен должны должны должны",["был должен","были должны"]],
+ llegar:["приезжать, прибывать","приезжаю приезжаешь приезжает приезжаем приезжаете приезжают",["приехал","приехали"]],
+ buscar:["искать","ищу ищешь ищет ищем ищете ищут",["искал","искали"]],
+ empezar:["начинать","начинаю начинаешь начинает начинаем начинаете начинают",["начал","начали"]],
+ pedir:["просить, заказывать","прошу просишь просит просим просите просят",["попросил","попросили"]],
+ dormir:["спать","сплю спишь спит спим спите спят",["поспал","поспали"]],
+ sentir:["чувствовать","чувствую чувствуешь чувствует чувствуем чувствуете чувствуют",["почувствовал","почувствовали"]],
+ conocer:["знать (кого-то, место)","знаком знаком знаком знакомы знакомы знакомы",["познакомился","познакомились"],"conocer: знать кого-то · в pretérito «познакомился»"],
+ traer:["приносить","приношу приносишь приносит приносим приносите приносят",["принёс","принесли"]],
+ oír:["слышать","слышу слышишь слышит слышим слышите слышат",["услышал","услышали"]],
+ pensar:["думать","думаю думаешь думает думаем думаете думают",["подумал","подумали"]],
+ volver:["возвращаться","возвращаюсь возвращаешься возвращается возвращаемся возвращаетесь возвращаются",["вернулся","вернулись"]],
+ encontrar:["находить","нахожу находишь находит находим находите находят",["нашёл","нашли"]],
+ jugar:["играть","играю играешь играет играем играете играют",["сыграл","сыграли"]],
+ seguir:["продолжать, следовать","продолжаю продолжаешь продолжает продолжаем продолжаете продолжают",["продолжил","продолжили"]],
+ leer:["читать","читаю читаешь читает читаем читаете читают",["прочитал","прочитали"]],
+ creer:["верить, полагать","верю веришь верит верим верите верят",["поверил","поверили"]]
+});
+addTier(3,["ayudar","cambiar","dejar","terminar","usar","preguntar","olvidar","correr","recibir","subir"],{
+ entender:["entiendo entiendes entiende entendemos entendéis entienden","entendí entendiste entendió entendimos entendisteis entendieron"],
+ perder:["pierdo pierdes pierde perdemos perdéis pierden","perdí perdiste perdió perdimos perdisteis perdieron"],
+ contar:["cuento cuentas cuenta contamos contáis cuentan","conté contaste contó contamos contasteis contaron"],
+ recordar:["recuerdo recuerdas recuerda recordamos recordáis recuerdan","recordé recordaste recordó recordamos recordasteis recordaron"],
+ preferir:["prefiero prefieres prefiere preferimos preferís prefieren","preferí preferiste prefirió preferimos preferisteis prefirieron"],
+ servir:["sirvo sirves sirve servimos servís sirven","serví serviste sirvió servimos servisteis sirvieron"],
+ repetir:["repito repites repite repetimos repetís repiten","repetí repetiste repitió repetimos repetisteis repitieron"],
+ morir:["muero mueres muere morimos morís mueren","morí moriste murió morimos moristeis murieron"],
+ conducir:["conduzco conduces conduce conducimos conducís conducen","conduje condujiste condujo condujimos condujisteis condujeron"],
+ caer:["caigo caes cae caemos caéis caen","caí caíste cayó caímos caísteis cayeron"],
+ andar:["ando andas anda andamos andáis andan","anduve anduviste anduvo anduvimos anduvisteis anduvieron"],
+ pagar:["pago pagas paga pagamos pagáis pagan","pagué pagaste pagó pagamos pagasteis pagaron"],
+ sacar:["saco sacas saca sacamos sacáis sacan","saqué sacaste sacó sacamos sacasteis sacaron"],
+ tocar:["toco tocas toca tocamos tocáis tocan","toqué tocaste tocó tocamos tocasteis tocaron"],
+ almorzar:["almuerzo almuerzas almuerza almorzamos almorzáis almuerzan","almorcé almorzaste almorzó almorzamos almorzasteis almorzaron"]
+},{
+ ayudar:["помогать","помогаю помогаешь помогает помогаем помогаете помогают",["помог","помогли"]],
+ cambiar:["менять","меняю меняешь меняет меняем меняете меняют",["поменял","поменяли"]],
+ dejar:["оставлять","оставляю оставляешь оставляет оставляем оставляете оставляют",["оставил","оставили"]],
+ terminar:["заканчивать","заканчиваю заканчиваешь заканчивает заканчиваем заканчиваете заканчивают",["закончил","закончили"]],
+ usar:["использовать","использую используешь использует используем используете используют",["использовал","использовали"]],
+ preguntar:["спрашивать","спрашиваю спрашиваешь спрашивает спрашиваем спрашиваете спрашивают",["спросил","спросили"]],
+ olvidar:["забывать","забываю забываешь забывает забываем забываете забывают",["забыл","забыли"]],
+ correr:["бегать","бегаю бегаешь бегает бегаем бегаете бегают",["побежал","побежали"]],
+ recibir:["получать","получаю получаешь получает получаем получаете получают",["получил","получили"]],
+ subir:["подниматься","поднимаюсь поднимаешься поднимается поднимаемся поднимаетесь поднимаются",["поднялся","поднялись"]],
+ entender:["понимать","понимаю понимаешь понимает понимаем понимаете понимают",["понял","поняли"]],
+ perder:["терять","теряю теряешь теряет теряем теряете теряют",["потерял","потеряли"]],
+ contar:["рассказывать, считать","рассказываю рассказываешь рассказывает рассказываем рассказываете рассказывают",["рассказал","рассказали"]],
+ recordar:["помнить","помню помнишь помнит помним помните помнят",["вспомнил","вспомнили"]],
+ preferir:["предпочитать","предпочитаю предпочитаешь предпочитает предпочитаем предпочитаете предпочитают",["предпочёл","предпочли"]],
+ servir:["служить, подавать","служу служишь служит служим служите служат",["послужил","послужили"]],
+ repetir:["повторять","повторяю повторяешь повторяет повторяем повторяете повторяют",["повторил","повторили"]],
+ morir:["умирать","умираю умираешь умирает умираем умираете умирают",["умер","умерли"]],
+ conducir:["водить (машину)","вожу водишь водит водим водите водят",["вёл","вели"],"conducir: водить машину"],
+ caer:["падать","падаю падаешь падает падаем падаете падают",["упал","упали"]],
+ andar:["ходить пешком, гулять","хожу ходишь ходит ходим ходите ходят",["прошёлся","прошлись"],"andar: ходить пешком"],
+ pagar:["платить","плачу платишь платит платим платите платят",["заплатил","заплатили"]],
+ sacar:["доставать, вынимать","достаю достаёшь достаёт достаём достаёте достают",["достал","достали"]],
+ tocar:["трогать, играть на инструменте","трогаю трогаешь трогает трогаем трогаете трогают",["потрогал","потрогали"]],
+ almorzar:["обедать","обедаю обедаешь обедает обедаем обедаете обедают",["пообедал","пообедали"]]
+});
+const RUP=["я","ты","он","мы","вы (vosotros)","они"];
+function ruPhrase(v,t,p){
+  const r=RU[v]; const f=t==="pres"?r[1].split(" ")[p]:r[2][p<3?0:1];
+  return RUP[p]+" "+f;
+}
+// ---- tenses ----
+// g = color group: pres | past | fut | subj | imp
+const TENSES=[
+ {k:"pres", mood:"Indicativo", name:"presente", ru:"настоящее · сейчас", g:"pres"},
+ {k:"pret", mood:"Indicativo", name:"pretérito indefinido", short:"pretérito", ru:"прошедшее · законченное действие", g:"past"},
+ {k:"imp",  mood:"Indicativo", name:"pretérito imperfecto", short:"imperfecto", ru:"прошедшее · фон, привычка, «бывало»", g:"past"},
+ {k:"perf", mood:"Indicativo", name:"pretérito perfecto", short:"perfecto", ru:"прошедшее, связанное с сейчас · he hablado", g:"past"},
+ {k:"plus", mood:"Indicativo", name:"pluscuamperfecto", short:"pluscuamp.", ru:"предпрошедшее · уже сделал до того", g:"past"},
+ {k:"fut",  mood:"Indicativo", name:"futuro simple", short:"futuro", ru:"будущее · сделаю", g:"fut"},
+ {k:"futp", mood:"Indicativo", name:"futuro perfecto", short:"futuro perf.", ru:"будет сделано к моменту · habré hablado", g:"fut"},
+ {k:"cond", mood:"Indicativo", name:"condicional", ru:"условное · сделал бы", g:"fut"},
+ {k:"condp",mood:"Indicativo", name:"condicional perfecto", short:"cond. perf.", ru:"сделал бы тогда · habría hablado", g:"fut"},
+ {k:"sp",   mood:"Subjuntivo", name:"presente de subjuntivo", short:"subj. presente", ru:"желание, сомнение · que hable", g:"subj"},
+ {k:"si",   mood:"Subjuntivo", name:"imperfecto de subjuntivo", short:"subj. imperfecto", ru:"si / ojalá в прошлом · que hablara", g:"subj"},
+ {k:"spf",  mood:"Subjuntivo", name:"perfecto de subjuntivo", short:"subj. perfecto", ru:"que haya hablado", g:"subj"},
+ {k:"spl",  mood:"Subjuntivo", name:"pluscuamperfecto de subjuntivo", short:"subj. pluscuamp.", ru:"si hubiera hablado", g:"subj"},
+ {k:"impa", mood:"Imperativo", name:"imperativo afirmativo", short:"imperativo", ru:"приказ, просьба · ¡habla!", g:"imp"}
+];
+const TMAP={}; TENSES.forEach(t=>TMAP[t.k]=t);
+const DEFAULT_TENSES=["pres","pret"];
+const IMP_PERS=["—","tú","usted","nosotros","vosotros","ustedes"];
+const persLabel=(t,p)=>t==="impa"?IMP_PERS[p]:PERS[p];
+const hasPerson=(t,p)=>!(t==="impa"&&p===0);
+
+// ---- conjugation engine ----
+const vt=v=>v.endsWith("ar")?"ar":v.endsWith("er")?"er":"ir"; // oír → ir
+const base=v=>v.slice(0,-2);
+function basic(v,t,p){ // presente / pretérito: explicit forms for irregulars, endings for regulars
+  if(IRR[v]) return IRR[v][t].split(" ")[p];
+  return base(v)+REG[vt(v)][t][p];
+}
+const IMPF_IRR={ser:"era eras era éramos erais eran",ir:"iba ibas iba íbamos ibais iban",ver:"veía veías veía veíamos veíais veían"};
+const IMPF={ar:["aba","abas","aba","ábamos","abais","aban"],er:["ía","ías","ía","íamos","íais","ían"],ir:["ía","ías","ía","íamos","íais","ían"]};
+const FUT_STEM={tener:"tendr",poner:"pondr",salir:"saldr",venir:"vendr",poder:"podr",saber:"sabr",querer:"querr",hacer:"har",decir:"dir","oír":"oir"};
+const FUT=["é","ás","á","emos","éis","án"], COND=["ía","ías","ía","íamos","íais","ían"];
+const PART_IRR={hacer:"hecho",decir:"dicho",poner:"puesto",ver:"visto",escribir:"escrito",abrir:"abierto",volver:"vuelto",morir:"muerto",leer:"leído",creer:"creído","oír":"oído",traer:"traído",caer:"caído"};
+const part=v=>PART_IRR[v]||base(v)+(vt(v)==="ar"?"ado":"ido");
+const HABER={perf:"he has ha hemos habéis han",plus:"había habías había habíamos habíais habían",futp:"habré habrás habrá habremos habréis habrán",condp:"habría habrías habría habríamos habríais habrían",spf:"haya hayas haya hayamos hayáis hayan",spl:"hubiera hubieras hubiera hubiéramos hubierais hubieran"};
+const SP_OVR={ser:"sea seas sea seamos seáis sean",estar:"esté estés esté estemos estéis estén",ir:"vaya vayas vaya vayamos vayáis vayan",saber:"sepa sepas sepa sepamos sepáis sepan",dar:"dé des dé demos deis den"};
+// subjuntivo nosotros/vosotros: -ir stem-changers keep e→i / o→u; -ar/-er stem-changers go back to the infinitive stem
+const SP_NOS_IR={sentir:"sint",dormir:"durm",preferir:"prefir",morir:"mur"};
+const SP_NOS_INF=new Set(["querer","poder","empezar","pensar","volver","encontrar","jugar","entender","perder","contar","recordar","almorzar"]);
+const spell=(v,st)=>/car$/.test(v)?st.replace(/c$/,"qu"):/gar$/.test(v)?st.replace(/g$/,"gu"):/zar$/.test(v)?st.replace(/z$/,"c"):st;
+const SP_END={ar:["e","es","e","emos","éis","en"],er:["a","as","a","amos","áis","an"],ir:["a","as","a","amos","áis","an"]};
+function subjPres(v,p){
+  if(SP_OVR[v]) return SP_OVR[v].split(" ")[p];
+  let st=basic(v,"pres",0).slice(0,-1);
+  if(p===3||p===4){ if(SP_NOS_IR[v]) st=SP_NOS_IR[v]; else if(SP_NOS_INF.has(v)) st=base(v); }
+  return spell(v,st)+SP_END[vt(v)][p];
+}
+function subjImpf(v,p){
+  const st=basic(v,"pret",5).slice(0,-3); // ellos pretérito minus -ron
+  const acc=st.slice(0,-1)+({a:"á",e:"é"}[st.slice(-1)]||st.slice(-1));
+  return [st+"ra",st+"ras",st+"ra",acc+"ramos",st+"rais",st+"ran"][p];
+}
+const IMP_TU={decir:"di",hacer:"haz",ir:"ve",poner:"pon",salir:"sal",ser:"sé",tener:"ten",venir:"ven"};
+function imperative(v,p){
+  if(p===0) return null;
+  if(p===1) return IMP_TU[v]||basic(v,"pres",2);
+  if(p===4) return v.slice(0,-1)+"d";
+  if(p===3&&v==="ir") return "vamos";
+  return subjPres(v,p);
+}
+function form(v,t,p){
+  switch(t){
+    case "pres": case "pret": return basic(v,t,p);
+    case "imp": return IMPF_IRR[v]?IMPF_IRR[v].split(" ")[p]:base(v)+IMPF[vt(v)][p];
+    case "fut": return (FUT_STEM[v]||v)+FUT[p];
+    case "cond": return (FUT_STEM[v]||v)+COND[p];
+    case "perf": case "plus": case "futp": case "condp": case "spf": case "spl":
+      return HABER[t].split(" ")[p]+" "+part(v);
+    case "sp": return subjPres(v,p);
+    case "si": return subjImpf(v,p);
+    case "impa": return imperative(v,p);
+  }
+  return null;
+}
+// irregular table
+(function(){
+  let out="",voc="";
+  for(const n of [1,2,3]){
+    let h='<h3>'+TIER_NAME[n]+'</h3><div class="tbl"><table><thead><tr><th>глагол</th><th>время</th>'+PERS.map(p=>'<th>'+p+'</th>').join('')+'</tr></thead><tbody>';
+    for(const v in IRR){
+      if(TIER[v]!==n) continue;
+      ["pres","pret"].forEach((t,i)=>{
+        h+='<tr>'+(i===0?'<td rowspan="2"><span class="f e">'+v+'</span><br><span class="p" style="font-size:12px;color:var(--muted)">'+RU[v][0]+'</span></td>':'')+
+        '<td class="p">'+(t==="pres"?"presente":"pretérito")+'</td>'+IRR[v][t].split(" ").map(x=>'<td class="f">'+x+'</td>').join('')+'</tr>';
+      });
+    }
+    out+=h+'</tbody></table></div>';
+    voc+='<h3>Правильные · '+TIER_NAME[n]+'</h3><div class="vocab">'+REGULAR.filter(v=>TIER[v]===n).map(v=>'<div><span class="f e">'+v+'</span><span>'+RU[v][0]+'</span></div>').join("")+'</div>';
+  }
+  document.getElementById("irrTables").innerHTML=out;
+  document.getElementById("vocab").innerHTML=voc;
+})();
+
+// state
+const KEY="conj-trainer-v1";
+let S={t:0,review:{},total:0,right:0,streak:0};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s&&s.review) S=Object.assign(S,s);}catch(e){}
+// IndexedDB key-value store: progress stays in this browser
+const IDB={db:null,
+  open(){return new Promise((res,rej)=>{const r=indexedDB.open("conjugacion",1);
+    r.onupgradeneeded=()=>r.result.createObjectStore("kv");
+    r.onsuccess=()=>res(this.db=r.result); r.onerror=()=>rej(r.error);});},
+  get(k){return new Promise((res,rej)=>{const q=this.db.transaction("kv").objectStore("kv").get(k);
+    q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error);});},
+  set(k,v){return new Promise((res,rej)=>{const tx=this.db.transaction("kv","readwrite");
+    tx.objectStore("kv").put(v,k); tx.oncomplete=()=>res(); tx.onerror=()=>rej(tx.error);});}
+};
+let idbReady=false,writing=false,dirty=false,timer=null;
+const setNote=s=>{const n=document.getElementById("syncNote"); if(n) n.textContent=s;};
+function save(){ dirty=true; clearTimeout(timer); timer=setTimeout(flush,400); }
+async function flush(){
+  if(!dirty||writing) return;
+  dirty=false;
+  if(!idbReady){ try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} return; }
+  writing=true;
+  try{ await IDB.set("progress",JSON.parse(JSON.stringify(S))); }
+  catch(e){ setNote("Не получилось сохранить прогресс в браузере."); }
+  writing=false;
+  if(dirty) flush();
+}
+const $=id=>document.getElementById(id);
+// tense checkboxes, grouped by mood; selection remembered in this browser
+const TKEY="conj-tenses-v1";
+let selTenses=DEFAULT_TENSES.slice();
+try{const s=JSON.parse(localStorage.getItem(TKEY)||"null"); if(Array.isArray(s)){const ok=s.filter(k=>TMAP[k]); if(ok.length) selTenses=ok;}}catch(e){}
+function renderTenses(){
+  const moods=[...new Set(TENSES.map(t=>t.mood))];
+  $("tenses").innerHTML=moods.map(m=>'<div class="mood"><b>'+m+'</b>'+
+    TENSES.filter(t=>t.mood===m).map(t=>'<label class="tchip"><input type="checkbox" id="tn-'+t.k+'" value="'+t.k+'"'+(selTenses.includes(t.k)?" checked":"")+'><span>'+(t.short||t.name)+'</span></label>').join("")+'</div>').join("")+
+    '<div class="tbtns"><button type="button" data-set="def">Presente + pretérito</button><button type="button" data-set="ind">Весь indicativo</button><button type="button" data-set="all">Все времена</button></div>';
+}
+function setTenses(list){
+  selTenses=list.slice();
+  try{localStorage.setItem(TKEY,JSON.stringify(selTenses));}catch(e){}
+  document.querySelectorAll('#tenses input').forEach(i=>i.checked=selTenses.includes(i.value));
+  show();
+}
+const opt=()=>({mode:document.querySelector('input[name=mode]:checked').value,tenses:selTenses,group:document.querySelector('input[name=group]:checked').value,tier:document.querySelector('input[name=tier]:checked').value,vos:$("vos").checked,strict:$("strict").checked});
+function pool(){
+  const o=opt(),items=[];
+  const verbs=(o.group==="reg"?REGULAR:o.group==="irr"?Object.keys(IRR):REGULAR.concat(Object.keys(IRR)))
+    .filter(v=>o.tier==="all"||TIER[v]===+o.tier);
+  for(const v of verbs)for(const t of o.tenses)for(let p=0;p<6;p++){ if(p===4&&!o.vos)continue; if(!hasPerson(t,p))continue; items.push(v+"|"+t+"|"+p); }
+  return items;
+}
+let cur=null,last=null,answered=false,prevS=null;
+const ICO={check:'<path d="M20 6 9 17l-5-5"/>',next:'<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>'};
+const setGo=done=>{ $("go").innerHTML='<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">'+ICO[done?"next":"check"]+'</svg><span>'+(done?"Дальше":"Проверить")+'</span><kbd>Enter ↵</kbd>'; $("undo").disabled=!done; };
+function pick(){
+  const P=pool(),set=new Set(P);
+  const due=Object.entries(S.review).filter(([k,r])=>set.has(k)&&r.due<=S.t&&k!==last).sort((a,b)=>a[1].due-b[1].due);
+  if(due.length) return due[0][0];
+  // prefer fresh cards; if everything is under review and not yet due, take the soonest one
+  const fresh=P.filter(k=>k!==last&&!(S.review[k]&&S.review[k].due>S.t));
+  if(fresh.length) return fresh[Math.floor(Math.random()*fresh.length)];
+  const soon=P.filter(k=>k!==last).sort((a,b)=>S.review[a].due-S.review[b].due);
+  return soon[0]||P[0];
+}
+function show(){
+  cur=pick(); last=cur; answered=false;
+  const [v,t,p]=cur.split("|");
+  const T=TMAP[t];
+  $("pTense").textContent=T.name;
+  $("pWhen").textContent=T.ru;
+  document.querySelector(".trainer").dataset.tg=T.g;
+  // Russian prompts exist only for presente and pretérito; other tenses fall back to Spanish
+  const m=opt().mode, ruOk=t==="pres"||t==="pret", ru=ruOk&&(m==="ru"||(m==="mix"&&Math.random()<.5));
+  $("pPron").hidden=ru; $("pSep").hidden=ru;
+  if(ru){ $("pVerb").textContent=ruPhrase(v,t,+p); $("pRu").textContent=RU[v][3]||"переведи на испанский"; }
+  else { $("pPron").textContent=persLabel(t,+p); $("pVerb").textContent=v; $("pRu").textContent=RU[v][0]; }
+  const r=S.review[cur];
+  $("pTag").textContent=r?"повтор · осталось верных: "+r.need:"";
+  $("ans").value=""; $("ans").focus({preventScroll:true});
+  setGo(false);
+}
+const norm=s=>s.trim().toLowerCase().replace(/\s+/g," ");
+const deacc=s=>s.normalize("NFD").replace(/[́]/g,"").normalize("NFC");
+const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+function diff(u,c){
+  let a=0; while(a<u.length&&a<c.length&&u[a]===c[a])a++;
+  let b=0; while(b<u.length-a&&b<c.length-a&&u[u.length-1-b]===c[c.length-1-b])b++;
+  const cm=c.slice(a,c.length-b),um=u.slice(a,u.length-b);
+  return {
+    c:esc(c.slice(0,a))+(cm?'<mark>'+esc(cm)+'</mark>':'<mark>∧</mark>')+esc(c.slice(c.length-b)),
+    u:esc(u.slice(0,a))+(um?'<del>'+esc(um)+'</del>':'<del>∧</del>')+esc(u.slice(u.length-b))
+  };
+}
+function trLine(v,t,p,c){
+  const head=v+" · "+persLabel(t,p)+" → "+c;
+  return (t==="pres"||t==="pret")? head+" — "+ruPhrase(v,t,p) : head+" — "+RU[v][0]+" ("+TMAP[t].name+")";
+}
+function check(){
+  const [v,t,p]=cur.split("|"),c=form(v,t,+p),u=norm($("ans").value);
+  if(!u)return false;
+  prevS=JSON.stringify(S);
+  const o=opt(); let ok=u===c, accentOnly=!ok&&deacc(u)===deacc(c);
+  if(accentOnly&&!o.strict) ok=true;
+  S.t++; S.total++;
+  const fb=$("fb");
+  if(ok){
+    S.right++; S.streak++;
+    const r=S.review[cur];
+    let msg="Верно.";
+    if(accentOnly) msg="Засчитано, но ударение: "+c;
+    if(r){ r.need--; if(r.need<=0){delete S.review[cur]; msg+=" Убрано из повторения.";} else { r.gap=Math.round(r.gap*1.8); r.due=S.t+r.gap; } }
+    fb.className="feedback ok"; fb.innerHTML='<div>'+esc(msg)+'</div><div class="tr">'+esc(trLine(v,t,+p,c))+'</div>';
+  }else{
+    S.streak=0;
+    const d=diff(u,c);
+    S.review[cur]={need:3,gap:4,due:S.t+4+Math.floor(Math.random()*3)};
+    fb.className="feedback bad";
+    fb.innerHTML='<div>'+(accentOnly?"Ошибка в ударении.":"Ошибка.")+'</div><div class="row">ты: '+d.u+'</div><div class="row">надо: '+d.c+'</div><div class="tr">'+esc(trLine(v,t,+p,c))+'</div>';
+  }
+  save(); render(); answered=true; setGo(true);
+  return true;
+}
+function render(){
+  const pct=S.total?Math.round(S.right/S.total*100):0;
+  const n=Object.keys(S.review).length;
+  $("stats").innerHTML='<span>ответов <b>'+S.total+'</b></span><span>верно <b>'+pct+'%</b></span><span>серия <b>'+S.streak+'</b></span><span>на повторении <b>'+n+'</b></span>';
+  const w=$("weak");
+  if(!n){w.innerHTML='<span class="empty">Пусто. Ошибки появятся здесь и будут возвращаться, пока не ответишь трижды.</span>';return;}
+  w.innerHTML=Object.entries(S.review).sort((a,b)=>a[1].due-b[1].due).map(([k,r])=>{const [v,t,p]=k.split("|");if(!TMAP[t]) return ""; return '<span class="chip">'+esc(persLabel(t,+p).split(" ")[0])+' '+v+' <i>'+esc(TMAP[t].short||TMAP[t].name)+' · ×'+r.need+'</i></span>';}).join("");
+}
+// no <form>: sandboxed previews block form submission entirely
+const step=()=>{ if(answered) show(); else check(); };
+// undo: misclick or misread task → forget the last answer and ask the same prompt again
+const FB_IDLE=$("fb").textContent;
+function undo(){
+  if(!answered||!prevS) return;
+  S=JSON.parse(prevS); prevS=null; save(); render();
+  answered=false; setGo(false);
+  const r=S.review[cur]; $("pTag").textContent=r?"повтор · осталось верных: "+r.need:"";
+  const fb=$("fb"); fb.className="feedback idle"; fb.textContent="Ответ отменён, попробуй ещё раз.";
+  $("ans").value=""; $("ans").focus({preventScroll:true});
+}
+$("go").addEventListener("click",step);
+$("undo").addEventListener("click",undo);
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&answered){ e.preventDefault(); undo(); } });
+$("ans").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.isComposing){ e.preventDefault(); step(); } });
+document.querySelectorAll(".keys button").forEach(b=>b.addEventListener("click",()=>{
+  const i=$("ans"),s=i.selectionStart??i.value.length,en=i.selectionEnd??s;
+  i.value=i.value.slice(0,s)+b.dataset.k+i.value.slice(en); i.focus(); i.setSelectionRange(s+1,s+1);
+}));
+renderTenses();
+$("tenses").addEventListener("change",e=>{
+  const list=[...document.querySelectorAll('#tenses input:checked')].map(i=>i.value);
+  if(!list.length){ e.target.checked=true; return; } // keep at least one tense
+  setTenses(TENSES.map(t=>t.k).filter(k=>list.includes(k)));
+});
+$("tenses").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-set]"); if(!b) return;
+  const s=b.dataset.set;
+  setTenses(s==="def"?DEFAULT_TENSES:s==="ind"?TENSES.filter(t=>t.mood==="Indicativo").map(t=>t.k):TENSES.map(t=>t.k));
+});
+document.querySelectorAll('input[name=group],input[name=tier],input[name=mode],#vos').forEach(x=>x.addEventListener("change",show));
+// two-step confirm: first click arms the button for 3 s
+function confirmBtn(id,action){
+  const b=$(id),lbl=b.querySelector("span"); let armed=false,tm=null;
+  b.addEventListener("click",()=>{
+    if(!armed){ armed=true; lbl.textContent="Точно?"; tm=setTimeout(()=>{armed=false;lbl.textContent=b.dataset.label;},3000); return; }
+    clearTimeout(tm); armed=false; lbl.textContent=b.dataset.label; action();
+  });
+}
+const resetProgress=()=>{ S={t:0,review:{},total:0,right:0,streak:0}; prevS=null; save(); render(); $("fb").className="feedback idle"; $("fb").textContent=FB_IDLE; };
+confirmBtn("reset",()=>{ resetProgress(); show(); });
+confirmBtn("resetAll",()=>{
+  resetProgress();
+  ["g-all","l-1","m-es","strict","vos"].forEach(id=>$(id).checked=true);
+  setTenses(DEFAULT_TENSES); // also calls show() and stores the list, which we drop below
+  try{localStorage.removeItem(TKEY);}catch(e){}
+});
+render(); show();
+
+// load progress from IndexedDB; migrate old localStorage data once
+(async()=>{
+  try{
+    if(!window.indexedDB) return;
+    await IDB.open(); idbReady=true;
+    const r=await IDB.get("progress");
+    if(r&&r.review&&(r.total||0)>=(S.total||0)){
+      S=Object.assign({t:0,review:{},total:0,right:0,streak:0},r); render();
+    }else if(S.total>0){ dirty=true; await flush(); }
+    try{localStorage.removeItem(KEY);}catch(e){}
+    if(dirty) flush();
+    setNote("Прогресс хранится в этом браузере (IndexedDB).");
+  }catch(e){ idbReady=false; }
+})();
+</script>
+
+</html>
