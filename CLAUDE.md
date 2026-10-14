@@ -9,7 +9,7 @@ UI language is Russian; verb content is Spanish. Hosted as a static site on GitH
 - `index.html` — the whole project: markup, CSS and JS in one file. No build step, no dependencies, no `package.json`.
 - `CLAUDE.md` — this file.
 
-The only external resource is Google Fonts (Young Serif, IBM Plex Sans, IBM Plex Mono), each with a system fallback. Do not add other CDNs.
+The only external resource is Google Fonts (Archivo Black, IBM Plex Sans, IBM Plex Mono), each with a system fallback. Do not add other CDNs.
 
 ## Hard constraints
 
@@ -29,7 +29,7 @@ The only external resource is Google Fonts (Young Serif, IBM Plex Sans, IBM Plex
 | Verbs with any irregularity | `IRR[verb] = {pres, pret}` | 6 space-separated forms each |
 | Russian translations | `RU[verb] = [infinitive, "6 present forms", [past sg, past pl], hint?]` | the hint disambiguates pairs like ser/estar, decir |
 | Verb set (level) | `TIER[verb] = 1\|2\|3` | 1 core, 2 frequent, 3 everyday |
-| Tenses | `TENSES` | `{k, mood, name, short?, ru, g}`; `g` is the color group: `pres` / `past` / `fut` / `subj` / `imp` |
+| Tenses | `TENSES` | `{k, mood, name, short?, ru, g}`; `g` is the family: `pres` / `past` / `fut` / `subj` / `imp`. Each tense's color is the token `--t-<k>` |
 
 Persons are indices 0–5: yo, tú, él/ella/Ud., nosotros, vosotros, ellos/Uds. The imperative has no form for index 0 (`hasPerson`).
 
@@ -55,6 +55,8 @@ Entry point: `form(verb, tenseKey, person)` returns a string or `null`.
 
 **Explanations.** `explain(verb, tenseKey, person)` returns HTML lines with the rule and the steps from the infinitive to the form. It follows the same branches and helper lists as `form()` (`whyBasic` for presente/pretérito, which classifies the irregularity by comparing with the regular form; `whySp` for the subjunctive). It is shown in the feedback after a mistake, followed by `tenseHtml`: the whole tense for that verb, with the asked person highlighted and the other forms that differ from `regularForm()` colored. When you change the engine or add a helper list, update `explain` too. Check that every form gets a non-empty explanation that mentions the form itself.
 
+**Page layout.** A top bar (title, cheat-sheet buttons, a «Что это?» link to `#about`), the trainer card in `main`, and a settings panel `aside#side` holding tenses, filters, progress and the resets. At 900px and wider the panel is a sticky column on the right. Below 900px it is a drawer that slides in from the right, opened by `#cfgOpen`; while it is open the rest of the page is `inert`, and Esc, ✕ or the scrim close it. The long description lives in `footer#about` at the end of the page. The look is poster-like: ink borders (`--edge`), sharp corners (`--r`) and hard offset shadows. Each tense has its own color token `--t-<k>`. Families share related hues, and compound tenses use a deeper shade. Red and green are reserved for wrong and right answers, so tense colors never use them. JS sets `--tc` to the current tense's token on the card (shadow, pill, primary button, input focus). The same color appears on the tense checkboxes in settings and on the verb-card tables; `--ts` is a tint of it made with `color-mix`.
+
 **Cheat sheet and search.** The page shows only the trainer. The header buttons (`nav.tools`, `data-open`) open `<dialog id="sheet">` on one of four tab panels: `#regular`, `#irregular`, `#other`, `#search`. Esc closes the dialog. The undo shortcut ignores Esc while the dialog is open. Search (`searchVerbs`) matches the infinitive, a word of the Russian translation, or any conjugated form or participle. Forms are compared without accents, through an index built on first use. The verb card shows all tenses, and colors forms where `form() !== regularForm()`.
 
 **Hints.** Buttons under the accent keys, available only before answering: «Правило» (`hintRule`, the rule for this verb and form), «Правильный?» (`hintRegular`, compares `form()` with `regularForm()`, which applies the plain rules with no exception lists), «Окончания» (`hintEndings`) and «Буква» (reveals the answer one letter at a time, up to length − 1). `kindBasic` classifies presente/pretérito forms for both `whyBasic` and `hintBasic`. Hints must never contain the answer, and must not name the verb, because in Russian-prompt mode the verb is part of the task. A correct answer given after any hint doesn't add to the streak, and the card goes into review with `need = 1`.
@@ -78,7 +80,7 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 
 ## Adding a tense
 
-1. Add an object to `TENSES` with a unique `k` and suitable `mood` and `g`. Its checkbox appears automatically.
+1. Add an object to `TENSES` with a unique `k` and suitable `mood` and `g`. Its checkbox appears automatically. Add a `--t-<k>` color in all three token blocks; it must not be red or green.
 2. Add a `case` to `form()`.
 3. If the tense lacks some person, extend `hasPerson` and `persLabel`.
 4. Add an explanation block to the `#other` panel of the cheat sheet.
@@ -114,7 +116,7 @@ for(const v of X.REGULAR.concat(Object.keys(X.IRR))){
 new Function(js); console.log(bad.length?bad:"OK");'
 ```
 
-In a browser: open `index.html` at desktop width and at ~400px. Check that Enter and the button work, that the header buttons open the dialog (and Esc / ✕ / backdrop close it), that the checkboxes switch tenses, and that the last checked tense cannot be unchecked.
+In a browser: open `index.html` at desktop width and at ~400px. Check that Enter and the button work, that «Настройки» opens and closes the settings drawer at ~400px, that the header buttons open the dialog (and Esc / ✕ / backdrop close it), that the checkboxes switch tenses, and that the last checked tense cannot be unchecked.
 
 ## Deploy
 
