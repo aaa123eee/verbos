@@ -111,6 +111,14 @@ button.primary{background:var(--cobalt);border-color:var(--cobalt);color:var(--s
 .feedback mark{background:var(--saffron-soft);color:var(--saffron);border-radius:3px;padding:0 1px;font-weight:600}
 .feedback .why{margin-top:8px;padding-top:10px;border-top:1px solid var(--line);color:var(--ink);font-size:14px;display:flex;flex-direction:column;gap:5px}
 .feedback .why b.f{color:var(--tc);font-weight:600;white-space:nowrap}
+.feedback .vt{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,auto);grid-auto-flow:column;gap:2px 16px}
+.feedback .vt div{display:flex;gap:8px;font-size:14px;padding:1px 6px;border-radius:4px}
+.feedback .vt span:first-child{color:var(--muted);font-size:13px;min-width:66px}
+.feedback .vt span:last-child{font-family:var(--f-mono)}
+.feedback .vtn{color:var(--muted);font-size:12px}
+.feedback .vt .me{background:var(--ts)}
+.feedback .vt .me span:last-child{color:var(--tc);font-weight:600}
+@media (max-width:480px){.feedback .vt{grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-flow:row}.feedback .vt div:empty{display:none}}
 .feedback del{color:var(--bad);text-decoration-thickness:2px}
 .stats{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
 .stats b{color:var(--ink);font-weight:600}
@@ -969,6 +977,16 @@ function trLine(v,t,p,c){
   return (t==="pres"||t==="pret")? head+" — "+ruPhrase(v,t,p) : head+" — "+RU[v][0]+" ("+TMAP[t].name+")";
 }
 const whyHtml=(v,t,p)=>'<div class="why"><h3>Как получается</h3>'+explain(v,t,p).map(l=>'<div>'+l+'</div>').join("")+'</div>';
+// the whole tense for this verb; the asked person is highlighted, forms off the general rule are colored
+function tenseHtml(v,t,p){
+  let odd=false;
+  const rows=[0,1,2,3,4,5].map(q=>{
+    if(!hasPerson(t,q)) return '<div></div>';
+    const f=form(v,t,q),x=q!==p&&f!==regularForm(v,t,q); odd=odd||x;
+    return '<div'+(q===p?' class="me"':'')+'><span>'+persLabel(t,q).split(" ")[0]+'</span><span'+(x?' class="x"':'')+'>'+f+'</span></div>';
+  }).join("");
+  return '<div class="why"><h3>'+esc(TMAP[t].name)+' · '+v+'</h3><div class="vt">'+rows+'</div>'+(odd?'<small class="vtn">Цветом — формы не по общему правилу.</small>':'')+'</div>';
+}
 function check(){
   const [v,t,p]=cur.split("|"),c=form(v,t,+p),u=norm($("ans").value);
   if(!u)return false;
@@ -994,7 +1012,7 @@ function check(){
     const d=diff(u,c);
     S.review[cur]={need:3,gap:4,due:S.t+4+Math.floor(Math.random()*3)};
     fb.className="feedback bad";
-    fb.innerHTML='<div>'+(accentOnly?"Ошибка в ударении.":"Ошибка.")+'</div><div class="row">ты: '+d.u+'</div><div class="row">надо: '+d.c+'</div><div class="tr">'+esc(trLine(v,t,+p,c))+'</div>'+whyHtml(v,t,+p);
+    fb.innerHTML='<div>'+(accentOnly?"Ошибка в ударении.":"Ошибка.")+'</div><div class="row">ты: '+d.u+'</div><div class="row">надо: '+d.c+'</div><div class="tr">'+esc(trLine(v,t,+p,c))+'</div>'+whyHtml(v,t,+p)+tenseHtml(v,t,+p);
   }
   save(); render(); answered=true; setGo(true);
   return true;
