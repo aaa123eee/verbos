@@ -54,6 +54,8 @@ Entry point: `form(verb, tenseKey, person)` returns a string or `null`.
 
 **Explanations.** `explain(verb, tenseKey, person)` returns HTML lines with the rule and the steps from the infinitive to the form. It follows the same branches and helper lists as `form()` (`whyBasic` for presente/pretérito, which classifies the irregularity by comparing with the regular form; `whySp` for the subjunctive). It is shown in the feedback after a mistake. When you change the engine or add a helper list, update `explain` too. Check that every form gets a non-empty explanation that mentions the form itself.
 
+**Hints.** Buttons under the accent keys, available only before answering: «Правило» (`hintRule`, the rule for this verb and form), «Правильный?» (`hintRegular`, compares `form()` with `regularForm()`, which applies the plain rules with no exception lists), «Окончания» (`hintEndings`) and «Буква» (reveals the answer one letter at a time, up to length − 1). `kindBasic` classifies presente/pretérito forms for both `whyBasic` and `hintBasic`. Hints must never contain the answer, and must not name the verb, because in Russian-prompt mode the verb is part of the task. A correct answer given after any hint doesn't add to the streak, and the card goes into review with `need = 1`.
+
 Russian prompts (`ruPhrase`) and full translations in feedback exist only for `pres` and `pret`. Other tenses always prompt in Spanish, and the feedback shows the infinitive's translation.
 
 ## Adding a verb
