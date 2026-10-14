@@ -15,7 +15,7 @@
   --cobalt:#1f47b8; --cobalt-soft:#e6ecfb; --saffron:#c47a00; --saffron-soft:#fdf1da;
   --ok:#1d7a4a; --ok-soft:#e2f4ea; --bad:#b3261e; --bad-soft:#fbe6e4;
   --pres-strong:#1f47b8; --pret-strong:#8f5200;
-  --fut-strong:#16705f; --fut-soft:#e0f2ee; --subj-strong:#86297a; --subj-soft:#f6e4f2; --imp-strong:#9c3a14; --imp-soft:#fbe8df;
+  --fut-strong:#16705f; --fut-soft:#e0f2ee; --subj-strong:#86297a; --subj-soft:#f6e4f2; --imp-strong:#9c3a14; --imp-soft:#fbe8df; --backdrop:rgba(24,32,58,.45);
   --f-display:"Young Serif",Georgia,"Times New Roman",serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -23,11 +23,11 @@
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#10142a; --surface:#181d38; --ink:#e8ebf7; --muted:#9aa2c2; --line:#2b3256;
   --cobalt:#8eabff; --cobalt-soft:#222c58; --saffron:#f2b54a; --saffron-soft:#3a2f17;
-  --ok:#6fd49c; --ok-soft:#173a2a; --bad:#ff8a80; --bad-soft:#40201f; --pres-strong:#8eabff; --pret-strong:#f2b54a; --fut-strong:#6fd1bd; --fut-soft:#163a35; --subj-strong:#e39ad3; --subj-soft:#3a2036; --imp-strong:#ff9f7a; --imp-soft:#40261c; color-scheme:dark}}
+  --ok:#6fd49c; --ok-soft:#173a2a; --bad:#ff8a80; --bad-soft:#40201f; --pres-strong:#8eabff; --pret-strong:#f2b54a; --fut-strong:#6fd1bd; --fut-soft:#163a35; --subj-strong:#e39ad3; --subj-soft:#3a2036; --imp-strong:#ff9f7a; --imp-soft:#40261c; --backdrop:rgba(0,0,0,.62); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#10142a; --surface:#181d38; --ink:#e8ebf7; --muted:#9aa2c2; --line:#2b3256;
   --cobalt:#8eabff; --cobalt-soft:#222c58; --saffron:#f2b54a; --saffron-soft:#3a2f17;
-  --ok:#6fd49c; --ok-soft:#173a2a; --bad:#ff8a80; --bad-soft:#40201f; --pres-strong:#8eabff; --pret-strong:#f2b54a; --fut-strong:#6fd1bd; --fut-soft:#163a35; --subj-strong:#e39ad3; --subj-soft:#3a2036; --imp-strong:#ff9f7a; --imp-soft:#40261c; color-scheme:dark}
+  --ok:#6fd49c; --ok-soft:#173a2a; --bad:#ff8a80; --bad-soft:#40201f; --pres-strong:#8eabff; --pret-strong:#f2b54a; --fut-strong:#6fd1bd; --fut-soft:#163a35; --subj-strong:#e39ad3; --subj-soft:#3a2036; --imp-strong:#ff9f7a; --imp-soft:#40261c; --backdrop:rgba(0,0,0,.62); color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:28px 64px;display:flex;flex-direction:column;gap:36px}
 header{display:flex;flex-direction:column;gap:6px}
@@ -35,7 +35,6 @@ h1{font-family:var(--f-display);font-weight:400;font-size:clamp(28px,5vw,40px);l
 h1 em{font-style:normal;color:var(--cobalt)}
 .lede{color:var(--muted);margin:0;max-width:62ch}
 nav{display:flex;gap:16px;flex-wrap:wrap;font-size:14px}
-nav a{color:var(--cobalt);text-decoration:none;border-bottom:1px solid currentColor}
 h2{font-family:var(--f-display);font-weight:400;font-size:26px;margin:0;text-wrap:balance}
 h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:600}
 section{display:flex;flex-direction:column;gap:18px}
@@ -123,6 +122,48 @@ button.primary{background:var(--cobalt);border-color:var(--cobalt);color:var(--s
 .foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
 .foot button{font-size:12px;padding:6px 10px;font-weight:500;color:var(--muted)}
 
+/* cheat sheet dialog */
+nav.tools{display:flex;gap:8px;flex-wrap:wrap}
+nav.tools button{font-size:13px;padding:7px 12px;font-weight:500;color:var(--cobalt)}
+dialog.sheet{width:min(1000px,calc(100% - 32px));height:calc(100% - 48px);max-width:none;max-height:none;margin:auto;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);overflow:hidden}
+dialog.sheet[open]{display:flex;flex-direction:column}
+dialog.sheet::backdrop{background:var(--backdrop)}
+body:has(dialog[open]){overflow:hidden}
+.sheet-head{display:flex;gap:8px;align-items:center;padding:8px 10px;border-bottom:1px solid var(--line);background:var(--surface)}
+.tabs{display:flex;gap:4px;flex:1;min-width:0;overflow-x:auto;scrollbar-width:none;padding:3px}
+.tabs button{font-size:13px;padding:7px 11px;font-weight:500;color:var(--muted);border-color:transparent;background:transparent;white-space:nowrap}
+.tabs button[aria-selected="true"]{background:var(--cobalt-soft);color:var(--cobalt)}
+.sheet .close{padding:8px;flex:none}
+.sheet-body{flex:1;overflow:auto;padding:20px 16px 48px}
+.panel{max-width:940px;margin:0 auto}
+@media (max-width:560px){
+  dialog.sheet{width:100%;height:100%;border:0;border-radius:0}
+  .tabs button:not([aria-selected="true"]) span{display:none}
+}
+/* verb search */
+#q{width:100%;box-sizing:border-box;font-family:var(--f-body);font-size:17px;padding:10px 14px;border:2px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+#q:focus{outline:none;border-color:var(--cobalt)}
+.results{display:flex;flex-wrap:wrap;gap:6px}
+.results button{font-size:13px;padding:5px 10px;font-weight:500;gap:6px}
+.results button .f{color:var(--cobalt)}
+.results button small{color:var(--muted);font-weight:400;font-size:12.5px}
+.results button[aria-pressed="true"]{border-color:var(--cobalt);background:var(--cobalt-soft)}
+#verbCard{display:flex;flex-direction:column;gap:12px}
+#verbCard:empty{display:none}
+.vhead{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline}
+.vname{font-family:var(--f-display);font-size:30px;line-height:1.1}
+.vhead .badge{font-size:12px;padding:2px 8px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.conj{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.conj .card{background:var(--surface);border:1px solid var(--line);border-top:3px solid var(--pres-strong);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.conj .card[data-g="past"]{border-top-color:var(--pret-strong)}
+.conj .card[data-g="fut"]{border-top-color:var(--fut-strong)}
+.conj .card[data-g="subj"]{border-top-color:var(--subj-strong)}
+.conj .card[data-g="imp"]{border-top-color:var(--imp-strong)}
+.conj h4{margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.conj .ln{display:flex;gap:8px;font-size:14px;border-radius:4px;padding:0 4px;margin:0 -4px}
+.conj .ln span:first-child{color:var(--muted);font-size:13px;min-width:66px}
+.conj .ln.found{background:var(--saffron-soft)}
+
 /* tables */
 .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px}
 .block{display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -144,8 +185,8 @@ ul.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;m
 <div class="wrap">
   <header>
     <h1>Conjugación <em>española</em></h1>
-    <p class="lede">Тренажёр без подсказок: пишешь форму, получаешь «верно» или место ошибки. Ошибки возвращаются через несколько вопросов, пока не ответишь правильно три раза. Времена выбираются галочками, по умолчанию presente и pretérito. Ниже шпаргалка по окончаниям.</p>
-    <nav><a href="#trainer">Тренажёр</a><a href="#regular">Правильные глаголы</a><a href="#irregular">Неправильные</a><a href="#other">Остальные времена</a></nav>
+    <p class="lede">Тренажёр без вариантов ответа: пишешь форму сам, получаешь «верно» или место ошибки. Ошибки возвращаются через несколько вопросов, пока не ответишь правильно три раза. Времена выбираются галочками, по умолчанию presente и pretérito. Шпаргалка и поиск глагола — по кнопкам ниже.</p>
+    <nav class="tools" aria-label="Шпаргалка"><button type="button" data-open="regular"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><span>Правильные</span></button><button type="button" data-open="irregular"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Неправильные</span></button><button type="button" data-open="other"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Остальные времена</span></button><button type="button" data-open="search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Поиск глагола</span></button></nav>
   </header>
 
   <section id="trainer">
@@ -211,7 +252,15 @@ ul.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;m
     </div>
   </section>
 
-  <section id="regular">
+</div>
+
+<dialog class="sheet" id="sheet" aria-label="Шпаргалка">
+  <div class="sheet-head">
+    <div class="tabs" role="tablist"><button type="button" role="tab" data-tab="regular"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg><span>Правильные</span></button><button type="button" role="tab" data-tab="irregular"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Неправильные</span></button><button type="button" role="tab" data-tab="other"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Остальные времена</span></button><button type="button" role="tab" data-tab="search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Поиск глагола</span></button></div>
+    <button type="button" class="close" id="sheetClose" aria-label="Закрыть"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="sheet-body" id="sheetBody">
+  <section class="panel" id="regular" role="tabpanel" hidden>
     <h2>Правильные глаголы</h2>
     <p>Отрезаешь <span class="f">-ar / -er / -ir</span> и добавляешь окончание. У <span class="f">-er</span> и <span class="f">-ir</span> окончания почти совпадают: в presente отличаются только nosotros и vosotros, в pretérito они одинаковые.</p>
     <div class="grid2">
@@ -247,7 +296,7 @@ ul.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;m
     <div class="block" id="vocab"></div>
   </section>
 
-  <section id="irregular">
+  <section class="panel" id="irregular" role="tabpanel" hidden>
     <h2>Неправильные глаголы</h2>
     <ul class="rules">
       <li><b>Yo на -go</b> в presente, остальное обычно: tener → <span class="f">ten<span class="x">go</span></span>, hacer → <span class="f">ha<span class="x">go</span></span>, poner, salir, venir, decir.</li>
@@ -264,7 +313,7 @@ ul.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;m
     <div class="block" id="irrTables"></div>
   </section>
 
-  <section id="other">
+  <section class="panel" id="other" role="tabpanel" hidden>
     <h2>Остальные времена</h2>
     <p>Все эти времена строятся по правилам из нескольких строк. Неправильных глаголов здесь гораздо меньше, чем в presente и pretérito.</p>
     <div class="grid2">
@@ -334,7 +383,14 @@ ul.rules{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;m
       </div>
     </div>
   </section>
-</div>
+  <section class="panel" id="search" role="tabpanel" hidden>
+    <h2>Поиск глагола</h2>
+    <input id="q" type="search" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Глагол, перевод или форма" placeholder="tener, иметь или tuve">
+    <div class="results" id="results"></div>
+    <div id="verbCard"></div>
+  </section>
+  </div>
+</dialog>
 
 <script>
 const PERS=["yo","tú","él / ella / Ud.","nosotros","vosotros","ellos / Uds."];
@@ -894,6 +950,7 @@ function show(){
   $("pTag").textContent=r?"повтор · осталось верных: "+r.need:"";
   $("ans").value=""; $("ans").focus({preventScroll:true});
   resetHints(); setGo(false);
+  const fb=$("fb"); fb.className="feedback idle"; fb.textContent=FB_IDLE; fb.hidden=S.total>0;
 }
 const norm=s=>s.trim().toLowerCase().replace(/\s+/g," ");
 const deacc=s=>s.normalize("NFD").replace(/[́]/g,"").normalize("NFC");
@@ -919,7 +976,7 @@ function check(){
   const o=opt(); let ok=u===c, accentOnly=!ok&&deacc(u)===deacc(c);
   if(accentOnly&&!o.strict) ok=true;
   S.t++; S.total++;
-  const fb=$("fb");
+  const fb=$("fb"); fb.hidden=false;
   if(ok){
     S.right++;
     const r=S.review[cur];
@@ -950,7 +1007,7 @@ function render(){
   if(!n){w.innerHTML='<span class="empty">Пусто. Ошибки появятся здесь и будут возвращаться, пока не ответишь трижды.</span>';return;}
   w.innerHTML=Object.entries(S.review).sort((a,b)=>a[1].due-b[1].due).map(([k,r])=>{const [v,t,p]=k.split("|");if(!TMAP[t]) return ""; return '<span class="chip">'+esc(persLabel(t,+p).split(" ")[0])+' '+v+' <i>'+esc(TMAP[t].short||TMAP[t].name)+' · ×'+r.need+'</i></span>';}).join("");
 }
-// no <form>: sandboxed previews block form submission entirely
+// no <form>: Enter is handled here, so nothing submits or reloads the page
 const step=()=>{ if(answered) show(); else check(); };
 // undo: misclick or misread task → forget the last answer and ask the same prompt again
 const FB_IDLE=$("fb").textContent;
@@ -959,13 +1016,13 @@ function undo(){
   S=JSON.parse(prevS); prevS=null; save(); render();
   answered=false; setGo(false);
   const r=S.review[cur]; $("pTag").textContent=r?"повтор · осталось верных: "+r.need:"";
-  const fb=$("fb"); fb.className="feedback idle"; fb.textContent="Ответ отменён, попробуй ещё раз.";
+  const fb=$("fb"); fb.hidden=false; fb.className="feedback idle"; fb.textContent="Ответ отменён, попробуй ещё раз.";
   $("ans").value=""; $("ans").focus({preventScroll:true});
 }
 $("go").addEventListener("click",step);
 $("undo").addEventListener("click",undo);
 $("hintbar").addEventListener("click",e=>{ const b=e.target.closest("button[data-h]"); if(b) useHint(b.dataset.h); });
-document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&answered){ e.preventDefault(); undo(); } });
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"&&answered&&!$("sheet").open){ e.preventDefault(); undo(); } });
 $("ans").addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.isComposing){ e.preventDefault(); step(); } });
 document.querySelectorAll(".keys button").forEach(b=>b.addEventListener("click",()=>{
   const i=$("ans"),s=i.selectionStart??i.value.length,en=i.selectionEnd??s;
@@ -999,6 +1056,70 @@ confirmBtn("resetAll",()=>{
   setTenses(DEFAULT_TENSES); // also calls show() and stores the list, which we drop below
   try{localStorage.removeItem(TKEY);}catch(e){}
 });
+// ---- cheat sheet dialog: opened by the header buttons, one tab per section ----
+const sheet=$("sheet");
+function openSheet(tab){
+  document.querySelectorAll("#sheet [data-tab]").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
+  document.querySelectorAll("#sheet .panel").forEach(x=>x.hidden=x.id!==tab);
+  $("sheetBody").scrollTop=0;
+  if(!sheet.open){ try{sheet.showModal();}catch(e){sheet.setAttribute("open","");} }
+  if(tab==="search"){ renderSearch(); $("q").focus(); }
+  else document.querySelector('#sheet [data-tab="'+tab+'"]').focus();
+}
+document.querySelector("nav.tools").addEventListener("click",e=>{ const b=e.target.closest("[data-open]"); if(b) openSheet(b.dataset.open); });
+document.querySelector("#sheet .tabs").addEventListener("click",e=>{ const b=e.target.closest("[data-tab]"); if(b) openSheet(b.dataset.tab); });
+$("sheetClose").addEventListener("click",()=>sheet.close());
+sheet.addEventListener("click",e=>{ if(e.target===sheet) sheet.close(); }); // click on the backdrop
+sheet.addEventListener("close",()=>$("ans").focus({preventScroll:true}));
+
+// ---- verb search: by infinitive, Russian translation or any conjugated form ----
+const ALL=REGULAR.concat(Object.keys(IRR)).sort((a,b)=>a.localeCompare(b,"es"));
+const skey=s=>deacc(s.toLowerCase().trim()).replace(/\s+/g," ");
+let FORMS=null; // deaccented form → [{v,t,p}], built on first search
+function formIndex(){
+  if(FORMS) return FORMS;
+  FORMS=new Map(); const add=(k,x)=>{ if(!FORMS.has(k)) FORMS.set(k,[]); FORMS.get(k).push(x); };
+  for(const v of ALL){
+    for(const T of TENSES) for(let p=0;p<6;p++){ const f=form(v,T.k,p); if(f!=null) add(skey(f),{v,t:T.k,p}); }
+    add(skey(part(v)),{v,part:true});
+  }
+  return FORMS;
+}
+function searchVerbs(q){
+  const k=skey(q); if(!k) return ALL.map(v=>({v,sc:9}));
+  const hits=new Map(),hit=(v,sc,x)=>{ const o=hits.get(v); if(!o||sc<o.sc) hits.set(v,{v,sc,x}); };
+  for(const v of ALL){
+    const kv=skey(v);
+    if(kv===k) hit(v,0); else if(kv.startsWith(k)) hit(v,1); else if(kv.includes(k)) hit(v,4);
+    if(RU[v][0].toLowerCase().split(/[\s,()]+/).some(w=>w&&w.startsWith(k))) hit(v,3);
+  }
+  (formIndex().get(k)||[]).forEach(x=>hit(x.v,2,x));
+  return [...hits.values()].sort((a,b)=>a.sc-b.sc||a.v.localeCompare(b.v,"es")).slice(0,30);
+}
+const formLabel=x=>x.part?"participio":(TMAP[x.t].short||TMAP[x.t].name)+", "+persLabel(x.t,x.p).split(" ")[0];
+let selVerb=null;
+function renderSearch(){
+  const q=$("q").value,R=searchVerbs(q),k=skey(q);
+  if(k&&R.length&&(R.length===1||R[0].sc===0||R[0].sc===2)&&!R.some(r=>r.v===selVerb)) selVerb=R[0].v; // obvious match: open it right away
+  if(!R.some(r=>r.v===selVerb)) selVerb=null;
+  $("results").innerHTML=R.length?R.map(r=>'<button type="button" data-v="'+r.v+'" aria-pressed="'+(r.v===selVerb)+'"><span class="f">'+r.v+'</span>'+
+    (k?'<small>'+esc(r.x?formLabel(r.x)+" · "+r.x.v:RU[r.v][0])+'</small>':'')+'</button>').join(""):'<span class="empty">Ничего не нашлось. Попробуй инфинитив, перевод или любую форму.</span>';
+  renderVerb(selVerb,k);
+}
+function renderVerb(v,k){
+  if(!v){ $("verbCard").innerHTML=""; return; }
+  const found=f=>k&&(skey(f)===k||skey(f.split(" ").pop())===k);
+  $("verbCard").innerHTML='<div class="vhead"><span class="vname">'+v+'</span><span>'+esc(RU[v][0])+'</span><span class="badge">'+(IRR[v]?"с особенностями":"правильный")+' · '+TIER_NAME[TIER[v]]+'</span></div>'+
+    '<p class="note">Цветом выделены формы, которые не строятся по общему правилу.</p><div class="conj">'+
+    TENSES.map(T=>'<div class="card" data-g="'+T.g+'"><h4>'+T.name+'</h4>'+[0,1,2,3,4,5].filter(p=>hasPerson(T.k,p)).map(p=>{
+      const f=form(v,T.k,p);
+      return '<div class="ln'+(found(f)?' found':'')+'"><span>'+persLabel(T.k,p).split(" ")[0]+'</span><span class="f'+(f!==regularForm(v,T.k,p)?' x':'')+'">'+f+'</span></div>';
+    }).join("")+'</div>').join("")+'</div>';
+}
+$("q").addEventListener("input",renderSearch);
+$("q").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const b=$("results").querySelector("button"); if(b){ selVerb=b.dataset.v; renderSearch(); } } });
+$("results").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(!b) return; selVerb=b.dataset.v; renderSearch(); });
+
 render(); show();
 
 // load progress from IndexedDB; migrate old localStorage data once

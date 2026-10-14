@@ -1,6 +1,6 @@
 # Verbos
 
-A Spanish verb conjugation trainer. The user types the verb form with no hints; mistakes come back later (a simple spaced-repetition scheme driven by a turn counter). The page also contains a cheat sheet of endings and rules.
+A Spanish verb conjugation trainer. The user types the verb form; optional hints sit behind buttons, and mistakes come back later (a simple spaced-repetition scheme driven by a turn counter). A cheat sheet of endings and rules, plus a verb search, opens in a dialog from the header buttons.
 
 UI language is Russian; verb content is Spanish. Hosted as a static site on GitHub Pages from the root of `main`.
 
@@ -13,9 +13,10 @@ The only external resource is Google Fonts (Young Serif, IBM Plex Sans, IBM Plex
 
 ## Hard constraints
 
-- **No `<form>` and no submit.** The page is also opened inside sandboxed iframes without `allow-forms`, where the browser silently blocks form submission. Enter is handled via `keydown` on `#ans`; the button is `type="button"` with a `click` handler.
+- **Only served from GitHub Pages**, never embedded in an iframe.
+- **No `<form>`.** Enter is handled via `keydown` on `#ans`, and every button is `type="button"` with a `click` handler, so nothing submits or reloads the page.
 - **Browser storage only.** No backend, no cloud database.
-- **Storage may be unavailable** (sandbox, private mode). Wrap every `localStorage` / `indexedDB` access in `try/catch`; the page must work without it.
+- **Storage may be unavailable** (private mode, blocked site data). Wrap every `localStorage` / `indexedDB` access in `try/catch`; the page must work without it.
 - **Colors only via tokens** in `:root`. Dark theme redefines the same tokens in both `@media (prefers-color-scheme: dark)` and `:root[data-theme="dark"]`; keep the two blocks in sync.
 - **Must work at ~400px width** with no horizontal page scroll. Wide tables live inside `.tbl` (`overflow-x: auto`).
 
@@ -54,6 +55,8 @@ Entry point: `form(verb, tenseKey, person)` returns a string or `null`.
 
 **Explanations.** `explain(verb, tenseKey, person)` returns HTML lines with the rule and the steps from the infinitive to the form. It follows the same branches and helper lists as `form()` (`whyBasic` for presente/pretérito, which classifies the irregularity by comparing with the regular form; `whySp` for the subjunctive). It is shown in the feedback after a mistake. When you change the engine or add a helper list, update `explain` too. Check that every form gets a non-empty explanation that mentions the form itself.
 
+**Cheat sheet and search.** The page shows only the trainer. The header buttons (`nav.tools`, `data-open`) open `<dialog id="sheet">` on one of four tab panels: `#regular`, `#irregular`, `#other`, `#search`. Esc closes the dialog. The undo shortcut ignores Esc while the dialog is open. Search (`searchVerbs`) matches the infinitive, a word of the Russian translation, or any conjugated form or participle. Forms are compared without accents, through an index built on first use. The verb card shows all tenses, and colors forms where `form() !== regularForm()`.
+
 **Hints.** Buttons under the accent keys, available only before answering: «Правило» (`hintRule`, the rule for this verb and form), «Правильный?» (`hintRegular`, compares `form()` with `regularForm()`, which applies the plain rules with no exception lists), «Окончания» (`hintEndings`) and «Буква» (reveals the answer one letter at a time, up to length − 1). `kindBasic` classifies presente/pretérito forms for both `whyBasic` and `hintBasic`. Hints must never contain the answer, and must not name the verb, because in Russian-prompt mode the verb is part of the task. A correct answer given after any hint doesn't add to the streak, and the card goes into review with `need = 1`.
 
 Russian prompts (`ruPhrase`) and full translations in feedback exist only for `pres` and `pret`. Other tenses always prompt in Spanish, and the feedback shows the infinitive's translation.
@@ -78,7 +81,7 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 1. Add an object to `TENSES` with a unique `k` and suitable `mood` and `g`. Its checkbox appears automatically.
 2. Add a `case` to `form()`.
 3. If the tense lacks some person, extend `hasPerson` and `persLabel`.
-4. Add an explanation block to the `#other` section of the cheat sheet.
+4. Add an explanation block to the `#other` panel of the cheat sheet.
 
 ## Progress storage
 
@@ -111,7 +114,7 @@ for(const v of X.REGULAR.concat(Object.keys(X.IRR))){
 new Function(js); console.log(bad.length?bad:"OK");'
 ```
 
-In a browser: open `index.html` both in a normal tab and inside an `<iframe sandbox="allow-scripts">`. Check that Enter and the button work, that the checkboxes switch tenses, and that the last checked tense cannot be unchecked.
+In a browser: open `index.html` at desktop width and at ~400px. Check that Enter and the button work, that the header buttons open the dialog (and Esc / ✕ / backdrop close it), that the checkboxes switch tenses, and that the last checked tense cannot be unchecked.
 
 ## Deploy
 
