@@ -2,7 +2,7 @@
 
 **Live: https://aaa123eee.github.io/verbos/**
 
-A Spanish verb conjugation trainer for Russian speakers. You see a verb, a person and a tense, and you type the form without hints. If you get it wrong, the page shows where the mistake is, which rule applies, and how the form is built step by step from the infinitive. Wrong answers come back a few questions later until you get them right three times.
+A Spanish verb conjugation trainer for Russian speakers. You see a verb, a person and a tense, and you type the form without hints. If you get it wrong, the page shows where the mistake is, which rule applies, and how the form is built step by step from the infinitive. Wrong answers come back a few questions later until you get them right three times. A second mistake in the same verb and tense makes you type out that whole tense from memory.
 
 - 14 tenses across indicativo, subjuntivo and imperativo, picked with checkboxes.
 - 77 common verbs in three levels, regular and irregular.
