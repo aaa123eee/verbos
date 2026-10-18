@@ -95,7 +95,7 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 
 - IndexedDB: database `conjugacion`, store `kv`, key `progress`. Shape: `{t, review, total, right, streak, miss?, drill?}`.
 - `review` holds cards under review: key `verb|tense|person`, value `{need, gap, due}`.
-- `localStorage`: `conj-tenses-v1` stores the selected tenses. `conj-trainer-v1` is the old progress format; it is migrated to IndexedDB on first load.
+- `localStorage`: `conj-tenses-v1` stores the selected tenses; `conj-settings-v1` stores the ids of the checked settings inputs (`SET_IDS`: verb type, level, prompt language, accents, vosotros). «Сбросить всё» removes both. `conj-trainer-v1` is the old progress format; it is migrated to IndexedDB on first load.
 - Size is bounded: only state is stored, never a log of answers.
 
 **Controls.** Enter / «Проверить» checks, then moves on. Esc / «Отменить» (only after an answer) restores `S` from an in-memory snapshot taken before the check and asks the same prompt again. Like a hint, an undo sets `undone` for this prompt: the next correct answer doesn't add to the streak, and the card goes into review with `need = 1`. «Сбросить прогресс» clears `S`; «Сбросить всё» also resets the tense selection and filters. Both resets need a second click within 3 s. Button icons are inline SVG (`.ico`); key hints are `<kbd>`, hidden on touch devices and below 480px.

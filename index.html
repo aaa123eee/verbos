@@ -1868,7 +1868,12 @@ $("tenses").addEventListener("click",e=>{
   const s=b.dataset.set;
   setTenses(s==="def"?DEFAULT_TENSES:s==="ind"?TENSES.filter(t=>t.mood==="Indicativo").map(t=>t.k):TENSES.map(t=>t.k));
 });
-document.querySelectorAll('input[name=group],input[name=tier],input[name=mode],#vos').forEach(x=>x.addEventListener("change",show));
+// the other settings (verb type, level, prompt language, accents, vosotros) survive reloads too
+const SKEY="conj-settings-v1",SET_IDS=["g-all","g-reg","g-irr","l-1","l-2","l-3","l-4","l-all","m-es","m-ru","m-mix","strict","vos"];
+const saveSettings=()=>{ try{localStorage.setItem(SKEY,JSON.stringify(SET_IDS.filter(id=>$(id).checked)));}catch(e){} };
+try{ const on=JSON.parse(localStorage.getItem(SKEY)||"null"); if(Array.isArray(on)) SET_IDS.forEach(id=>$(id).checked=on.includes(id)); }catch(e){}
+document.querySelectorAll('input[name=group],input[name=tier],input[name=mode],#vos').forEach(x=>x.addEventListener("change",()=>{ saveSettings(); show(); }));
+$("strict").addEventListener("change",saveSettings);
 // two-step confirm: first click arms the button for 3 s
 function confirmBtn(id,action){
   const b=$(id),lbl=b.querySelector("span"); let armed=false,tm=null;
@@ -1883,7 +1888,7 @@ confirmBtn("resetAll",()=>{
   resetProgress();
   ["g-all","l-1","m-es","strict","vos"].forEach(id=>$(id).checked=true);
   setTenses(DEFAULT_TENSES); // also calls show() and stores the list, which we drop below
-  try{localStorage.removeItem(TKEY);}catch(e){}
+  try{localStorage.removeItem(TKEY);localStorage.removeItem(SKEY);}catch(e){}
 });
 // ---- cheat sheet dialog: opened by the header buttons, one tab per section ----
 const sheet=$("sheet");
