@@ -27,13 +27,14 @@ The only external resource is Google Fonts (Archivo Black, IBM Plex Sans, IBM Pl
 | Regular endings (presente, pretérito) | `REG[ar\|er\|ir][pres\|pret]` | array of 6 endings |
 | Regular verbs | `REGULAR` | array of infinitives |
 | Verbs with any irregularity | `IRR[verb] = {pres, pret}` | 6 space-separated forms each |
-| Russian translations | `RU[verb] = [infinitive, "6 present forms", [past sg, past pl], hint?]` | the hint disambiguates pairs like ser/estar, decir |
-| Verb set (level) | `TIER[verb] = 1\|2\|3` | 1 core, 2 frequent, 3 everyday |
+| Russian translations | `RU[verb] = [infinitive, "6 present forms", [past sg, past pl], hint?]` | `RU[v][0]` is the short gloss shown in prompts; the hint disambiguates pairs like ser/estar, decir |
+| All meanings | `MEAN[verb] = "meaning; meaning; …"` | used by search and the verb card; every verb needs one |
+| Verb set (level) | `TIER[verb] = 1\|2\|3\|4` | 1 core, 2 frequent, 3 everyday, 4 extended |
 | Tenses | `TENSES` | `{k, mood, name, short?, ru, g}`; `g` is the family: `pres` / `past` / `fut` / `subj` / `imp`. Each tense's color is the token `--t-<k>` |
 
-Persons are indices 0–5: yo, tú, él/ella/Ud., nosotros, vosotros, ellos/Uds. The imperative has no form for index 0 (`hasPerson`).
+Persons are indices 0–5: yo, tú, él/ella/Ud., nosotros, vosotros, ellos/Uds. The imperatives (`impa`, `impn`) have no form for index 0 (`hasPerson`, `isImp`).
 
-Levels 2 and 3 are added with `addTier(n, regularVerbs, {verb: [pres, pret]}, ruEntries)`.
+Levels 2–4 are added with `addTier(n, regularVerbs, {verb: [pres, pret]}, ruEntries)`. Level 4 (~200 verbs) was generated from patterns (stem changes, spelling, -zco, -ducir, -uir, g→j, prefixed tener/poner/venir/hacer/traer) and checked against reference forms.
 
 "Irregular" in the UI filter means any verb in `IRR`: stem changes, spelling changes (busqué), i→y (leyó), not only truly irregular verbs.
 
@@ -44,20 +45,25 @@ Entry point: `form(verb, tenseKey, person)` returns a string or `null`.
 - `pres`, `pret` → `basic()`: explicit forms from `IRR`, otherwise stem + `REG`.
 - `imp` → stem + `IMPF`; exceptions in `IMPF_IRR` (ser, ir, ver).
 - `fut`, `cond` → `(FUT_STEM[v] || infinitive)` + endings. Special stems live in `FUT_STEM`; oír → `oir`.
-- Compound tenses (`perf plus futp condp spf spl`) → `HABER[t]` + `part(v)`. Irregular and accented participles live in `PART_IRR`.
+- Compound tenses (`perf plus ant futp condp spf spl fps`) → `HABER[t]` + `part(v)`. Irregular and accented participles live in `PART_IRR`.
 - `sp` (present subjunctive) → yo presente minus `-o` + `SP_END`.
   - Whole-paradigm exceptions: `SP_OVR` (ser, estar, ir, saber, dar).
   - nosotros/vosotros of -ir stem-changers: `SP_NOS_IR` (sint-, durm-, prefir-, mur-).
   - nosotros/vosotros of -ar/-er stem-changers: infinitive stem, listed in `SP_NOS_INF`.
   - -car/-gar/-zar spelling: `spell()`.
-- `si` (imperfect subjunctive) → ellos pretérito minus `-ron` + `-ra…`; nosotros gets an accent on the last vowel of the stem. Only the -ra form is accepted, not -se.
-- `impa` (affirmative imperative) → tú: él presente or `IMP_TU`; Ud./Uds./nosotros: present subjunctive (ir → `vamos`); vosotros: infinitive minus `-r` + `d`.
+- `si` (imperfect subjunctive) → ellos pretérito minus `-ron` + `-ra…`; nosotros gets an accent on the last vowel of the stem (`raForm(st, p, x)`).
+- `fs` (future subjunctive) → the same with `-re…`. `ant`, `fs`, `fps` are literary; their `ru` says so and they are off by default.
+- `altForm(v, t, p)` is a second accepted answer: the -se form for `si` and `hubiese` for `spl`. The check and the drill accept it; the feedback names the -ra form.
+- `impa` (affirmative imperative) → tú: él presente or `IMP_TU`; Ud./Uds./nosotros: present subjunctive (ir → `vamos`); vosotros: infinitive minus `-r` + `d`. Prefixed verbs have accented tú forms in `IMP_TU` (mantén, supón); `IMP_ROOT` names the root for the explanation.
+- `impn` (negative imperative) → `no` + present subjunctive for every person; the answer includes `no`.
 
-**Explanations.** `explain(verb, tenseKey, person)` returns HTML lines with the rule and the steps from the infinitive to the form. It follows the same branches and helper lists as `form()` (`whyBasic` for presente/pretérito, which classifies the irregularity by comparing with the regular form; `whySp` for the subjunctive). It is shown in the feedback after a mistake, followed by `tenseHtml`: the whole tense for that verb, with the asked person highlighted and the other forms that differ from `regularForm()` colored. When you change the engine or add a helper list, update `explain` too. Check that every form gets a non-empty explanation that mentions the form itself.
+**Russian prompts and synonyms.** Many verbs share a Russian phrase (начинать = empezar / comenzar). In a Russian prompt `synonymFor` accepts any verb whose `ruPhrase` is identical, and the feedback names the verb that was asked.
+
+**Explanations.** `explain(verb, tenseKey, person)` returns HTML lines with the rule and the steps from the infinitive to the form. It follows the same branches and helper lists as `form()` (`whyBasic` for presente/pretérito, which classifies the irregularity by comparing with the regular form; `whySp` for the subjunctive). It is shown in the feedback after a mistake, followed by `tenseHtml`: the whole tense for that verb, with the asked person highlighted and the other forms that differ from `regularForm()` colored. When you change the engine or add a helper list, update `explain` too. Check that every form gets a non-empty explanation that mentions each word of the form.
 
 **Page layout.** A top bar (title, cheat-sheet buttons, a «Что это?» link to `#about`), the trainer card in `main`, and a settings panel `aside#side` holding tenses, filters, progress and the resets. At 900px and wider the panel is a sticky column on the right. Below 900px it is a drawer that slides in from the right, opened by `#cfgOpen`; while it is open the rest of the page is `inert`, and Esc, ✕ or the scrim close it. The long description lives in `footer#about` at the end of the page. The look is poster-like: ink borders (`--edge`), sharp corners (`--r`) and hard offset shadows. Each tense has its own color token `--t-<k>`. Families share related hues, and compound tenses use a deeper shade. Red and green are reserved for wrong and right answers, so tense colors never use them. The one exception is the Spanish flag (`--flag-r`, `--flag-y`, the same in both themes), used only for the logo plate. JS sets `--tc` to the current tense's token on the card (shadow, pill, primary button, input focus). The same color appears on the tense checkboxes in settings and on the verb-card tables; `--ts` is a tint of it made with `color-mix`.
 
-**Cheat sheet and search.** The page shows only the trainer. The header buttons (`nav.tools`, `data-open`) open `<dialog id="sheet">` on one of four tab panels: `#regular`, `#irregular`, `#other`, `#search`. Esc closes the dialog. The undo shortcut ignores Esc while the dialog is open. Search (`searchVerbs`) matches the infinitive, a word of the Russian translation, or any conjugated form or participle. Forms are compared without accents, through an index built on first use. The verb card shows all tenses, and colors forms where `form() !== regularForm()`.
+**Cheat sheet and search.** The page shows only the trainer. The header buttons (`nav.tools`, `data-open`) open `<dialog id="sheet">` on one of four tab panels: `#regular`, `#irregular`, `#other`, `#search`. Esc closes the dialog. The undo shortcut ignores Esc while the dialog is open. Search (`searchVerbs`) matches the infinitive or any conjugated form or participle (Spanish query), or — for a Cyrillic query — words of the gloss, of `MEAN` and of the Russian forms used in prompts (`ruIndex`, ё = е, every query word must start a word). With a query, results are rows showing every meaning, the matched ones bold (`meanHtml`). Forms are compared without accents, through an index built on first use. The verb card shows all tenses, and colors forms where `form() !== regularForm()`.
 
 **Hints.** Buttons under the accent keys, available only before answering: «Правило» (`hintRule`, the rule for this verb and form), «Правильный?» (`hintRegular`, compares `form()` with `regularForm()`, which applies the plain rules with no exception lists), «Окончания» (`hintEndings`) and «Буква» (reveals the answer one letter at a time, up to length − 1). `kindBasic` classifies presente/pretérito forms for both `whyBasic` and `hintBasic`. Hints must never contain the answer, and must not name the verb, because in Russian-prompt mode the verb is part of the task. A correct answer given after any hint doesn't add to the streak, and the card goes into review with `need = 1`.
 
@@ -92,7 +98,7 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 - `localStorage`: `conj-tenses-v1` stores the selected tenses. `conj-trainer-v1` is the old progress format; it is migrated to IndexedDB on first load.
 - Size is bounded: only state is stored, never a log of answers.
 
-**Controls.** Enter / «Проверить» checks, then moves on. Esc / «Отменить» (only after an answer) restores `S` from an in-memory snapshot taken before the check and asks the same prompt again. «Сбросить прогресс» clears `S`; «Сбросить всё» also resets the tense selection and filters. Both resets need a second click within 3 s. Button icons are inline SVG (`.ico`); key hints are `<kbd>`, hidden on touch devices and below 480px.
+**Controls.** Enter / «Проверить» checks, then moves on. Esc / «Отменить» (only after an answer) restores `S` from an in-memory snapshot taken before the check and asks the same prompt again. Like a hint, an undo sets `undone` for this prompt: the next correct answer doesn't add to the streak, and the card goes into review with `need = 1`. «Сбросить прогресс» clears `S`; «Сбросить всё» also resets the tense selection and filters. Both resets need a second click within 3 s. Button icons are inline SVG (`.ico`); key hints are `<kbd>`, hidden on touch devices and below 480px.
 
 **Drill.** `noteMiss` counts mistakes per verb+tense in `S.miss` (`{"verb|tense": {n, t}}`; entries older than `DRILL_WINDOW` = 40 turns are pruned). A second mistake sets `S.drill = "verb|tense"`, and the feedback says a drill is coming; undo cancels it, because it restores `S`. The next step runs `startDrill`, which shows one input per person (respecting `vos` and `hasPerson`) instead of the answer field and hints. Enter checks a row; a wrong row shows the form and clears, to be typed again. `show()` always resumes a pending `S.drill`, so neither a reload nor a settings change skips it. Drill rows don't count in the stats.
 
@@ -108,12 +114,13 @@ const h=require("fs").readFileSync("index.html","utf8");
 const js=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join("\n");
 const X=new Function(js.slice(0,js.indexOf("// irregular table"))+";return {REGULAR,IRR,RU,TENSES,form};")();
 const exp={"tener|sp|3":"tengamos","dormir|sp|3":"durmamos","jugar|sp|0":"juegue","ser|si|3":"fuéramos",
- "decir|impa|1":"di","ir|impa|4":"id","oír|fut|0":"oiré","hacer|perf|0":"he hecho","pedir|pret|5":"pidieron"};
+ "decir|impa|1":"di","ir|impa|4":"id","oír|fut|0":"oiré","hacer|perf|0":"he hecho","pedir|pret|5":"pidieron",
+ "hablar|impn|1":"no hables","tener|ant|2":"hubo tenido","hablar|fs|3":"habláremos","elegir|pres|0":"elijo","mantener|impa|1":"mantén","colgar|sp|3":"colguemos"};
 const bad=[];
 for(const [k,v] of Object.entries(exp)){const [a,b,c]=k.split("|");const r=X.form(a,b,+c);if(r!==v)bad.push(k+": "+r+" ≠ "+v);}
 for(const v of X.REGULAR.concat(Object.keys(X.IRR))){
   if(!X.RU[v]||X.RU[v][1].split(" ").length!==6||X.RU[v][2].length!==2) bad.push("RU "+v);
-  for(const t of X.TENSES) for(let p=0;p<6;p++){const r=X.form(v,t.k,p); if(r==null&&!(t.k==="impa"&&p===0)) bad.push("null "+v+" "+t.k+" "+p);}
+  for(const t of X.TENSES) for(let p=0;p<6;p++){const r=X.form(v,t.k,p); if(r==null&&!((t.k==="impa"||t.k==="impn")&&p===0)) bad.push("null "+v+" "+t.k+" "+p);}
 }
 new Function(js); console.log(bad.length?bad:"OK");'
 ```
