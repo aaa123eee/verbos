@@ -2,12 +2,22 @@
 
 A Spanish verb conjugation trainer. The user types the verb form; optional hints sit behind buttons, and mistakes come back later (a simple spaced-repetition scheme driven by a turn counter). A cheat sheet of endings and rules, plus a verb search, opens in a dialog from the header buttons.
 
-UI language is Russian; verb content is Spanish. Hosted as a static site on GitHub Pages from the root of `main`.
+UI language is Russian; verb content is Spanish. Built with Astro into a static site and deployed to GitHub Pages by GitHub Actions on every push to `main`.
+
+The conjugation trainer is the main page (`/verbos/`) and must stay there. Further trainers become subpages (`/verbos/<name>/`).
 
 ## Layout
 
-- `index.html` — the whole project: markup, CSS and JS in one file. No build step, no dependencies, no `package.json`.
-- `CLAUDE.md` — this file.
+- `src/pages/index.astro` — the conjugation trainer page (markup). New trainers go to `src/pages/<name>.astro`.
+- `src/layouts/Base.astro` — shared `<head>`: viewport, favicon, fonts, base styles.
+- `src/styles/conjugacion.css` — tokens, themes and all styles of the trainer.
+- `src/lib/conjugation.js` — verb data, the conjugation engine, explanations and hints. Pure (no DOM), so tests import it directly.
+- `src/scripts/conjugacion.js` — the page logic: state, check/undo, drill, settings, dialog, search. Bundled by Astro as a module.
+- `tests/unit/` — Vitest: engine, data, explanations, hints, color tokens.
+- `tests/e2e/` — Playwright against the production build. `cases/*.js` run inside the page module through the e2e hook (`?e2e` → `window.__verbos(src)` evals in module scope) and report `ok …` / `FAIL …` lines via `document.title`.
+- `.github/workflows/deploy.yml` — test, build, publish.
+
+Plain JavaScript modules, no UI framework.
 
 The only external resource is Google Fonts (Archivo Black, IBM Plex Sans, IBM Plex Mono), each with a system fallback. Do not add other CDNs.
 
@@ -20,7 +30,7 @@ The only external resource is Google Fonts (Archivo Black, IBM Plex Sans, IBM Pl
 - **Colors only via tokens** in `:root`. Dark theme redefines the same tokens in both `@media (prefers-color-scheme: dark)` and `:root[data-theme="dark"]`; keep the two blocks in sync.
 - **Must work at ~400px width** with no horizontal page scroll. Wide tables live inside `.tbl` (`overflow-x: auto`).
 
-## Data model (JS in `index.html`)
+## Data model (`src/lib/conjugation.js`)
 
 | What | Where | Format |
 |---|---|---|
@@ -82,7 +92,7 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
    - fully irregular present subjunctive → `SP_OVR`;
    - irregular imperfecto → `IMPF_IRR`.
 4. Cheat-sheet tables and the vocabulary list are generated from the data; don't edit them by hand.
-5. Run the checks below and add a couple of reference forms for the new verb to `exp`.
+5. Run the checks below and add a couple of reference forms for the new verb to the `ref` table in `tests/unit/engine.test.js`.
 
 ## Adding a tense
 
@@ -106,27 +116,15 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 
 ## Checks
 
-Data and engine (Node, no dependencies):
-
 ```bash
-node -e '
-const h=require("fs").readFileSync("index.html","utf8");
-const js=[...h.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(m=>m[1]).join("\n");
-const X=new Function(js.slice(0,js.indexOf("// irregular table"))+";return {REGULAR,IRR,RU,TENSES,form};")();
-const exp={"tener|sp|3":"tengamos","dormir|sp|3":"durmamos","jugar|sp|0":"juegue","ser|si|3":"fuéramos",
- "decir|impa|1":"di","ir|impa|4":"id","oír|fut|0":"oiré","hacer|perf|0":"he hecho","pedir|pret|5":"pidieron",
- "hablar|impn|1":"no hables","tener|ant|2":"hubo tenido","hablar|fs|3":"habláremos","elegir|pres|0":"elijo","mantener|impa|1":"mantén","colgar|sp|3":"colguemos"};
-const bad=[];
-for(const [k,v] of Object.entries(exp)){const [a,b,c]=k.split("|");const r=X.form(a,b,+c);if(r!==v)bad.push(k+": "+r+" ≠ "+v);}
-for(const v of X.REGULAR.concat(Object.keys(X.IRR))){
-  if(!X.RU[v]||X.RU[v][1].split(" ").length!==6||X.RU[v][2].length!==2) bad.push("RU "+v);
-  for(const t of X.TENSES) for(let p=0;p<6;p++){const r=X.form(v,t.k,p); if(r==null&&!((t.k==="impa"||t.k==="impn")&&p===0)) bad.push("null "+v+" "+t.k+" "+p);}
-}
-new Function(js); console.log(bad.length?bad:"OK");'
+npm test            # Vitest: reference forms, every form exists, data complete, explanations and hints for all ~29k forms, color tokens
+npm run build       # Astro → dist/
+npm run test:e2e    # Playwright on `astro preview`: all trainer flows, 400px layout, Enter flow
+npm run check       # all three, the same as CI
 ```
 
-In a browser: open `index.html` at desktop width and at ~400px. Check that Enter and the button work, that «Настройки» opens and closes the settings drawer at ~400px, that the header buttons open the dialog (and Esc / ✕ / backdrop close it), that the checkboxes switch tenses, and that the last checked tense cannot be unchecked.
+Run `npm run check` before every release. To see the page: `npm run dev` (http://localhost:4321/verbos/). Also look at it at desktop width and at ~400px, in light and dark.
 
 ## Deploy
 
-Settings → Pages → Deploy from a branch → `main` / root. The site is served at `https://<user>.github.io/verbos/`.
+Settings → Pages → Source: **GitHub Actions**. `.github/workflows/deploy.yml` runs on every push to `main`: `npm ci`, unit tests, build, Playwright, then uploads `dist/` and deploys. A failed step publishes nothing. `astro.config.mjs` sets `base: "/verbos"`; the site is served at `https://aaa123eee.github.io/verbos/`.

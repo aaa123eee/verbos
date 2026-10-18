@@ -11,4 +11,10 @@ A Spanish verb conjugation trainer for Russian speakers. You see a verb, a perso
 - A cheat sheet of endings and rules, and a verb search that finds a verb by its infinitive, any of its Russian meanings, a Russian form (`сказал` → decir) or any Spanish form (`tuve` → tener), and shows all its meanings and tenses.
 - Progress is stored only in your browser. No account, no server.
 
-The whole app is a single `index.html` with no build step and no dependencies.
+Built with [Astro](https://astro.build) into a static site; every push to `main` is tested and deployed to GitHub Pages by GitHub Actions.
+
+```bash
+npm install
+npm run dev     # http://localhost:4321/verbos/
+npm run check   # unit tests, build, browser tests
+```
