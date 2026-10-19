@@ -15,6 +15,11 @@ The conjugation trainer is the main page (`/verbos/`) and must stay there. Furth
 - `src/scripts/conjugacion.js` — the page logic: state, check/undo, drill, settings, dialog, search. Bundled by Astro as a module.
 - `tests/unit/` — Vitest: engine, data, explanations, hints, color tokens.
 - `tests/e2e/` — Playwright against the production build. `cases/*.js` run inside the page module through the e2e hook (`?e2e` → `window.__verbos(src)` evals in module scope) and report `ok …` / `FAIL …` lines via `document.title`.
+- `src/components/TrainerPage.astro` — page shell for every new trainer (top bar, menu, settings panel, card, hints, about footer, rules dialog). Slots: `settings`, `about`, `rules`.
+- `src/components/TrainerNav.astro` + `src/lib/trainers.js` — the menu of trainers under the top bar. Add every new page to `TRAINERS`.
+- `src/lib/trainer-kit.js` — the runtime behind `TrainerPage`: checking, feedback, undo, hints, review, progress, settings, drawer.
+- `src/lib/es/` — Spanish modules: `syllables.js` (syllables, stress, `attach` for clitics), `gerund.js`, `pronombres.js` (tasks of the pronouns page).
+- `src/pages/pronombres.astro` + `src/scripts/pronombres.js` — pronouns, reflexive verbs, gerund (`/verbos/pronombres/`).
 - `.github/workflows/deploy.yml` — test, build, publish.
 
 Plain JavaScript modules, no UI framework.
@@ -29,6 +34,22 @@ The only external resource is Google Fonts (Archivo Black, IBM Plex Sans, IBM Pl
 - **Storage may be unavailable** (private mode, blocked site data). Wrap every `localStorage` / `indexedDB` access in `try/catch`; the page must work without it.
 - **Colors only via tokens** in `:root`. Dark theme redefines the same tokens in both `@media (prefers-color-scheme: dark)` and `:root[data-theme="dark"]`; keep the two blocks in sync.
 - **Must work at ~400px width** with no horizontal page scroll. Wide tables live inside `.tbl` (`overflow-x: auto`).
+
+## Trainer kit (new trainers)
+
+The conjugation page has its own script (it predates the kit). Every other trainer is `TrainerPage.astro` + a small script that calls
+
+```js
+createTrainer({ id, next(settings) → task, fromKey(key) → task, allowed(key, settings) → bool })
+```
+
+A task is `{ key, tc, tag, when, main, sub, answers, why, rule, label }`: `key` rebuilds the task (mistakes come back by key), `tc` is the tense color key (`--t-<tc>`), `main` is HTML, `answers[0]` is the main answer and the rest are also accepted, `why` are explanation lines (HTML) shown after a mistake, `rule` is the «Правило» hint (must not contain the answer), `label` names the task in the review list.
+
+The kit reads settings from every named `<input>` inside `#side`: a checkbox with a `value` belongs to a group (array, at least one stays checked), a checkbox without a value is a boolean (`strict` switches accent strictness), radios give one value. Settings are stored in `localStorage` `verbos-<id>-settings-v1`; progress goes to the same IndexedDB as the conjugation page under the key `progress:<id>`. Undo, hints and review work exactly like on the conjugation page. `?e2e` exposes `window.__kit(src)`, which evals inside `createTrainer`.
+
+**Adding a trainer:** a module in `src/lib/es/` with `randomTask` / `fromKey` and unit tests; `src/pages/<name>.astro` using `TrainerPage`; `src/scripts/<name>.js` calling `createTrainer`; an entry in `TRAINERS`; a Playwright spec.
+
+**Pronouns page.** Kinds: object pronouns (`obj`: verb + direct and/or indirect object from `OBJ_VERBS`, `IO`), reflexive verbs (`refl`, `REFL_VERBS`) and the gerund (`ger`, estar + gerundio). Contexts: presente, pretérito, imperativo, imperativo negativo, + infinitivo (ir a / querer / tener que / poder), estar + gerundio. With an infinitive or gerund both orders are accepted (`quiero dártelo` / `te lo quiero dar`). `attach` keeps the stressed syllable and adds or drops the written accent; nosotros loses -s before nos / se, vosotros loses -d before os (-ir → -íos, irse → idos).
 
 ## Data model (`src/lib/conjugation.js`)
 
@@ -117,9 +138,9 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 ## Checks
 
 ```bash
-npm test            # Vitest: reference forms, every form exists, data complete, explanations and hints for all ~29k forms, color tokens
+npm test            # Vitest: conjugation (reference forms, completeness, explanations, hints, colors), syllables, gerund, pronoun tasks
 npm run build       # Astro → dist/
-npm run test:e2e    # Playwright on `astro preview`: all trainer flows, 400px layout, Enter flow
+npm run test:e2e    # Playwright on `astro preview`: conjugation flows, pronouns page flows, 400px layout, menu
 npm run check       # all three, the same as CI
 ```
 

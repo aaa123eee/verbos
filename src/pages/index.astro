@@ -1,6 +1,7 @@
 ---
 // The conjugation trainer: the main page of the site.
 import Base from "../layouts/Base.astro";
+import TrainerNav from "../components/TrainerNav.astro";
 import "../styles/conjugacion.css";
 ---
 <Base title="Conjugación española">
@@ -12,6 +13,7 @@ import "../styles/conjugacion.css";
     <a class="ghost fyi" href="#about" title="Как это работает"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/></svg><span>Что это?</span></a>
     <button type="button" class="ghost only-m" id="cfgOpen" aria-controls="side" aria-expanded="false" title="Настройки"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>Настройки</span></button>
   </header>
+  <TrainerNav current="conjugacion" />
 
   <aside class="side" id="side" aria-label="Настройки" tabindex="-1">
     <div class="side-head only-m"><h2>Настройки</h2><button type="button" class="ghost" id="cfgClose" aria-label="Закрыть"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
@@ -105,7 +107,7 @@ import "../styles/conjugacion.css";
       <li>Подсказки — правило, правильный ли глагол, окончания, следующая буква — под полем ответа, по кнопкам.</li>
       <li>Времена, набор глаголов и язык задания — в настройках: слева на компьютере, за кнопкой «Настройки» на телефоне. По умолчанию presente и pretérito.</li>
       <li>Шпаргалка с окончаниями и правилами и поиск глагола — кнопки вверху страницы. Поиск понимает и испанский, и русский: «говорить» найдёт hablar и decir, «сказал» — decir, «tuve» — tener.</li>
-      <li>274 глагола в четырёх наборах и все 18 времён. Книжные времена (pretérito anterior, futuro de subjuntivo) по умолчанию выключены. Форма на -se (hablase) засчитывается наравне с -ra.</li>
+      <li>279 глаголов в четырёх наборах и все 18 времён. Книжные времена (pretérito anterior, futuro de subjuntivo) по умолчанию выключены. Форма на -se (hablase) засчитывается наравне с -ra.</li>
       <li>Прогресс хранится только в этом браузере: без аккаунта и сервера.</li>
     </ul>
   </footer>

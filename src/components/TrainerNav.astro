@@ -1,0 +1,10 @@
+---
+// The menu of trainers under the top bar; the current one is marked.
+import { TRAINERS } from "../lib/trainers.js";
+interface Props { current: string }
+const { current } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+---
+<nav class="trainers" aria-label="Тренажёры">
+  {TRAINERS.map((t) => <a href={base + t.href} aria-current={t.id === current ? "page" : undefined}>{t.name}</a>)}
+</nav>

@@ -16,6 +16,7 @@ describe("conjugation engine", () => {
       "construir|sp|0": "construya", "enviar|sp|3": "enviemos", "enviar|sp|0": "envíe", "resolver|perf|2": "ha resuelto",
       "valer|fut|1": "valdrás", "caber|sp|0": "quepa", "poseer|perf|0": "he poseído", "deshacer|impa|1": "deshaz",
       "convenir|cond|0": "convendría", "costar|impa|1": "cuesta", "vestir|sp|3": "vistamos",
+      "sentar|sp|3": "sentemos", "divertir|sp|3": "divirtamos", "acostar|pres|0": "acuesto", "equivocar|sp|0": "equivoque",
     };
     const got = Object.fromEntries(Object.keys(ref).map((k) => { const [v, t, p] = k.split("|"); return [k, E.form(v, t, +p)]; }));
     expect(got).toEqual(ref);
@@ -35,9 +36,9 @@ describe("conjugation engine", () => {
 });
 
 describe("verb data", () => {
-  it("has 274 distinct verbs, each with Russian forms and all meanings", () => {
+  it("has 279 distinct verbs, each with Russian forms and all meanings", () => {
     expect(new Set(VERBS).size).toBe(VERBS.length);
-    expect(VERBS.length).toBe(274);
+    expect(VERBS.length).toBe(279);
     const bad = VERBS.filter((v) => !E.RU[v] || E.RU[v][1].split(" ").length !== 6 || E.RU[v][2].length !== 2 || !E.MEAN[v] || !E.TIER[v]);
     expect(bad).toEqual([]);
   });

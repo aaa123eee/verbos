@@ -273,7 +273,7 @@ function setDrawer(open){
   if(open&&!narrow.matches) return;
   side.classList.toggle("open",open); $("scrim").hidden=!open;
   $("cfgOpen").setAttribute("aria-expanded",open);
-  document.querySelectorAll(".top,.main,.about").forEach(x=>x.inert=open);
+  document.querySelectorAll(".top,.trainers,.main,.about").forEach(x=>x.inert=open);
   if(open) side.focus(); else $("ans").focus({preventScroll:true});
 }
 $("cfgOpen").addEventListener("click",()=>setDrawer(true));

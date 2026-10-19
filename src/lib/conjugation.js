@@ -251,7 +251,12 @@ addTier(4,["quedar", "crear", "considerar", "tratar", "presentar", "lograr", "en
  "distraer":["distraigo distraes distrae distraemos distraéis distraen", "distraje distrajiste distrajo distrajimos distrajisteis distrajeron"],
  "valer":["valgo vales vale valemos valéis valen", "valí valiste valió valimos valisteis valieron"],
  "caber":["quepo cabes cabe cabemos cabéis caben", "cupe cupiste cupo cupimos cupisteis cupieron"],
- "poseer":["poseo posees posee poseemos poseéis poseen", "poseí poseíste poseyó poseímos poseísteis poseyeron"]
+ "poseer":["poseo posees posee poseemos poseéis poseen", "poseí poseíste poseyó poseímos poseísteis poseyeron"],
+ "sentar":["siento sientas sienta sentamos sentáis sientan", "senté sentaste sentó sentamos sentasteis sentaron"],
+ "acostar":["acuesto acuestas acuesta acostamos acostáis acuestan", "acosté acostaste acostó acostamos acostasteis acostaron"],
+ "divertir":["divierto diviertes divierte divertimos divertís divierten", "divertí divertiste divirtió divertimos divertisteis divirtieron"],
+ "acordar":["acuerdo acuerdas acuerda acordamos acordáis acuerdan", "acordé acordaste acordó acordamos acordasteis acordaron"],
+ "equivocar":["equivoco equivocas equivoca equivocamos equivocáis equivocan", "equivoqué equivocaste equivocó equivocamos equivocasteis equivocaron"]
 },{
  "quedar":["оставаться", "остаюсь остаёшься остаётся остаёмся остаётесь остаются", ["остался", "остались"]],
  "crear":["создавать", "создаю создаёшь создаёт создаём создаёте создают", ["создал", "создали"]],
@@ -449,7 +454,12 @@ addTier(4,["quedar", "crear", "considerar", "tratar", "presentar", "lograr", "en
  "distraer":["отвлекать", "отвлекаю отвлекаешь отвлекает отвлекаем отвлекаете отвлекают", ["отвлёк", "отвлекли"]],
  "valer":["стоить, иметь ценность", "стою стоишь стоит стоим стоите стоят", ["стоил", "стоили"]],
  "caber":["помещаться", "помещаюсь помещаешься помещается помещаемся помещаетесь помещаются", ["поместился", "поместились"]],
- "poseer":["обладать", "обладаю обладаешь обладает обладаем обладаете обладают", ["обладал", "обладали"]]
+ "poseer":["обладать", "обладаю обладаешь обладает обладаем обладаете обладают", ["обладал", "обладали"]],
+ "sentar":["сажать", "сажаю сажаешь сажает сажаем сажаете сажают", ["посадил", "посадили"]],
+ "acostar":["укладывать (спать)", "укладываю укладываешь укладывает укладываем укладываете укладывают", ["уложил", "уложили"]],
+ "divertir":["развлекать", "развлекаю развлекаешь развлекает развлекаем развлекаете развлекают", ["развлёк", "развлекли"]],
+ "acordar":["договариваться", "договариваюсь договариваешься договаривается договариваемся договариваетесь договариваются", ["договорился", "договорились"]],
+ "equivocar":["путать, вводить в заблуждение", "путаю путаешь путает путаем путаете путают", ["перепутал", "перепутали"]]
 });
 // every meaning of each verb, for search and the verb card; RU[v][0] stays the short gloss used in prompts
 const MEAN={
@@ -650,6 +660,11 @@ const MEAN={
  "valer":"стоить; иметь ценность; годиться; ладно, хорошо (vale)",
  "caber":"помещаться; вмещаться; нет сомнений (no cabe duda)",
  "poseer":"обладать; владеть; иметь",
+ "sentar":"сажать; садиться (sentarse); подходить, идти (об одежде, еде: sentar bien)",
+ "acostar":"укладывать спать; ложиться (acostarse)",
+ "divertir":"развлекать; веселиться (divertirse)",
+ "acordar":"договариваться; вспоминать, помнить (acordarse de)",
+ "equivocar":"путать; ошибаться (equivocarse)",
  "hablar":"говорить; разговаривать; беседовать",
  "trabajar":"работать; трудиться; обрабатывать",
  "comprar":"покупать",
@@ -784,10 +799,11 @@ const HABER={perf:"he has ha hemos habéis han",plus:"había habías había hab�
 const HABER_SE="hubiese hubieses hubiese hubiésemos hubieseis hubiesen"; // accepted alternative for spl
 const SP_OVR={ser:"sea seas sea seamos seáis sean",estar:"esté estés esté estemos estéis estén",ir:"vaya vayas vaya vayamos vayáis vayan",saber:"sepa sepas sepa sepamos sepáis sepan",dar:"dé des dé demos deis den"};
 // subjuntivo nosotros/vosotros: -ir stem-changers keep e→i / o→u; -ar/-er stem-changers go back to the infinitive stem
-const SP_NOS_IR={sentir:"sint",dormir:"durm",preferir:"prefir",morir:"mur",mentir:"mint",sugerir:"sugir",convertir:"convirt",advertir:"advirt"};
+const SP_NOS_IR={sentir:"sint",dormir:"durm",preferir:"prefir",morir:"mur",mentir:"mint",sugerir:"sugir",convertir:"convirt",advertir:"advirt",divertir:"divirt"};
 const SP_NOS_INF=new Set(["querer","poder","empezar","pensar","volver","encontrar","jugar","entender","perder","contar","recordar","almorzar",
  "cerrar","despertar","recomendar","negar","comenzar","encender","defender","extender","atender","costar","mostrar","probar","soñar","sonar","aprobar",
- "demostrar","volar","colgar","mover","devolver","resolver","envolver","morder","enviar","continuar","prohibir"]);
+ "demostrar","volar","colgar","mover","devolver","resolver","envolver","morder","enviar","continuar","prohibir",
+ "sentar","acostar","acordar"]);
 const spell=(v,st)=>/car$/.test(v)?st.replace(/c$/,"qu"):/gar$/.test(v)?st.replace(/g$/,"gu"):/zar$/.test(v)?st.replace(/z$/,"c"):st;
 const SP_END={ar:["e","es","e","emos","éis","en"],er:["a","as","a","amos","áis","an"],ir:["a","as","a","amos","áis","an"]};
 function subjPres(v,p){

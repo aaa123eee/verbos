@@ -1,0 +1,74 @@
+---
+// Page shell for a trainer built on trainer-kit.js: top bar, menu, settings panel (drawer on phones),
+// the trainer card, the about footer and an optional rules dialog.
+// Slots: "settings" (sections of the side panel), "about" (footer content), "rules" (dialog content).
+import Base from "../layouts/Base.astro";
+import TrainerNav from "./TrainerNav.astro";
+import "../styles/conjugacion.css";
+interface Props { title: string; brand: string; brandEm: string; current: string; placeholder?: string }
+const { title, brand, brandEm, current, placeholder = "ответ" } = Astro.props;
+const hasRules = Astro.slots.has("rules");
+const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+---
+<Base title={title}>
+<div class="app">
+  <header class="top">
+    <h1 class="brand"><span>{brand}</span> <em>{brandEm}</em></h1>
+    {hasRules && <nav class="tools" aria-label="Правила"><button type="button" class="ghost" id="rulesOpen" title="Правила"><Fragment set:html={I('<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5"/>')} /><span>Правила</span></button></nav>}
+    <span class="sep" aria-hidden="true"></span>
+    <a class="ghost fyi" href="#about" title="Как это работает"><Fragment set:html={I('<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>')} /><span>Что это?</span></a>
+    <button type="button" class="ghost only-m" id="cfgOpen" aria-controls="side" aria-expanded="false" title="Настройки"><Fragment set:html={I('<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>')} /><span>Настройки</span></button>
+  </header>
+  <TrainerNav current={current} />
+
+  <aside class="side" id="side" aria-label="Настройки" tabindex="-1">
+    <div class="side-head only-m"><h2>Настройки</h2><button type="button" class="ghost" id="cfgClose" aria-label="Закрыть"><Fragment set:html={I('<path d="M18 6 6 18M6 6l12 12"/>')} /></button></div>
+    <slot name="settings" />
+    <section>
+      <h3>Прогресс</h3>
+      <div class="stats" id="stats"></div>
+      <div class="weak"><h3>Сейчас на повторении</h3><div class="chips" id="weak"></div></div>
+      <div class="foot">
+        <span class="empty" id="syncNote">Прогресс хранится в этом браузере.</span>
+        <span class="resets"><button type="button" id="reset" data-label="Сбросить прогресс"><Fragment set:html={I('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')} /><span>Сбросить прогресс</span></button><button type="button" id="resetAll" data-label="Сбросить всё"><Fragment set:html={I('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>')} /><span>Сбросить всё</span></button></span>
+      </div>
+    </section>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <main class="main" id="trainer">
+    <div class="trainer">
+      <div class="prompt" aria-live="polite">
+        <div class="tense"><span class="pill" id="pTag"></span><span class="when" id="pWhen"></span><span class="mini" id="mini"></span></div>
+        <div class="q" id="pMain"></div>
+        <div class="ru" id="pSub"></div>
+        <div class="tag" id="pRev"></div>
+      </div>
+      <div class="answer">
+        <input id="ans" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Твой ответ" placeholder={placeholder}>
+      </div>
+      <div class="aux">
+        <div class="acts"><button class="primary" type="button" id="go"></button><button type="button" id="undo" disabled title="Отменить ответ и ответить заново (Esc)"><Fragment set:html={I('<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>')} /><span>Отменить</span><kbd>Esc</kbd></button></div>
+        <div class="keys" aria-label="Буквы с ударением">
+          {["á","é","í","ó","ú","ñ"].map((k) => <button type="button" data-k={k}>{k}</button>)}
+        </div>
+      </div>
+      <div class="hintbar" id="hintbar" role="group" aria-label="Подсказки">
+        <span class="hl">Подсказки</span>
+        <button type="button" data-h="rule"><Fragment set:html={I('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2z"/>')} /><span>Правило</span></button>
+        <button type="button" data-h="letter"><Fragment set:html={I('<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>')} /><span>Буква</span></button>
+      </div>
+      <div class="hints" id="hints" hidden></div>
+      <div class="feedback idle" id="fb">Enter — проверить, ещё раз Enter — следующий вопрос. Esc — отменить ответ, если ошибся по невнимательности.</div>
+    </div>
+  </main>
+
+  <footer class="about" id="about"><slot name="about" /></footer>
+</div>
+
+{hasRules && <dialog class="sheet" id="rules" aria-label="Правила">
+  <div class="sheet-head"><div class="tabs"><button type="button" aria-selected="true"><span>Правила</span></button></div>
+    <button type="button" class="close" id="rulesClose" aria-label="Закрыть"><Fragment set:html={I('<path d="M6 6l12 12M18 6 6 18"/>')} /></button></div>
+  <div class="sheet-body"><section class="panel"><slot name="rules" /></section></div>
+</dialog>}
+</Base>

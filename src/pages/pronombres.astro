@@ -1,0 +1,78 @@
+---
+// Pronouns, reflexive verbs and the gerund: dámelo, no te levantes, estoy duchándome.
+import TrainerPage from "../components/TrainerPage.astro";
+const C = (name: string, value: string, label: string, on = false) => ({ name, value, label, on });
+const types = [C("types", "obj", "Местоимения-дополнения: me lo, se lo", true), C("types", "refl", "Возвратные глаголы: me levanto", true), C("types", "ger", "Герундий: estoy hablando", true)];
+const ctxs = [C("ctxs", "pres", "presente", true), C("ctxs", "pret", "pretérito"), C("ctxs", "impa", "imperativo", true), C("ctxs", "impn", "imperativo negativo", true), C("ctxs", "inf", "+ инфинитив", true), C("ctxs", "ger", "estar + gerundio", true)];
+---
+<TrainerPage title="Pronombres · Conjugación española" brand="Pronombres" brandEm="y gerundio" current="pronombres" placeholder="например: me lo da">
+  <Fragment slot="settings">
+    <section>
+      <h3>Что тренируем</h3>
+      <div class="seg">{types.map((t) => <label class="check"><input type="checkbox" name={t.name} value={t.value} checked={t.on}> {t.label}</label>)}</div>
+    </section>
+    <section>
+      <h3>Где стоят местоимения</h3>
+      <div class="seg">{ctxs.map((t) => <label class="check"><input type="checkbox" name={t.name} value={t.value} checked={t.on}> {t.label}</label>)}</div>
+      <p class="empty">Для местоимений и возвратных глаголов. Герундий всегда идёт с estar.</p>
+    </section>
+    <section>
+      <h3>Проверка</h3>
+      <div class="seg">
+        <label class="check"><input type="checkbox" name="strict" checked> Ударения считаются</label>
+        <label class="check"><input type="checkbox" name="vos" checked> С vosotros</label>
+      </div>
+    </section>
+  </Fragment>
+
+  <Fragment slot="about">
+    <h2>Как это работает</h2>
+    <p>Тренажёр местоимений, возвратных глаголов и герундия. Задание показывает глагол, лицо и что заменить; ответ пишешь целиком: <b>me lo da</b>, <b>dámelo</b>, <b>no te levantes</b>, <b>estoy duchándome</b>.</p>
+    <ul>
+      <li><b>Enter</b> — проверить, ещё раз Enter — дальше. <b>Esc</b> — отменить ответ.</li>
+      <li>Где верны два порядка (<b>quiero dártelo</b> и <b>te lo quiero dar</b>), засчитываются оба.</li>
+      <li>Ошибки возвращаются, пока не ответишь правильно три раза; вопрос после подсказки или отмены вернётся один раз.</li>
+      <li>Правила — по кнопке вверху. Прогресс хранится только в этом браузере.</li>
+    </ul>
+  </Fragment>
+
+  <Fragment slot="rules">
+    <h2>Местоимения и герундий</h2>
+    <div class="grid2">
+      <div class="block">
+        <h3>Какие местоимения</h3>
+        <div class="tbl"><table>
+          <thead><tr><th></th><th>прямое</th><th>косвенное</th><th>возвратное</th></tr></thead>
+          <tbody>
+            <tr><td class="p">yo</td><td class="f">me</td><td class="f">me</td><td class="f">me</td></tr>
+            <tr><td class="p">tú</td><td class="f">te</td><td class="f">te</td><td class="f">te</td></tr>
+            <tr><td class="p">él, ella, Ud.</td><td class="f">lo, la</td><td class="f">le <span class="e">(se)</span></td><td class="f">se</td></tr>
+            <tr><td class="p">nosotros</td><td class="f">nos</td><td class="f">nos</td><td class="f">nos</td></tr>
+            <tr><td class="p">vosotros</td><td class="f">os</td><td class="f">os</td><td class="f">os</td></tr>
+            <tr><td class="p">ellos, Uds.</td><td class="f">los, las</td><td class="f">les <span class="e">(se)</span></td><td class="f">se</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Прямое — кого? что?, косвенное — кому? Предмет: <span class="f">el libro → lo, la carta → la, los platos → los, las fotos → las</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Порядок и se</h3>
+        <div class="note"><span>Два местоимения: <b>сначала косвенное, потом прямое</b> — <span class="f">me lo, te la, nos los</span>.</span><span><b>le / les + lo / la / los / las → se</b>: два местоимения на l- подряд не ставят. <span class="f">Le doy el libro → Se lo doy.</span></span></div>
+      </div>
+      <div class="block">
+        <h3>Куда ставить</h3>
+        <div class="note"><span><b>Перед спрягаемым глаголом</b>: <span class="f">me lo da, se levantó</span>.</span><span><b>Утвердительный императив — приклеить к концу</b>: <span class="f">dámelo, levántate, dígaselo</span>.</span><span><b>Отрицательный императив — перед глаголом</b>: <span class="f">no me lo des, no te levantes</span>.</span><span><b>Инфинитив и герундий — оба варианта</b>: <span class="f">quiero dártelo = te lo quiero dar</span>, <span class="f">estoy duchándome = me estoy duchando</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Ударение при приклеивании</h3>
+        <div class="note"><span>Ударение остаётся на том же слоге, а слово становится длиннее. Если ударный слог оказался третьим с конца или дальше, нужна тильда: <span class="f">da → dámelo, explica → explícamelo, dando → dándotelo</span>.</span><span>Если правило и так ставит ударение куда надо, тильды нет: <span class="f">dar → darte, haz → hazlo, decid → decidme</span>.</span><span>nosotros теряет -s перед nos и se: <span class="f">sentemos → sentémonos, demos + se lo → démoselo</span>. vosotros теряет -d перед os: <span class="f">sentad → sentaos, vestid → vestíos</span>; исключение <span class="f">idos</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Герундий</h3>
+        <div class="note"><span><span class="f">-ar → -ando</span>, <span class="f">-er / -ir → -iendo</span>: hablando, comiendo, viviendo.</span><span>Основа на гласную → <span class="f">-yendo</span>: leyendo, oyendo, trayendo, construyendo.</span><span>-ir со сменой корня: e → i, o → u — pidiendo, sintiendo, durmiendo, diciendo, viniendo. Особые: <span class="f">yendo, pudiendo</span>.</span><span>estar + герундий — действие прямо сейчас: <span class="f">estoy hablando</span>.</span></div>
+      </div>
+    </div>
+  </Fragment>
+</TrainerPage>
+
+<script>
+import "../scripts/pronombres.js";
+</script>
