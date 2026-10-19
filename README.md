@@ -14,6 +14,7 @@ A Spanish verb conjugation trainer for Russian speakers. You see a verb, a perso
 More trainers on the same site:
 
 - **Местоимения и герундий** (`/verbos/pronombres/`): object pronouns (*me lo da, dámelo, se lo doy*), reflexive verbs (*me levanto, levántate, no te levantes*) and the gerund (*estoy hablando, estoy duchándome*), with the accent rules for attached pronouns.
+- **Ударения** (`/verbos/acentos/`): write a word with or without its tilde (*cancion → canción*, *examen*), verb forms (*hablo / habló*), plurals (*joven → jóvenes*), and the tilde that tells words apart (*tú / tu, qué / que*); every mistake shows the syllables and the rule.
 
 Built with [Astro](https://astro.build) into a static site; every push to `main` is tested and deployed to GitHub Pages by GitHub Actions.
 

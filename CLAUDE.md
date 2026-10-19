@@ -20,6 +20,7 @@ The conjugation trainer is the main page (`/verbos/`) and must stay there. Furth
 - `src/lib/trainer-kit.js` — the runtime behind `TrainerPage`: checking, feedback, undo, hints, review, progress, settings, drawer.
 - `src/lib/es/` — Spanish modules: `syllables.js` (syllables, stress, `attach` for clitics), `gerund.js`, `pronombres.js` (tasks of the pronouns page).
 - `src/pages/pronombres.astro` + `src/scripts/pronombres.js` — pronouns, reflexive verbs, gerund (`/verbos/pronombres/`).
+- `src/pages/acentos.astro` + `src/scripts/acentos.js` — written accents (`/verbos/acentos/`); rules and tasks in `src/lib/es/acentos.js`, word lists in `acentos-data.js`.
 - `.github/workflows/deploy.yml` — test, build, publish.
 
 Plain JavaScript modules, no UI framework.
@@ -50,6 +51,8 @@ The kit reads settings from every named `<input>` inside `#side`: a checkbox wit
 **Adding a trainer:** a module in `src/lib/es/` with `randomTask` / `fromKey` and unit tests; `src/pages/<name>.astro` using `TrainerPage`; `src/scripts/<name>.js` calling `createTrainer`; an entry in `TRAINERS`; a Playwright spec.
 
 **Pronouns page.** Kinds: object pronouns (`obj`: verb + direct and/or indirect object from `OBJ_VERBS`, `IO`), reflexive verbs (`refl`, `REFL_VERBS`) and the gerund (`ger`, estar + gerundio). Contexts: presente, pretérito, imperativo, imperativo negativo, + infinitivo (ir a / querer / tener que / poder), estar + gerundio. With an infinitive or gerund both orders are accepted (`quiero dártelo` / `te lo quiero dar`). `attach` keeps the stressed syllable and adds or drops the written accent; nosotros loses -s before nos / se, vosotros loses -d before os (-ir → -íos, irse → idos).
+
+**Accents page.** Kinds: `word` (a word from `WORDS` shown without tildes, the translation tells homographs apart), `verb` (a one-word form from the engine, with verb · tense · person), `plural` (`PLURALS`; stress stays on the same syllable, irregular shifts listed with their plural), `diacr` (a `DIACRITIC` sentence with a gap; `DIACRITIC_WHY` explains the pair). `analyze` / `spellByRules` / `explainWord` implement the rules: aguda on a vowel / n / s, llana on any other consonant, esdrújula always, an accented i / u next to a / e / o always (h doesn't separate them), two weak vowels are a diphthong, one syllable — no tilde except the diacritic ones (`MONO_DIACRITIC`), -mente keeps the adjective's tilde. Tests check that every listed word and every one-word engine form is spelled the way the rules say — a new word with a typo fails the build.
 
 ## Data model (`src/lib/conjugation.js`)
 
@@ -138,7 +141,7 @@ Russian prompts (`ruPhrase`) and full translations in feedback exist only for `p
 ## Checks
 
 ```bash
-npm test            # Vitest: conjugation (reference forms, completeness, explanations, hints, colors), syllables, gerund, pronoun tasks
+npm test            # Vitest: conjugation (reference forms, completeness, explanations, hints, colors), syllables, gerund, pronoun tasks, accent rules and tasks
 npm run build       # Astro → dist/
 npm run test:e2e    # Playwright on `astro preview`: conjugation flows, pronouns page flows, 400px layout, menu
 npm run check       # all three, the same as CI

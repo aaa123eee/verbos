@@ -18,8 +18,15 @@ function nuclei(w) {
   }
   return out;
 }
-// two adjacent vowels share a syllable unless both are strong or the weak one carries the accent (hiatus)
-const joins = (a, b) => !(STRONG.includes(a) && STRONG.includes(b)) && !ACCENTED_WEAK.includes(a) && !ACCENTED_WEAK.includes(b) && !(a === b);
+// two adjacent vowels share a syllable unless both are strong, or an accented i / u stands next to a strong vowel (día, país);
+// two weak vowels always form a diphthong in writing, even with an accent (construí, huí)
+const weak = (c) => WEAK.includes(c) || ACCENTED_WEAK.includes(c);
+const joins = (a, b) => {
+  if (a === b) return false;
+  if (weak(a) && weak(b)) return true;
+  if (STRONG.includes(a) && STRONG.includes(b)) return false;
+  return !ACCENTED_WEAK.includes(a) && !ACCENTED_WEAK.includes(b);
+};
 
 export function syllables(word) {
   const w = word.toLowerCase(), N = nuclei(w);
@@ -68,7 +75,7 @@ const strip = (s) => s.replace(/[áéíóú]/g, (c) => PLAIN[c]);
 function accentSyllable(s) {
   const chars = [...s];
   let pos = chars.findIndex((c) => STRONG.includes(c));
-  if (pos < 0) for (let i = chars.length - 1; i >= 0; i--) if (WEAK.includes(chars[i]) && !(chars[i] === "u" && /[qg]/.test(chars[i - 1] || ""))) { pos = i; break; }
+  if (pos < 0) for (let i = chars.length - 1; i >= 0; i--) if (WEAK.includes(chars[i]) && !(chars[i] === "u" && /[qg]/.test(chars[i - 1] || "") && /[eiéí]/.test(chars[i + 1] || ""))) { pos = i; break; }
   if (pos < 0) return s;
   chars[pos] = ACUTE[chars[pos]] || chars[pos];
   return chars.join("");
@@ -77,11 +84,12 @@ function accentSyllable(s) {
 // rewrite the accent of word so that syllable `idx` is stressed; keeps an accent that breaks a diphthong (oír)
 export function withStress(word, idx) {
   const plainWord = strip(word);
-  const hiatus = /[aeo][íú]|[íú][aeo]/.test(word);
+  const hiatus = /[aeo]h?[íú]|[íú]h?[aeo]/.test(word); // h between the vowels doesn't keep them apart (búho)
   const sy = syllables(hiatus ? word : plainWord);
   if (!hiatus && defaultStress(plainWord, sy) === idx && sy.length > 1) return sy.join("");
   if (hiatus) return word; // the accent is needed anyway to keep the vowels apart
   if (sy.length === 1) return plainWord;
+  idx = Math.min(idx, sy.length - 1);
   sy[idx] = accentSyllable(sy[idx]);
   return sy.join("");
 }

@@ -1,0 +1,58 @@
+---
+// Accents: where the tilde goes and why — words, verb forms, plurals, and tú / tu in a sentence.
+import TrainerPage from "../components/TrainerPage.astro";
+const kinds = [["word", "Слова: cancion → canción"], ["verb", "Формы глаголов: hablo / habló"], ["plural", "Множественное число: joven → jóvenes"], ["diacr", "Тильда различает слова: tú / tu, qué / que"]];
+---
+<TrainerPage title="Acentos · Conjugación española" brand="Acentos" brandEm="y tildes" current="acentos" placeholder="слово с тильдой или без">
+  <Fragment slot="settings">
+    <section>
+      <h3>Что тренируем</h3>
+      <div class="seg">{kinds.map(([v, l]) => <label class="check"><input type="checkbox" name="kinds" value={v} checked> {l}</label>)}</div>
+      <p class="empty">Ударения здесь считаются всегда: в этом и смысл.</p>
+    </section>
+  </Fragment>
+
+  <Fragment slot="about">
+    <h2>Как это работает</h2>
+    <p>Тренажёр письменного ударения. Слово показано без тильд — напиши его правильно: с тильдой, если она нужна, или как есть. После ошибки видно, на какие слоги делится слово, какой из них ударный и какое правило сработало.</p>
+    <ul>
+      <li><b>Enter</b> — проверить, ещё раз Enter — дальше. <b>Esc</b> — отменить ответ. Кнопки á é í ó ú ñ — под полем ответа.</li>
+      <li>Перевод под словом подсказывает, какое слово имеется в виду: <b>papa</b> (картофель) и <b>papá</b> (папа) пишутся по-разному.</li>
+      <li>Ошибки возвращаются, пока не ответишь правильно три раза. Правила — по кнопке вверху. Прогресс хранится только в этом браузере.</li>
+    </ul>
+  </Fragment>
+
+  <Fragment slot="rules">
+    <h2>Где ставить тильду</h2>
+    <div class="grid2">
+      <div class="block">
+        <h3>Сначала — ударный слог</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>ударение</th><th>название</th><th>тильда, если слово кончается…</th><th>примеры</th></tr></thead>
+          <tbody>
+            <tr><td class="p">последний слог</td><td class="f">aguda</td><td>на гласную, n, s</td><td class="f">canción, café, reloj</td></tr>
+            <tr><td class="p">второй с конца</td><td class="f">llana</td><td>на любую другую согласную</td><td class="f">árbol, lápiz, examen</td></tr>
+            <tr><td class="p">третий с конца</td><td class="f">esdrújula</td><td>всегда</td><td class="f">música, sábado</td></tr>
+            <tr><td class="p">четвёртый с конца</td><td class="f">sobresdrújula</td><td>всегда</td><td class="f">dígamelo</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>Без тильды ударение и так падает на второй слог с конца у слов на гласную, n, s (<span class="f">casa, joven, lunes</span>) и на последний у остальных (<span class="f">reloj, ciudad, feliz</span>). Тильда ставится, только когда ударение с этим не совпадает.</span></div>
+      </div>
+      <div class="block">
+        <h3>Дифтонг и его разрыв</h3>
+        <div class="note"><span>a, e, o — сильные гласные, i, u — слабые. Слабая рядом с сильной или две слабые сливаются в один слог: <span class="f">bue-no, ciu-dad, rui-do</span>.</span><span>Если ударная i или u стоит рядом с a, e, o, слог разрывается и тильда нужна всегда, против общих правил: <span class="f">día, país, río, baúl, búho</span> (h не мешает).</span><span>Две слабые гласные — всегда дифтонг: <span class="f">construí, huí</span> пишутся по общим правилам (aguda на гласную).</span></div>
+      </div>
+      <div class="block">
+        <h3>Односложные слова</h3>
+        <div class="note"><span>Обычно без тильды: <span class="f">sol, pie, fue, dio, vio, fui, ti</span>.</span><span>Тильда только там, где она различает два слова: <span class="f">tú / tu, él / el, mí / mi, sí / si, té / te, dé / de, sé / se, más / mas</span>.</span><span>Вопросительные и восклицательные слова — с тильдой: <span class="f">qué, cómo, cuándo, dónde, quién, cuánto</span>; те же слова в роли союза или «который» — без неё.</span></div>
+      </div>
+      <div class="block">
+        <h3>Множественное число и -mente</h3>
+        <div class="note"><span>Ударение остаётся на том же слоге, а слогов становится больше: <span class="f">joven → jóvenes, examen → exámenes</span>, но <span class="f">canción → canciones, inglés → ingleses</span>.</span><span>Llana на -s не меняется: <span class="f">el lunes → los lunes</span>. Редкое смещение ударения: <span class="f">carácter → caracteres, régimen → regímenes</span>.</span><span>Наречия на -mente сохраняют тильду прилагательного: <span class="f">rápido → rápidamente</span>, <span class="f">feliz → felizmente</span>.</span></div>
+      </div>
+    </div>
+  </Fragment>
+</TrainerPage>
+
+<script>
+import "../scripts/acentos.js";
+</script>
