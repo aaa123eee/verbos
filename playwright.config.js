@@ -7,5 +7,5 @@ export default defineConfig({
   retries: process.env.CI ? 1 : 0,
   use: { baseURL: "http://localhost:4321/verbos/" },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: { command: "npx astro preview --port 4321", url: "http://localhost:4321/verbos/", reuseExistingServer: !process.env.CI, stdout: "pipe", stderr: "pipe" },
+  webServer: { command: "npx astro preview --port 4321 --ignore-lock", url: "http://localhost:4321/verbos/", reuseExistingServer: !process.env.CI, stdout: "pipe", stderr: "pipe" },
 });

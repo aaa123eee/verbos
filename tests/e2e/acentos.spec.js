@@ -9,7 +9,7 @@ const answer = async (page, text) => { await page.fill("#ans", text); await page
 test.beforeEach(async ({ page }) => { await page.goto("acentos/?e2e"); await page.waitForTimeout(400); });
 
 test("a word without its tilde is a mistake, and the syllables explain why", async ({ page }) => {
-  await ask(page, "word|0"); // canción is the first word
+  await ask(page, "word|canción");
   await expect(page.locator("#pMain")).toHaveText("cancion");
   await answer(page, "cancion");
   await expect(page.locator("#fb")).toHaveClass(/bad/);
@@ -31,7 +31,7 @@ test("a word that needs no tilde is right as it is", async ({ page }) => {
 });
 
 test("plural and the tú / tu sentences", async ({ page }) => {
-  await ask(page, "plural|6"); // joven
+  await ask(page, "plural|joven");
   await answer(page, "jóvenes");
   await expect(page.locator("#fb")).toHaveClass(/ok/);
   await page.press("#ans", "Enter");
@@ -53,6 +53,6 @@ test("phone width: no sideways scroll; the menu lists every trainer", async ({ p
   await page.setViewportSize({ width: 400, height: 800 });
   await page.goto("acentos/");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(400);
-  await expect(page.locator("nav.trainers a")).toHaveText(["Спряжение", "Местоимения и герундий", "Ударения"]);
+  await expect(page.locator("nav.trainers a")).toHaveText(["Спряжение", "Местоимения и герундий", "Ударения", "Род и согласование"]);
   await expect(page.locator('nav.trainers a[aria-current="page"]')).toHaveText("Ударения");
 });

@@ -3,4 +3,5 @@ export const TRAINERS = [
   { id: "conjugacion", href: "", name: "Спряжение" },
   { id: "pronombres", href: "pronombres/", name: "Местоимения и герундий" },
   { id: "acentos", href: "acentos/", name: "Ударения" },
+  { id: "genero", href: "genero/", name: "Род и согласование" },
 ];

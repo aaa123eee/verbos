@@ -1,0 +1,83 @@
+---
+// Gender and agreement: el / la for every dictionary noun, los / las with the plural, the four forms of every adjective.
+import TrainerPage from "../components/TrainerPage.astro";
+import { NOUNS, ADJS } from "../lib/es/genero.js";
+const kinds = [["art", "Род и артикль: el problema, la mano"], ["artpl", "Артикль и множественное число: los hoteles"], ["adj", "Формы прилагательных: blanco → blancas"]];
+const n = (x: number) => x.toLocaleString("ru-RU");
+---
+<TrainerPage title="Género · Conjugación española" brand="Género" brandEm="y concordancia" current="genero" placeholder="например: el problema">
+  <Fragment slot="settings">
+    <section>
+      <h3>Что тренируем</h3>
+      <div class="seg">{kinds.map(([v, l]) => <label class="check"><input type="checkbox" name="kinds" value={v} checked> {l}</label>)}</div>
+    </section>
+    <section>
+      <h3>Слова из словаря</h3>
+      <div class="seg">
+        <label><input type="radio" name="top" value="1000"><span>1000 самых частых</span></label>
+        <label><input type="radio" name="top" value="3000"><span>3000 самых частых</span></label>
+        <label><input type="radio" name="top" value="all" checked><span>Все слова</span></label>
+      </div>
+      <p class="empty">Всего {n(NOUNS.length)} существительных и {n(ADJS.length)} прилагательных.</p>
+    </section>
+    <section>
+      <h3>Проверка</h3>
+      <div class="seg"><label class="check"><input type="checkbox" name="strict" checked> Ударения считаются</label></div>
+    </section>
+  </Fragment>
+
+  <Fragment slot="about">
+    <h2>Как это работает</h2>
+    <p>Тренажёр рода существительных и согласования прилагательных. Для существительного напиши его с определённым артиклем: <b>el problema</b>, <b>la mano</b>, во множественном числе — <b>los problemas</b>. Для прилагательного — нужную форму: <b>blanco</b> → ж. р., мн. ч. → <b>blancas</b>.</p>
+    <ul>
+      <li><b>Enter</b> — проверить, ещё раз Enter — дальше. <b>Esc</b> — отменить ответ.</li>
+      <li>Слова общего рода (<b>el / la estudiante</b>) и слова, у которых бывают оба рода (<b>el / la mar</b>), засчитываются с любым артиклем.</li>
+      <li>После ошибки видно, подходит ли слово под правило окончаний или это исключение, которое надо запомнить.</li>
+      <li>Все {n(NOUNS.length)} существительных и {n(ADJS.length)} прилагательных — из общего словаря. Он собран из русского и английского Викисловаря (CC BY-SA); частотность — по субтитрам OpenSubtitles (проект FrequencyWords, CC BY-SA 4.0).</li>
+      <li>Ошибки возвращаются, пока не ответишь правильно три раза. Правила — по кнопке вверху. Прогресс хранится только в этом браузере.</li>
+    </ul>
+  </Fragment>
+
+  <Fragment slot="rules">
+    <h2>Род и согласование</h2>
+    <div class="grid2">
+      <div class="block">
+        <h3>Род по окончанию</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>окончание</th><th>род</th><th>примеры</th><th>исключения</th></tr></thead>
+          <tbody>
+            <tr><td class="p">-o</td><td>мужской</td><td class="f">el libro</td><td class="f">la mano, la foto, la moto, la radio</td></tr>
+            <tr><td class="p">-a</td><td>женский</td><td class="f">la casa</td><td class="f">el día, el mapa, el sofá</td></tr>
+            <tr><td class="p">-ma (греч.)</td><td>мужской</td><td class="f">el problema, el tema, el idioma</td><td class="f">la cama, la forma</td></tr>
+            <tr><td class="p">-ción, -sión</td><td>женский</td><td class="f">la canción, la decisión</td><td></td></tr>
+            <tr><td class="p">-dad, -tad, -tud</td><td>женский</td><td class="f">la ciudad, la libertad, la salud</td><td></td></tr>
+            <tr><td class="p">-umbre, -sis</td><td>женский</td><td class="f">la costumbre, la crisis</td><td class="f">el análisis</td></tr>
+            <tr><td class="p">-aje, -or</td><td>мужской</td><td class="f">el viaje, el amor</td><td class="f">la flor, la labor</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>На -e, -l, -n, -z и прочие согласные род по окончанию не угадать: <span class="f">el coche, la noche, el hotel, la miel</span>. Учи слово сразу с артиклем.</span></div>
+      </div>
+      <div class="block">
+        <h3>el agua, el / la estudiante</h3>
+        <div class="note"><span>Женские слова на <b>ударное a- / ha-</b> берут <span class="f">el</span> в единственном числе: <span class="f">el agua, el hambre, el águila</span>. Род остаётся женским: <span class="f">el agua fría, las aguas</span>.</span><span><b>Общий род</b>: артикль показывает пол — <span class="f">el / la estudiante, el / la artista, el / la joven</span>. Почти все слова на -ista такие.</span><span>Некоторые слова бывают обоих родов: <span class="f">el / la mar</span>; у других род меняет смысл — <span class="f">el capital</span> (капитал), <span class="f">la capital</span> (столица).</span></div>
+      </div>
+      <div class="block">
+        <h3>Формы прилагательных</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>м. р.</th><th>ж. р.</th><th>м. р. мн.</th><th>ж. р. мн.</th></tr></thead>
+          <tbody>
+            <tr><td class="f">blanco</td><td class="f">blanca</td><td class="f">blancos</td><td class="f">blancas</td></tr>
+            <tr><td class="f">trabajador</td><td class="f">trabajadora</td><td class="f">trabajadores</td><td class="f">trabajadoras</td></tr>
+            <tr><td class="f">inglés</td><td class="f">inglesa</td><td class="f">ingleses</td><td class="f">inglesas</td></tr>
+            <tr><td class="f">verde</td><td class="f">verde</td><td class="f">verdes</td><td class="f">verdes</td></tr>
+            <tr><td class="f">azul</td><td class="f">azul</td><td class="f">azules</td><td class="f">azules</td></tr>
+            <tr><td class="f">feliz</td><td class="f">feliz</td><td class="f">felices</td><td class="f">felices</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>-o → -a. На -or, -án, -ín, -ón, -és и национальности на согласную (<span class="f">español, andaluz</span>) получают -a, тильда с последнего слога уходит. Остальные по роду не меняются; mayor, mejor, peor, superior… — тоже.</span><span>Множественное: -s после гласной, -es после согласной, z → c. На ударную -í: <span class="f">marroquíes</span> (и <span class="f">marroquís</span>).</span></div>
+      </div>
+    </div>
+  </Fragment>
+</TrainerPage>
+
+<script>
+import "../scripts/genero.js";
+</script>
