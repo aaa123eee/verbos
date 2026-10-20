@@ -1,0 +1,124 @@
+---
+// Words: a Spanish ⇄ Russian dictionary that remembers what you look up, and a day-based review of those words.
+import Base from "../layouts/Base.astro";
+import TrainerNav from "../components/TrainerNav.astro";
+import "../styles/conjugacion.css";
+const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICO = {
+  list: '<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+  info: '<circle cx="12" cy="12" r="9"/><path d="M12 16v-5M12 8h.01"/>',
+  cfg: '<path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
+  speak: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/>',
+  undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+  down: '<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>',
+  up: '<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>',
+};
+const R = (name: string, value: string, label: string, on = false) => ({ name, value, label, on });
+const perDay = [R("perDay", "0", "Не добавлять"), R("perDay", "5", "5"), R("perDay", "10", "10", true), R("perDay", "20", "20")];
+const source = [R("src", "mine", "Только мои слова"), R("src", "freq", "Мои, потом частотный словарь", true)];
+const modes = [R("modes", "see", "Вспомнить перевод", true), R("modes", "write", "Написать по-испански", true), R("modes", "listen", "На слух", true)];
+---
+<Base title="Palabras · Conjugación española">
+<div class="app words">
+  <header class="top">
+    <h1 class="brand"><span>Palabras</span> <em>y diccionario</em></h1>
+    <nav class="tools" aria-label="Слова"><button type="button" class="ghost" id="listOpen" title="Мои слова"><Fragment set:html={I(ICO.list)} /><span>Мои слова</span></button></nav>
+    <span class="sep" aria-hidden="true"></span>
+    <a class="ghost fyi" href="#about" title="Как это работает"><Fragment set:html={I(ICO.info)} /><span>Что это?</span></a>
+    <button type="button" class="ghost only-m" id="cfgOpen" aria-controls="side" aria-expanded="false" title="Настройки"><Fragment set:html={I(ICO.cfg)} /><span>Настройки</span></button>
+  </header>
+  <TrainerNav current="palabras" />
+
+  <aside class="side" id="side" aria-label="Настройки" tabindex="-1">
+    <div class="side-head only-m"><h2>Настройки</h2><button type="button" class="ghost" id="cfgClose" aria-label="Закрыть"><Fragment set:html={I(ICO.x)} /></button></div>
+    <section>
+      <h3>Сегодня</h3>
+      <div class="stats loading" id="stats">{["на сегодня","сегодня ответов","дней подряд","мои слова","новых сегодня","знаю"].map((t) => <span>{t} <b></b></span>)}</div>
+    </section>
+    <section>
+      <h3>Новых слов в день</h3>
+      <div class="seg seg-row">{perDay.map((t) => <label><input type="radio" name={t.name} value={t.value} checked={t.on}><span>{t.label}</span></label>)}</div>
+      <div class="seg">{source.map((t) => <label><input type="radio" name={t.name} value={t.value} checked={t.on}><span>{t.label}</span></label>)}</div>
+      <p class="empty">Новые слова — сначала те, что ты искал, потом самые частые слова языка по порядку.</p>
+    </section>
+    <section>
+      <h3>Как спрашивать</h3>
+      <div class="seg">{modes.map((t) => <label class="check"><input type="checkbox" name={t.name} value={t.value} checked={t.on}> {t.label}</label>)}</div>
+      <div class="seg"><label class="check"><input type="checkbox" name="strict" checked> Ударения считаются</label></div>
+      <p class="empty" id="voiceNote" hidden>В этом браузере нет испанского голоса, поэтому «на слух» пропускается.</p>
+    </section>
+    <section>
+      <h3>Данные</h3>
+      <div class="foot">
+        <span class="empty" id="syncNote">Слова и прогресс хранятся в этом браузере.</span>
+        <span class="resets">
+          <button type="button" id="exportBtn"><Fragment set:html={I(ICO.down)} /><span>Сохранить в файл</span></button>
+          <button type="button" id="importBtn"><Fragment set:html={I(ICO.up)} /><span>Загрузить из файла</span></button>
+        </span>
+        <input type="file" id="importFile" accept=".json,application/json" hidden>
+        <span class="empty" id="ioNote"></span>
+      </div>
+    </section>
+  </aside>
+  <div class="scrim" id="scrim" hidden></div>
+
+  <main class="main">
+    <section class="look" aria-label="Словарь">
+      <div class="lookbar">
+        <Fragment set:html={I(ICO.search)} />
+        <input id="q" type="search" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Слово по-испански или по-русски" aria-label="Найти слово">
+      </div>
+      <div class="lres" id="res" aria-live="polite"></div>
+    </section>
+
+    <div class="trainer loading" id="rev">
+      <div class="prompt" aria-live="polite">
+        <div class="tense"><span class="pill" id="pTag">вспомни перевод</span><span class="when" id="pWhen"></span><span class="mini" id="mini">осталось <b></b> · дней подряд <b></b></span></div>
+        <div class="q" id="pMain">…</div>
+        <div class="ru" id="pSub">&nbsp;</div>
+        <div class="pmean" id="pMean" hidden></div>
+        <div class="tag" id="pRev"></div>
+      </div>
+      <div class="answer off" id="ansRow" inert><input id="ans" type="text" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Твой ответ" placeholder="по-испански"></div>
+      <div class="aux">
+        <div class="acts">
+          <button class="primary" type="button" id="go"><span>Показать перевод</span><kbd>Enter ↵</kbd></button>
+          <button type="button" id="no" hidden><span>Не помню</span><kbd>1</kbd></button>
+          <button type="button" id="undo" disabled title="Отменить ответ (Esc)"><Fragment set:html={I(ICO.undo)} /><span>Отменить</span><kbd>Esc</kbd></button>
+          <button type="button" class="spk" id="spk" hidden title="Произнести"><Fragment set:html={I(ICO.speak)} /></button>
+        </div>
+        <div class="keys off" id="keys" inert aria-label="Буквы с ударением">{["á","é","í","ó","ú","ñ"].map((k) => <button type="button" data-k={k}>{k}</button>)}</div>
+      </div>
+      <div class="feedback idle" id="fb">Вспомни перевод и нажми Enter.</div>
+    </div>
+  </main>
+
+  <footer class="about" id="about">
+    <h2>Как это работает</h2>
+    <p>Словарь и запоминалка в одном. Ищи слово по-испански или по-русски — найденные слова сами попадают в «Мои слова» сразу при поиске и потом возвращаются на повторение: сегодня, завтра, через 3 дня, через неделю и дальше, пока не запомнишь.</p>
+    <ul>
+      <li><b>Поиск</b> понимает формы: <b>fui</b> — это ir и ser, <b>casas</b> — casa, <b>blancas</b> — blanco. У каждого слова все переводы, которые удалось собрать, род и артикль, формы. Найденное слово сразу попадает в «Мои слова» (по-русски — первое слово, у которого перевод совпадает с запросом); уточнил запрос или выбрал другое слово — сохранится оно. Убрать — одной кнопкой. Пока ищешь, повторение спрятано; Esc — вернуться к нему.</li>
+      <li>Если слова нет в словаре, по Enter можно спросить переводчик <b>MyMemory</b> (mymemory.translated.net) — туда уходит только этот запрос.</li>
+      <li><b>Повторение</b>: сначала вспоминаешь перевод (Enter — показать, Enter — помню, 1 — не помню), потом пишешь слово по-испански по переводу (существительное можно с артиклем), потом на слух. Ошибка возвращает слово в начало и ещё раз в этот же день. <b>Esc</b> — отменить последний ответ.</li>
+      <li>Словарь собран из русского и английского Викисловаря (CC BY-SA, через kaikki.org); частотность — по субтитрам OpenSubtitles (FrequencyWords, CC BY-SA 4.0).</li>
+      <li>Всё хранится только в этом браузере. Чтобы перенести слова на другое устройство, сохрани их в файл и загрузи там.</li>
+    </ul>
+  </footer>
+</div>
+
+<dialog class="sheet" id="list" aria-label="Мои слова">
+  <div class="sheet-head"><div class="tabs"><button type="button" aria-selected="true"><span>Мои слова</span></button></div>
+    <button type="button" class="close" id="listClose" aria-label="Закрыть"><Fragment set:html={I(ICO.x)} /></button></div>
+  <div class="sheet-body"><section class="panel">
+    <input id="lf" type="search" autocomplete="off" spellcheck="false" placeholder="Фильтр" aria-label="Фильтр слов">
+    <p class="empty" id="lcount"></p>
+    <div class="tbl"><table><thead><tr><th>слово</th><th>перевод</th><th>когда</th><th></th></tr></thead><tbody id="lt"></tbody></table></div>
+  </section></div>
+</dialog>
+</Base>
+
+<script>
+import "../scripts/palabras.js";
+</script>

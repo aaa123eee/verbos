@@ -412,8 +412,14 @@ function renderVerb(v,k){
 $("q").addEventListener("input",renderSearch);
 $("q").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); const b=$("results").querySelector("button"); if(b){ selVerb=b.dataset.v; renderSearch(); } } });
 $("results").addEventListener("click",e=>{ const b=e.target.closest("button[data-v]"); if(!b) return; selVerb=b.dataset.v; renderSearch(); });
+// a link like /verbos/#verbo=ir (from the words page) opens that verb's card in the search
+function openFromHash(){
+  const m=location.hash.match(/^#verbo=(.+)$/), v=m&&decodeURIComponent(m[1]);
+  if(v&&ALL.includes(v)){ $("q").value=v; selVerb=v; openSheet("search"); }
+}
+addEventListener("hashchange",openFromHash);
 
-render(); show();
+render(); show(); openFromHash();
 
 // load progress from IndexedDB; migrate old localStorage data once
 (async()=>{

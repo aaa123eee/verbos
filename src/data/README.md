@@ -8,8 +8,11 @@ Rows: `[word, part of speech, gender, meanings, flags, forms]`, most frequent fi
 - flags: `u` — a noun without a plural, `p` — plural only (gafas, vacaciones)
 - forms: the plural of a noun; for an adjective, `"feminine masculine-plural feminine-plural"` (blanca blancos blancas)
 
+`lookup.json` — the full dictionary of the words page, from the same script: rows `[word, part of speech, gender, meanings, more translations]`, most frequent first (part of speech also `phr` — a phrase, `part` — a particle). "More translations" are the Russian words that translate the Spanish one in other entries, the best supported first.
+
 Sources and licenses — the file is a derived work and is distributed under **CC BY-SA 4.0**:
 - Spanish entries of the Russian Wiktionary (ru.wiktionary.org), CC BY-SA, via the machine-readable extract of [kaikki.org](https://kaikki.org/ruwiktionary/) (wiktextract by Tatu Ylonen).
 - Spanish nouns and adjectives of the English Wiktionary (en.wiktionary.org), CC BY-SA, via [kaikki.org](https://kaikki.org/dictionary/Spanish/): gender where the Russian Wiktionary has none, common gender (el / la estudiante), plurals, adjective forms.
+- Translations read backwards from the Russian entries of the Russian Wiktionary, and from the translation tables of the English Wiktionary (English entries), both CC BY-SA, via kaikki.org.
 - Word frequencies: [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave, OpenSubtitles 2018, CC BY-SA 4.0.
 - Meanings of the conjugation trainer's verbs come from `src/lib/conjugation.js` (`MEAN`).

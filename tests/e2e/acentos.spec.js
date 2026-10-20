@@ -53,6 +53,6 @@ test("phone width: no sideways scroll; the menu lists every trainer", async ({ p
   await page.setViewportSize({ width: 400, height: 800 });
   await page.goto("acentos/");
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(400);
-  await expect(page.locator("nav.trainers a")).toHaveText(["Спряжение", "Местоимения и герундий", "Ударения", "Род и согласование"]);
+  await expect(page.locator("nav.trainers a")).toHaveText(["Спряжение", "Слова", "Местоимения и герундий", "Ударения", "Род и согласование"]);
   await expect(page.locator('nav.trainers a[aria-current="page"]')).toHaveText("Ударения");
 });

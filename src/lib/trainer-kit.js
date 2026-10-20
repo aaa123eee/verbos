@@ -20,7 +20,7 @@ function diff(u, c) {
 }
 
 // IndexedDB key-value store shared with the conjugation page (same database, own key per trainer)
-const IDB = {
+export const IDB = {
   db: null,
   open() { return new Promise((res, rej) => { const r = indexedDB.open("conjugacion", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res((this.db = r.result)); r.onerror = () => rej(r.error); }); },
   get(k) { return new Promise((res, rej) => { const q = this.db.transaction("kv").objectStore("kv").get(k); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },

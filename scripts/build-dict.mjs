@@ -5,11 +5,17 @@
 //   - FrequencyWords by Hermit Dave, Spanish word frequencies from OpenSubtitles 2018 (top 50k)
 //   - Spanish nouns and adjectives of the English Wiktionary (kaikki.org): gender where the Russian one has none,
 //     plurals, and the four forms of adjectives
+//   - for the words page (lookup.json), every Russian translation we can find: the Spanish translations of Russian
+//     entries of the Russian Wiktionary, read backwards, and the translation tables of the English Wiktionary, where
+//     Spanish and Russian words of one English sense are paired
 // A word gets in if it, or one of its forms, appears in the frequency list. Verb forms are mapped to the
 // infinitive with our own conjugation engine; the engine's verbs always get in, with their curated meanings.
 //
-// Run: npm run build:dict   (downloads into .cache/ on first run; the output is committed)
-import { mkdirSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+// Run: npm run build:dict   (downloads ~5.5 GB into .cache/ on first run; the output is committed)
+import { mkdirSync, existsSync, readFileSync, writeFileSync, renameSync, createReadStream, createWriteStream } from "node:fs";
+import { createInterface } from "node:readline";
+import { Readable } from "node:stream";
+import { pipeline } from "node:stream/promises";
 import { REGULAR, IRR, TENSES, form, part, MEAN } from "../src/lib/conjugation.js";
 
 const CACHE = new URL("../.cache/", import.meta.url);
@@ -17,24 +23,35 @@ const SRC = {
   wikt: ["ru-es.jsonl", "https://kaikki.org/ruwiktionary/%D0%98%D1%81%D0%BF%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9/kaikki.org-dictionary-%D0%98%D1%81%D0%BF%D0%B0%D0%BD%D1%81%D0%BA%D0%B8%D0%B9.jsonl"],
   enNoun: ["en-noun.jsonl", "https://kaikki.org/dictionary/Spanish/pos-noun/kaikki.org-dictionary-Spanish-by-pos-noun.jsonl"],
   enAdj: ["en-adj.jsonl", "https://kaikki.org/dictionary/Spanish/pos-adj/kaikki.org-dictionary-Spanish-by-pos-adj.jsonl"],
+  ruRu: ["ru-ru.jsonl", "https://kaikki.org/ruwiktionary/%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9/kaikki.org-dictionary-%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9.jsonl"],
+  enAll: ["en-all.jsonl", "https://kaikki.org/dictionary/English/kaikki.org-dictionary-English.jsonl"],
   freq: ["es_50k.txt", "https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/es/es_50k.txt"],
 };
-async function load([name, url]) {
+async function fetchTo([name, url]) {
   mkdirSync(CACHE, { recursive: true });
   const file = new URL(name, CACHE);
   if (!existsSync(file)) {
     console.log("downloading", url);
     const r = await fetch(url);
     if (!r.ok) throw new Error(url + " → " + r.status);
-    writeFileSync(file, Buffer.from(await r.arrayBuffer()));
+    const part = new URL(name + ".part", CACHE);
+    await pipeline(Readable.fromWeb(r.body), createWriteStream(part));
+    renameSync(part, file);
   }
-  return readFileSync(file, "utf8");
+  return file;
+}
+const load = async (src) => readFileSync(await fetchTo(src), "utf8");
+// the big files (gigabytes) are read line by line; "has" skips lines without it before parsing
+async function* records(src, has) {
+  for await (const line of createInterface({ input: createReadStream(await fetchTo(src)), crlfDelay: Infinity })) {
+    if (line && line.includes(has)) yield JSON.parse(line);
+  }
 }
 
 const POS = { noun: "n", adj: "a", verb: "v", adv: "adv", num: "num", pron: "pron", prep: "prep", conj: "conj", intj: "intj" };
 // wiki leftovers: [[ ]], stray braces and brackets, footnote numbers like узел[2]
 function cleanGloss(g) {
-  let s = g.replace(/\[\[|\]\]|[{}]/g, "").replace(/\[\d+\]/g, "").replace(/\s+/g, " ").trim();
+  let s = g.replace(/\[\[|\]\]|[{}]/g, "").replace(/\[\d+\]/g, "").replace(/\s+\d+\)\s*/g, "; ").replace(/\s+/g, " ").trim();
   s = s.replace(/^[\[\]]+|[\[\]]+$/g, "").trim();
   if (s.length > 110) { const cut = s.slice(0, 110).lastIndexOf(";"); s = (cut > 40 ? s.slice(0, cut) : s.slice(0, 107).replace(/\s+\S*$/, "")) + (cut > 40 ? "" : "…"); }
   return s;
@@ -155,3 +172,78 @@ mkdirSync(new URL("./", out), { recursive: true });
 writeFileSync(out, JSON.stringify(rows));
 const byPos = {}; for (const r of rows) byPos[r[1]] = (byPos[r[1]] || 0) + 1;
 console.log(rows.length, "entries", byPos, (JSON.stringify(rows).length / 1024).toFixed(0) + " KB");
+
+// ---- lookup.json: every Spanish word or short phrase with every Russian translation we can find (the words page) ----
+// row: [word, part of speech, gender, meanings (Russian Wiktionary entry, or the curated verb meanings first),
+//       more translations (other sources, the best supported first)]; most frequent first
+const unstress = (s) => s.normalize("NFD").replace(/[̀́]/g, "").normalize("NFC");
+const ES_OK = /^[a-záéíóúüñ]+(?: [a-záéíóúüñ]+){0,3}$/, RU_OK = /^[а-яё]+(?:[ -][а-яё]+){0,3}$/;
+const LPOS = { ...POS, phrase: "phr", particle: "part" };
+const L = new Map(); // "word|pos" → { w, p, g: {m, f}, base: [], more: Map(ru → support) }
+const lx = (w, p) => { const k = w + "|" + p; return L.get(k) || L.set(k, { w, p, g: { m: 0, f: 0 }, base: [], more: new Map() }).get(k); };
+for (const line of (await load(SRC.wikt)).split("\n")) {
+  if (!line.trim()) continue;
+  const e = JSON.parse(line), p = LPOS[e.pos];
+  if (!p || !ES_OK.test(e.word)) continue;
+  const senses = (e.senses || []).flatMap((s) => s.glosses || []).map(cleanGloss).filter((g) => g.length > 1);
+  if (!senses.length) continue;
+  const o = lx(e.word, p);
+  o.base = [...new Set([...o.base, ...senses])];
+  const g = gender(e); if (g === "m" || g === "mf") o.g.m += 5; if (g === "f" || g === "mf") o.g.f += 5;
+}
+for (const v of ENGINE) { const o = lx(v, "v"); o.base = [...new Set([...MEAN[v].split("; "), ...o.base])]; }
+const addMore = (es, p, ru, n, tags = []) => {
+  if (!es || !ru) return; // a table row with a note instead of a word
+  es = es.trim(); ru = unstress(ru.trim().toLowerCase());
+  if (!ES_OK.test(es) || !RU_OK.test(ru)) return;
+  const o = lx(es, p); o.more.set(ru, (o.more.get(ru) || 0) + n);
+  if (tags.includes("masculine")) o.g.m++; if (tags.includes("feminine")) o.g.f++;
+};
+// Russian entries: their Spanish translations, read backwards (weight 2: a direct Russian → Spanish pair)
+// translations sit on the entry or on its senses
+const trs = (e) => (e.translations || []).concat((e.senses || []).flatMap((s) => s.translations || []));
+let nRu = 0;
+for await (const e of records(SRC.ruRu, '"lang_code": "es"')) {
+  const p = LPOS[e.pos]; if (!p || e.lang_code !== "ru") continue;
+  for (const t of trs(e)) if (t.lang_code === "es") for (const w of t.word.split(/,\s*/)) addMore(w, p, e.word, 2, t.tags);
+  nRu++;
+}
+// English entries: Spanish and Russian words of one translation table (one English sense) translate each other
+let nEn = 0;
+for await (const e of records(SRC.enAll, '"lang_code": "es"')) {
+  const p = LPOS[e.pos]; if (!p || e.lang_code !== "en") continue;
+  const bySense = new Map();
+  for (const t of trs(e)) {
+    if (t.lang_code !== "es" && t.lang_code !== "ru") continue;
+    const s = bySense.get(t.sense || "") || bySense.set(t.sense || "", { es: [], ru: [] }).get(t.sense || "");
+    s[t.lang_code].push(t);
+  }
+  for (const { es, ru } of bySense.values()) {
+    if (!es.length || !ru.length || es.length > 8 || ru.length > 10) continue; // a huge table is too loose to pair
+    for (const a of es) for (const b of ru) addMore(a.word, p, b.word, 1, a.tags);
+  }
+  nEn++;
+}
+// a translation already said by the entry's own meanings is left out
+const ruWords = (s) => s.toLowerCase().replace(/ё/g, "е").split(/[^а-я-]+/).filter(Boolean);
+const OBSCENE = /(^|[^а-я])(вы|за|раз|от|на|по|у|с|до|про|въ|подъ|съ)?[еёъ]б[аиу]|ху[йяеё]|пизд|бляд|трах/;
+const lrows = [];
+for (const o of L.values()) {
+  // a meaning whose words all appear in a longer one is left out: "бросать" next to "бросать, кидать; метать"
+  // (the longer one takes the place of the first short one, so the curated order of verb meanings stays)
+  // only a list of synonyms covers it, not a meaning with a label: "время" stays next to "грам. время (глагола)"
+  const longer = (m) => o.base.find((x) => x.length > m.length && /[,;]/.test(x) && ruWords(m).every((w) => ruWords(x.replace(/\([^)]*\)/g, "")).includes(w)));
+  o.base = [...new Set(o.base.map((m) => { let x = m, y; while ((y = longer(x))) x = y; return x; }))];
+  const said = new Set(o.base.flatMap(ruWords));
+  // obscene words go last (coger, tirar have such meanings in Latin America); the page marks them
+  const more = [...o.more].filter(([r]) => !ruWords(r).every((x) => said.has(x))).sort((a, b) => OBSCENE.test(a[0]) - OBSCENE.test(b[0]) || b[1] - a[1] || a[0].localeCompare(b[0], "ru")).map(([r]) => r).slice(0, 30);
+  if (!o.base.length && !more.length) continue;
+  const dg = merged.get(o.w + "|n")?.g;
+  const g = o.p !== "n" ? "" : dg || (o.g.m && o.g.f ? "mf" : o.g.m ? "m" : o.g.f ? "f" : "");
+  const s = merged.get(o.w + "|" + o.p)?.s || freq.get(o.w) || 0;
+  lrows.push({ r: [o.w, o.p, g, o.base, more], s });
+}
+lrows.sort((a, b) => b.s - a.s || a.r[0].localeCompare(b.r[0], "es"));
+const lout = JSON.stringify(lrows.map((x) => x.r));
+writeFileSync(new URL("../src/data/lookup.json", import.meta.url), lout);
+console.log("lookup:", lrows.length, "entries,", nRu, "Russian and", nEn, "English entries read,", (lout.length / 1024).toFixed(0) + " KB");
