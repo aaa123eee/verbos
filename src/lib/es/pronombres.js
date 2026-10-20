@@ -1,41 +1,20 @@
 // Tasks for the pronouns page: object pronouns (me lo, se lo), reflexive verbs (me levanto) and the gerund (estoy hablando).
 // Every task is rebuilt from its key, so mistakes can come back later.
-import { RU, form, subjPres, persLabel, PERS, IMP_PERS } from "../conjugation.js";
+import { RU, REGULAR, IRR, form, subjPres, PERS, IMP_PERS } from "../conjugation.js";
+import { OBJ, REFL } from "./pronombres-data.js";
+export { OBJ, REFL };
 import { attach } from "./syllables.js";
 import { gerund, explainGerund } from "./gerund.js";
 
 const F = (s) => '<b class="f">' + s + "</b>";
 const pick = (a, r) => a[Math.floor(r() * a.length)];
 
-// verbs with the things they usually take; io: can take an indirect object (a alguien)
-export const OBJ_VERBS = {
-  dar: ["el libro", "la llave", "los regalos", "las fotos"], decir: ["la verdad", "el secreto", "las noticias"],
-  traer: ["el café", "la cuenta", "los platos"], mandar: ["la carta", "el mensaje", "los documentos"],
-  enviar: ["el paquete", "las fotos", "la invitación"], explicar: ["el problema", "la regla", "los ejercicios"],
-  enseñar: ["la ciudad", "las fotos", "el camino"], mostrar: ["el piso", "las fotos", "el camino"],
-  comprar: ["el regalo", "la camiseta", "los zapatos", "las flores"], regalar: ["el libro", "las flores", "la bicicleta"],
-  devolver: ["el dinero", "las llaves", "los libros"], pedir: ["el favor", "la cuenta", "los documentos"],
-  vender: ["el coche", "la casa", "los muebles"], escribir: ["la carta", "el correo", "las postales"],
-  contar: ["la historia", "el chiste", "los detalles"], entregar: ["el informe", "las llaves", "la tarea"],
-  ofrecer: ["el trabajo", "la ayuda", "los dulces"], preparar: ["la cena", "el desayuno", "los bocadillos"],
-  leer: ["el cuento", "la carta", "las noticias"], llevar: ["la maleta", "el abrigo", "los niños"],
-};
 export const IO = [["a mí", "me", 0], ["a ti", "te", 1], ["a él", "le", 2], ["a ella", "le", 2], ["a usted", "le", 2],
   ["a nosotros", "nos", 3], ["a vosotros", "os", 4], ["a ellos", "les", 5], ["a ellas", "les", 5], ["a ustedes", "les", 5]];
-const DO_CL = { el: "lo", la: "la", los: "los", las: "las" };
 const DO_RU = { lo: "м. р., ед. ч.", la: "ж. р., ед. ч.", los: "м. р., мн. ч.", las: "ж. р., мн. ч." };
 const REFL_CL = ["me", "te", "se", "nos", "os", "se"];
-export const REFL_VERBS = {
-  levantar: "вставать", duchar: "принимать душ", lavar: "мыться", llamar: "называться (меня зовут)", acostar: "ложиться спать",
-  vestir: "одеваться", sentar: "садиться", despertar: "просыпаться", quedar: "оставаться", ir: "уходить", sentir: "чувствовать себя",
-  dormir: "засыпать", poner: "надевать; становиться", quitar: "снимать (с себя)", divertir: "веселиться", acordar: "помнить, вспоминать",
-  equivocar: "ошибаться", preocupar: "волноваться", enfadar: "злиться", casar: "жениться, выходить замуж", afeitar: "бриться",
-  peinar: "причёсываться", olvidar: "забывать", mover: "двигаться", preparar: "готовиться", cuidar: "беречь себя",
-  perder: "теряться, заблудиться", caer: "падать", arreglar: "собираться, наряжаться", quejar: "жаловаться", parecer: "быть похожим",
-};
-const GER_VERBS = ["hablar", "comer", "vivir", "leer", "oír", "traer", "construir", "pedir", "dormir", "decir", "venir", "ir", "poder", "sentir",
-  "seguir", "servir", "repetir", "morir", "vestir", "elegir", "preferir", "mentir", "creer", "caer", "hacer", "escribir", "trabajar", "estudiar",
-  "jugar", "tener", "ver", "dar", "salir", "conseguir", "divertir", "destruir", "incluir", "corregir", "competir", "medir"];
+// the gerund works for every verb of the engine
+const GER_VERBS = REGULAR.concat(Object.keys(IRR));
 export const CONTEXTS = {
   pres: { name: "presente", tc: "pres" }, pret: { name: "pretérito", tc: "pret" },
   impa: { name: "imperativo", tc: "impa" }, impn: { name: "imperativo negativo", tc: "impn" },
@@ -62,9 +41,9 @@ function build(t) {
   if (type === "ger") return buildGer(t, it);
   let cl = [], what = [], why = [];
   if (type === "obj") {
-    const doN = t.doN != null ? OBJ_VERBS[v][t.doN] : null, io = t.io != null ? IO[t.io] : null;
-    let ioCl = io ? io[1] : null; const doCl = doN ? DO_CL[doN.split(" ")[0]] : null;
-    if (doN) { what.push(doN); why.push(doN + " → " + F(doCl) + " (прямое дополнение: " + DO_RU[doCl] + ")."); }
+    const ob = t.doN != null ? OBJ[v].objs[t.doN] : null, io = t.io != null ? IO[t.io] : null;
+    let ioCl = io ? io[1] : null; const doCl = ob ? ob.pr : null, doN = ob ? ob.ph : null;
+    if (ob) { what.push(doN); why.push(doN + " → " + F(doCl) + " (прямое дополнение: " + DO_RU[doCl] + (/^(a |al )/.test(doN) ? "; a перед человеком — не косвенное дополнение" : doN === "el agua" ? "; agua женского рода, el — только ради звучания" : "") + ")."); }
     if (io) { what.push(io[0]); why.push(io[0] + " → " + F(io[1]) + " (косвенное дополнение)."); }
     if (ioCl && doCl && (ioCl === "le" || ioCl === "les")) { ioCl = "se"; why.push(io[1] + " + " + doCl + " → " + F("se " + doCl) + ": два местоимения на l- подряд не ставят, le / les превращается в se."); }
     cl = [ioCl, doCl].filter(Boolean);
@@ -77,7 +56,7 @@ function build(t) {
     cl = [REFL_CL[p]];
     why.push("Возвратное местоимение для " + pl + ": " + F(cl[0]) + ".");
     it.main = v + "se";
-    it.sub = REFL_VERBS[v];
+    it.sub = REFL[v];
     it.rule.push("Возвратное местоимение по лицу: me, te, se, nos, os, se.");
     it.label = v + "se";
   }
@@ -142,10 +121,11 @@ export function randomTask({ types, ctxs, vos = true }, r = Math.random) {
     if (!vos) persons = persons.filter((x) => x !== 4);
     const p = pick(persons, r);
     if (type === "ger") return build({ type, v: pick(GER_VERBS, r), ctx: "ger", p });
-    if (type === "refl") return build({ type, v: pick(Object.keys(REFL_VERBS), r), ctx, p, aux: ctx === "inf" ? pick(["ir", "querer", "tener"], r) : null });
-    const v = pick(Object.keys(OBJ_VERBS), r), roll = r();
-    const doN = roll < 0.85 ? Math.floor(r() * OBJ_VERBS[v].length) : null;
-    let io = roll > 0.3 || doN == null ? Math.floor(r() * IO.length) : null;
+    if (type === "refl") return build({ type, v: pick(Object.keys(REFL), r), ctx, p, aux: ctx === "inf" ? pick(["ir", "querer", "tener"], r) : null });
+    // an indirect object only where it is natural (dar algo a alguien); some tasks replace only one of the two
+    const v = pick(Object.keys(OBJ), r), O = OBJ[v], roll = r();
+    const doN = !O.io || roll < 0.85 ? Math.floor(r() * O.objs.length) : null;
+    const io = O.io && (roll > 0.3 || doN == null) ? Math.floor(r() * IO.length) : null;
     // the indirect object can't be the subject itself (that would be reflexive)
     if (io != null && IO[io][2] === p) continue;
     if (io != null && !vos && IO[io][2] === 4) continue;

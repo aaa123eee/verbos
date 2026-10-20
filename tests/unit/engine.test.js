@@ -36,9 +36,9 @@ describe("conjugation engine", () => {
 });
 
 describe("verb data", () => {
-  it("has 279 distinct verbs, each with Russian forms and all meanings", () => {
+  it("has 286 distinct verbs, each with Russian forms and all meanings", () => {
     expect(new Set(VERBS).size).toBe(VERBS.length);
-    expect(VERBS.length).toBe(279);
+    expect(VERBS.length).toBe(286);
     const bad = VERBS.filter((v) => !E.RU[v] || E.RU[v][1].split(" ").length !== 6 || E.RU[v][2].length !== 2 || !E.MEAN[v] || !E.TIER[v]);
     expect(bad).toEqual([]);
   });

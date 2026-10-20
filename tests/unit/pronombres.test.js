@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { syllables, stressIndex, attach } from "../../src/lib/es/syllables.js";
 import { gerund } from "../../src/lib/es/gerund.js";
-import { fromKey, randomTask, CONTEXTS } from "../../src/lib/es/pronombres.js";
+import { fromKey, randomTask, CONTEXTS, OBJ, REFL } from "../../src/lib/es/pronombres.js";
+import { REGULAR, IRR } from "../../src/lib/conjugation.js";
 
 describe("syllables and stress", () => {
   it("splits words into syllables", () => {
@@ -59,5 +60,14 @@ describe("pronoun tasks", () => {
       expect(t.key.startsWith("refl|")).toBe(true);
       expect(t.key.split("|")[3]).not.toBe("4");
     }
+  });
+  it("cover the full verb set: every transitive and reflexive verb is in the engine, and every verb gets a gerund task", () => {
+    const all = new Set(REGULAR.concat(Object.keys(IRR)));
+    expect(Object.keys(OBJ).filter((v) => !all.has(v))).toEqual([]);
+    expect(Object.keys(REFL).filter((v) => !all.has(v))).toEqual([]);
+    expect(Object.keys(OBJ).length).toBeGreaterThan(200);
+    const seen = { obj: new Set(), refl: new Set(), ger: new Set() };
+    for (let i = 0; i < 30000; i++) { const [t, v] = randomTask({ types: ["obj", "refl", "ger"], ctxs: Object.keys(CONTEXTS) }).key.split("|"); seen[t].add(v); }
+    expect([seen.obj.size, seen.refl.size, seen.ger.size]).toEqual([Object.keys(OBJ).length, Object.keys(REFL).length, all.size]);
   });
 });

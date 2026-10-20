@@ -1,11 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { analyze, spellByRules, plural, explainWord, fromKey, randomTask, strip } from "../../src/lib/es/acentos.js";
-import { WORDS, PLURALS, DIACRITIC, DIACRITIC_WHY } from "../../src/lib/es/acentos-data.js";
+import { analyze, spellByRules, plural, explainWord, fromKey, randomTask, strip, ACC_WORDS, PL_NOUNS, allowed } from "../../src/lib/es/acentos.js";
+import { DIACRITIC, DIACRITIC_WHY } from "../../src/lib/es/acentos-data.js";
+import { LEX } from "../../src/lib/es/lexicon.js";
 import { REGULAR, IRR, form } from "../../src/lib/conjugation.js";
 
 describe("accent rules", () => {
-  it("every word in the list is spelled the way the rules say (catches typos in the data)", () => {
-    expect(WORDS.filter(({ w }) => spellByRules(w) !== w).map(({ w }) => w)).toEqual([]);
+  it("every dictionary word follows the rules, except the known diacritic words and old spellings", () => {
+    const off = LEX.filter((e) => spellByRules(e.w) !== e.w).map((e) => e.w);
+    const known = ["qué", "cómo", "sólo", "quién", "dónde", "cuál", "cuánto", "cuándo", "éste", "adónde", "guión", "aquél"];
+    expect(off.filter((w) => !known.includes(w))).toEqual([]);
+    expect(ACC_WORDS.length).toBeGreaterThan(6000); // the accents page uses the whole dictionary
   });
   it("every one-word verb form of the engine follows the rules too", () => {
     const bad = new Set();
@@ -25,7 +29,7 @@ describe("accent rules", () => {
     expect(Object.fromEntries(Object.keys(ref).map((w) => [w, plural(w)]))).toEqual(ref);
   });
   it("explains every word and names it", () => {
-    expect(WORDS.filter(({ w }) => !explainWord(w).join(" ").replace(/<[^>]+>/g, "").includes(w)).map(({ w }) => w)).toEqual([]);
+    expect(ACC_WORDS.filter(({ w }) => !explainWord(w).join(" ").replace(/<[^>]+>/g, "").includes(w)).map(({ w }) => w)).toEqual([]);
   });
 });
 
@@ -51,7 +55,13 @@ describe("accent tasks", () => {
     expect([...seen].sort()).toEqual(["diacr", "plural", "verb", "word"]);
     for (let i = 0; i < 100; i++) expect(randomTask({ kinds: ["plural"] }).key.startsWith("plural|")).toBe(true);
   });
-  it("covers every plural in the list", () => {
-    expect(PLURALS.every((x) => plural(x.w))).toBe(true);
+  it("covers every noun of the dictionary with a regular plural, and the size setting limits the words", () => {
+    expect(PL_NOUNS.length).toBeGreaterThan(4000);
+    expect(PL_NOUNS.every((e) => plural(e.w))).toBe(true);
+    for (let i = 0; i < 300; i++) {
+      const t = randomTask({ kinds: ["word", "plural"], top: "1000" });
+      expect(allowed(t.key, { kinds: ["word", "plural"], top: "1000" })).toBe(true);
+      expect(LEX.find((e) => e.w === t.key.split("|")[1]).rank).toBeLessThanOrEqual(1000);
+    }
   });
 });

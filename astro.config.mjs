@@ -6,4 +6,6 @@ export default defineConfig({
   base: "/verbos",
   trailingSlash: "always",
   build: { format: "directory" },
+  // the dictionary (src/data/dict.json, ~6.5k words) is one ~560 kB chunk, ~160 kB gzipped; that is expected
+  vite: { build: { chunkSizeWarningLimit: 800 } },
 });

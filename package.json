@@ -8,7 +8,8 @@
     "preview": "astro preview",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "check": "vitest run && astro build && playwright test"
+    "check": "vitest run && astro build && playwright test",
+    "build:dict": "node scripts/build-dict.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.64.1",

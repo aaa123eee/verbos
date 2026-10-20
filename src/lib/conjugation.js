@@ -148,7 +148,7 @@ addTier(3,["ayudar","cambiar","dejar","terminar","usar","preguntar","olvidar","c
  almorzar:["обедать","обедаю обедаешь обедает обедаем обедаете обедают",["пообедал","пообедали"]]
 });
 // level 4: расширенные — the next ~200 most frequent verbs
-addTier(4,["quedar", "crear", "considerar", "tratar", "presentar", "lograr", "entrar", "desarrollar", "resultar", "señalar", "formar", "acabar", "intentar", "contestar", "ganar", "gastar", "guardar", "enseñar", "estudiar", "limpiar", "cocinar", "preparar", "bailar", "nadar", "descansar", "visitar", "invitar", "llorar", "gritar", "regalar", "cuidar", "celebrar", "amar", "odiar", "arreglar", "mandar", "desear", "evitar", "pintar", "fumar", "firmar", "alquilar", "aceptar", "apoyar", "aumentar", "bajar", "cortar", "dibujar", "echar", "imaginar", "levantar", "luchar", "matar", "notar", "observar", "ocupar", "parar", "participar", "quitar", "robar", "saltar", "salvar", "separar", "tirar", "votar", "ahorrar", "lavar", "mejorar", "comprender", "responder", "prometer", "romper", "meter", "temer", "depender", "esconder", "sorprender", "cumplir", "permitir", "existir", "insistir", "compartir", "discutir", "partir", "añadir", "unir", "sufrir", "asistir", "admitir", "dividir", "describir", "descubrir", "cubrir", "resistir"],{
+addTier(4,["duchar","preocupar","enfadar","casar","afeitar","peinar","quejar","quedar", "crear", "considerar", "tratar", "presentar", "lograr", "entrar", "desarrollar", "resultar", "señalar", "formar", "acabar", "intentar", "contestar", "ganar", "gastar", "guardar", "enseñar", "estudiar", "limpiar", "cocinar", "preparar", "bailar", "nadar", "descansar", "visitar", "invitar", "llorar", "gritar", "regalar", "cuidar", "celebrar", "amar", "odiar", "arreglar", "mandar", "desear", "evitar", "pintar", "fumar", "firmar", "alquilar", "aceptar", "apoyar", "aumentar", "bajar", "cortar", "dibujar", "echar", "imaginar", "levantar", "luchar", "matar", "notar", "observar", "ocupar", "parar", "participar", "quitar", "robar", "saltar", "salvar", "separar", "tirar", "votar", "ahorrar", "lavar", "mejorar", "comprender", "responder", "prometer", "romper", "meter", "temer", "depender", "esconder", "sorprender", "cumplir", "permitir", "existir", "insistir", "compartir", "discutir", "partir", "añadir", "unir", "sufrir", "asistir", "admitir", "dividir", "describir", "descubrir", "cubrir", "resistir"],{
  "explicar":["explico explicas explica explicamos explicáis explican", "expliqué explicaste explicó explicamos explicasteis explicaron"],
  "practicar":["practico practicas practica practicamos practicáis practican", "practiqué practicaste practicó practicamos practicasteis practicaron"],
  "colocar":["coloco colocas coloca colocamos colocáis colocan", "coloqué colocaste colocó colocamos colocasteis colocaron"],
@@ -455,6 +455,13 @@ addTier(4,["quedar", "crear", "considerar", "tratar", "presentar", "lograr", "en
  "valer":["стоить, иметь ценность", "стою стоишь стоит стоим стоите стоят", ["стоил", "стоили"]],
  "caber":["помещаться", "помещаюсь помещаешься помещается помещаемся помещаетесь помещаются", ["поместился", "поместились"]],
  "poseer":["обладать", "обладаю обладаешь обладает обладаем обладаете обладают", ["обладал", "обладали"]],
+ "duchar":["мыть под душем", "мою моешь моет моем моете моют", ["помыл", "помыли"], "ducharse — принимать душ"],
+ "preocupar":["беспокоить", "беспокою беспокоишь беспокоит беспокоим беспокоите беспокоят", ["обеспокоил", "обеспокоили"]],
+ "enfadar":["сердить", "сержу сердишь сердит сердим сердите сердят", ["рассердил", "рассердили"]],
+ "casar":["женить, венчать", "венчаю венчаешь венчает венчаем венчаете венчают", ["обвенчал", "обвенчали"]],
+ "afeitar":["брить", "брею бреешь бреет бреем бреете бреют", ["побрил", "побрили"]],
+ "peinar":["причёсывать", "причёсываю причёсываешь причёсывает причёсываем причёсываете причёсывают", ["причесал", "причесали"]],
+ "quejar":["жаловаться", "жалуюсь жалуешься жалуется жалуемся жалуетесь жалуются", ["пожаловался", "пожаловались"], "quejar(se) — жаловаться"],
  "sentar":["сажать", "сажаю сажаешь сажает сажаем сажаете сажают", ["посадил", "посадили"]],
  "acostar":["укладывать (спать)", "укладываю укладываешь укладывает укладываем укладываете укладывают", ["уложил", "уложили"]],
  "divertir":["развлекать", "развлекаю развлекаешь развлекает развлекаем развлекаете развлекают", ["развлёк", "развлекли"]],
@@ -660,6 +667,13 @@ const MEAN={
  "valer":"стоить; иметь ценность; годиться; ладно, хорошо (vale)",
  "caber":"помещаться; вмещаться; нет сомнений (no cabe duda)",
  "poseer":"обладать; владеть; иметь",
+ "duchar":"мыть под душем; принимать душ (ducharse)",
+ "preocupar":"беспокоить; волноваться (preocuparse)",
+ "enfadar":"сердить; злиться, сердиться (enfadarse)",
+ "casar":"женить, венчать; жениться, выходить замуж (casarse)",
+ "afeitar":"брить; бриться (afeitarse)",
+ "peinar":"причёсывать; причёсываться (peinarse)",
+ "quejar":"жаловаться (quejarse)",
  "sentar":"сажать; садиться (sentarse); подходить, идти (об одежде, еде: sentar bien)",
  "acostar":"укладывать спать; ложиться (acostarse)",
  "divertir":"развлекать; веселиться (divertirse)",
