@@ -1,11 +1,12 @@
 ---
 // Pronouns, reflexive verbs and the gerund: dámelo, no te levantes, estoy duchándome.
 import TrainerPage from "../components/TrainerPage.astro";
+import { randomTask } from "../lib/es/pronombres.js";
 const C = (name: string, value: string, label: string, on = false) => ({ name, value, label, on });
 const types = [C("types", "obj", "Местоимения-дополнения: me lo, se lo", true), C("types", "refl", "Возвратные глаголы: me levanto", true), C("types", "ger", "Герундий: estoy hablando", true)];
 const ctxs = [C("ctxs", "pres", "presente", true), C("ctxs", "pret", "pretérito"), C("ctxs", "impa", "imperativo", true), C("ctxs", "impn", "imperativo negativo", true), C("ctxs", "inf", "+ инфинитив", true), C("ctxs", "ger", "estar + gerundio", true)];
 ---
-<TrainerPage title="Pronombres · Conjugación española" brand="Pronombres" brandEm="y gerundio" current="pronombres" placeholder="например: me lo da">
+<TrainerPage title="Pronombres · Conjugación española" brand="Pronombres" brandEm="y gerundio" current="pronombres" first={randomTask({ types: types.filter((t) => t.on).map((t) => t.value), ctxs: ctxs.filter((t) => t.on).map((t) => t.value), vos: true })} placeholder="например: me lo da">
   <Fragment slot="settings">
     <section>
       <h3>Что тренируем</h3>

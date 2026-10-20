@@ -87,7 +87,7 @@ const modes = [R("modes", "see", "Вспомнить перевод", true), R("
           <button class="primary" type="button" id="go"><span>Показать перевод</span><kbd>Enter ↵</kbd></button>
           <button type="button" id="no" hidden><span>Не помню</span><kbd>1</kbd></button>
           <button type="button" id="undo" disabled title="Отменить ответ (Esc)"><Fragment set:html={I(ICO.undo)} /><span>Отменить</span><kbd>Esc</kbd></button>
-          <button type="button" class="spk" id="spk" hidden title="Произнести"><Fragment set:html={I(ICO.speak)} /></button>
+          <button type="button" class="spk off" id="spk" inert title="Произнести"><Fragment set:html={I(ICO.speak)} /></button>
         </div>
         <div class="keys off" id="keys" inert aria-label="Буквы с ударением">{["á","é","í","ó","ú","ñ"].map((k) => <button type="button" data-k={k}>{k}</button>)}</div>
       </div>

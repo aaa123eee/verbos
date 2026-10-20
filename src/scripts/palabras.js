@@ -295,19 +295,19 @@ function next(focus = $("rev").contains(document.activeElement)) {
     if (focus) $("go").focus({ preventScroll: true });
   } else {
     const shown = shownMeanings(e, c);
-    $("pMain").innerHTML = mode === "write" ? '<span class="sent">' + esc(shown.join("; ")) + "</span>" : '<button type="button" class="spk big" data-say="1" title="Ещё раз">' + SPK + "</button>";
+    $("pMain").innerHTML = mode === "write" ? '<span class="sent">' + esc(shown.join("; ")) + "</span>" : '<button type="button" class="spk big" data-say="1" title="Послушать">' + SPK + "</button>";
     $("pSub").textContent = (POS_RU[e.p] || "") + (e.p === "n" && mode === "write" ? " · можно с артиклем" : "");
     off(false);
-    fb.textContent = mode === "write" ? "Напиши слово по-испански и нажми Enter." : "Напиши, что услышал. Кнопка с динамиком — ещё раз.";
+    fb.textContent = mode === "write" ? "Напиши слово по-испански и нажми Enter." : "Нажми на динамик, послушай и напиши, что услышал.";
     setGo("Проверить");
-    if (mode === "listen") setTimeout(() => speak(e.w), 150);
     if (focus) $("ans").focus({ preventScroll: true });
   }
-  $("spk").hidden = !voice || mode === "listen";
+  hide("spk", !voice || mode === "listen");
   render();
 }
 // see mode and the done card don't use the answer field, but it keeps its place
-function off(v) { for (const id of ["ansRow", "keys"]) { $(id).classList.toggle("off", v); $(id).inert = v; } }
+const hide = (id, v) => { $(id).classList.toggle("off", v); $(id).inert = v; };
+function off(v) { hide("ansRow", v); hide("keys", v); }
 function showDone(focus) {
   cur = null;
   const n = Object.keys(S.cards).length, st = settings();
@@ -315,7 +315,7 @@ function showDone(focus) {
   $("pTag").textContent = "на сегодня всё"; $("pWhen").textContent = ""; $("pRev").textContent = ""; $("pMean").hidden = true;
   $("pMain").textContent = n ? "¡Muy bien!" : "Пока пусто";
   $("pSub").textContent = n ? "Повторено всё, что было на сегодня." : "Найди слово в словаре выше — оно появится здесь.";
-  off(true); $("no").hidden = true; $("spk").hidden = true; $("undo").disabled = !undoSnap;
+  off(true); $("no").hidden = true; hide("spk", true); $("undo").disabled = !undoSnap;
   const fb = $("fb"); fb.className = "feedback idle";
   fb.textContent = st.perDay || n ? "Следующие слова — завтра. Можно взять ещё новых: кнопка ниже." : "";
   setGo("Ещё 5 новых");
@@ -354,7 +354,7 @@ function step() {
       revealed = true;
       $("pMean").innerHTML = meaningsHtml(e); $("pMean").hidden = false; $("rev").classList.add("revealed");
       fb.textContent = "Вспомнил? Enter — помню, 1 — не помню.";
-      setGo("Помню"); $("no").hidden = false; speak(e.w);
+      setGo("Помню"); $("no").hidden = false;
       return;
     }
     const k = result(true);
@@ -372,7 +372,6 @@ function step() {
   fb.innerHTML = "<div>" + (ok ? "Верно." : syn ? "Тоже верно: " + esc(syn.w) + ". Загадано другое слово:" : accent ? (strict ? "Ошибка в ударении." : "Засчитано, но с ударением:") : "Ошибка.") + "</div>" +
     (ok ? "" : '<div class="row">надо: <b>' + esc(withArticle(e)) + "</b></div>") + meaningsHtml(e) + '<div class="tr">Следующий раз — ' + whenText(k) + ". Esc — отменить ответ.</div>";
   setGo("Дальше");
-  speak(e.w);
 }
 // a "see" answer moves on at once; the line above the next word says what happened
 function afterSee(ok, k) {

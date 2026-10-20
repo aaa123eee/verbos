@@ -1,11 +1,11 @@
 ---
 // Gender and agreement: el / la for every dictionary noun, los / las with the plural, the four forms of every adjective.
 import TrainerPage from "../components/TrainerPage.astro";
-import { NOUNS, ADJS } from "../lib/es/genero.js";
+import { NOUNS, ADJS, randomTask } from "../lib/es/genero.js";
 const kinds = [["art", "Род и артикль: el problema, la mano"], ["artpl", "Артикль и множественное число: los hoteles"], ["adj", "Формы прилагательных: blanco → blancas"]];
 const n = (x: number) => x.toLocaleString("ru-RU");
 ---
-<TrainerPage title="Género · Conjugación española" brand="Género" brandEm="y concordancia" current="genero" placeholder="например: el problema">
+<TrainerPage title="Género · Conjugación española" brand="Género" brandEm="y concordancia" current="genero" first={randomTask({ kinds: kinds.map((k) => k[0]), top: "1000" })} placeholder="например: el problema">
   <Fragment slot="settings">
     <section>
       <h3>Что тренируем</h3>

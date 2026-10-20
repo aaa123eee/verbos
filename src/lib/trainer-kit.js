@@ -20,6 +20,11 @@ function diff(u, c) {
 }
 
 // IndexedDB key-value store shared with the conjugation page (same database, own key per trainer)
+const setB = (el, vals) => el.querySelectorAll("b").forEach((b, i) => (b.textContent = vals[i]));
+// a page answered on before hides the first-visit hint already in <head> (Base.astro), before the first paint
+export function markSeen() {
+  try { const s = JSON.parse(localStorage.getItem("verbos-seen") || "[]"); if (!s.includes(location.pathname)) { s.push(location.pathname); localStorage.setItem("verbos-seen", JSON.stringify(s)); } } catch (e) {}
+}
 export const IDB = {
   db: null,
   open() { return new Promise((res, rej) => { const r = indexedDB.open("conjugacion", 1); r.onupgradeneeded = () => r.result.createObjectStore("kv"); r.onsuccess = () => res((this.db = r.result)); r.onerror = () => rej(r.error); }); },
@@ -68,7 +73,7 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
   });
 
   // ---- state of the current task ----
-  let cur = null, last = null, answered = false, prevS = null, undone = false, hintUsed = new Set(), letters = 0;
+  let loaded = false, cur = null, last = null, answered = false, prevS = null, undone = false, hintUsed = new Set(), letters = 0;
   const ICO = { check: '<path d="M20 6 9 17l-5-5"/>', next: '<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>' };
   const setGo = (done) => {
     $("go").innerHTML = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + ICO[done ? "next" : "check"] + "</svg><span>" + (done ? "Дальше" : "Проверить") + "</span><kbd>Enter ↵</kbd>";
@@ -93,8 +98,11 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
   }
 
   // due mistakes first, then a new task
+  let firstKey = document.querySelector(".trainer").dataset.first || null;
   function pick() {
     const st = settings();
+    // the task already drawn in the markup comes first
+    if (firstKey) { const k = firstKey; firstKey = null; if (allowed(k, st)) { try { return fromKey(k); } catch (e) {} } }
     const due = Object.entries(S.review).filter(([k, r]) => r.due <= S.t && k !== last && allowed(k, st)).sort((a, b) => a[1].due - b[1].due);
     if (due.length) { try { return fromKey(due[0][0]); } catch (e) { delete S.review[due[0][0]]; } }
     for (let i = 0; i < 20; i++) { const t = next(st); if (t.key !== last) return t; }
@@ -102,6 +110,7 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
   }
   const FB_IDLE = $("fb").textContent;
   function show() {
+    if (!loaded) return;
     cur = pick(); last = cur.key; answered = false; prevS = null; undone = false;
     $("pTag").textContent = cur.tag; $("pWhen").textContent = cur.when || "";
     $("pMain").innerHTML = cur.main; $("pSub").textContent = cur.sub || "";
@@ -150,10 +159,13 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
     const fb = $("fb"); fb.hidden = false; fb.className = "feedback idle"; fb.textContent = "Ответ отменён, попробуй ещё раз. Этот вопрос потом вернётся ещё раз.";
     $("ans").value = ""; $("ans").focus({ preventScroll: true });
   }
+  // the numbers fill the labels already in the markup, and only once the saved progress is read (nothing jumps on load)
   function render() {
+    if (!loaded) return;
     const pct = S.total ? Math.round((S.right / S.total) * 100) : 0, n = Object.keys(S.review).length;
-    $("stats").innerHTML = "<span>ответов <b>" + S.total + "</b></span><span>верно <b>" + pct + "%</b></span><span>серия <b>" + S.streak + "</b></span><span>на повторении <b>" + n + "</b></span>";
-    $("mini").innerHTML = S.total ? "серия <b>" + S.streak + "</b> · верно <b>" + pct + "%</b>" : "";
+    setB($("stats"), [S.total, pct + "%", S.streak, n]);
+    setB($("mini"), [S.streak, pct + "%"]); $("mini").toggleAttribute("data-empty", !S.total);
+    if (S.total) markSeen();
     const w = $("weak");
     if (!n) { w.innerHTML = '<span class="empty">Пусто. Ошибки появятся здесь и будут возвращаться, пока не ответишь трижды.</span>'; return; }
     w.innerHTML = Object.entries(S.review).sort((a, b) => a[1].due - b[1].due).map(([k, r]) => {
@@ -214,10 +226,16 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
     show();
   });
 
-  render(); show();
+  // the first task waits for the saved progress (a review may be due), so the card is drawn once
+  function start() {
+    if (loaded) return;
+    loaded = true; render(); show();
+    document.querySelector(".trainer").classList.remove("loading"); $("stats").classList.remove("loading");
+  }
+  setTimeout(start, 1500);
   (async () => {
     try {
-      if (!window.indexedDB) return;
+      if (!window.indexedDB) return start();
       await IDB.open(); idbReady = true;
       const r = await IDB.get(PKEY);
       if (r && r.review && (r.total || 0) >= (S.total || 0)) { S = Object.assign(fresh(), r); render(); }
@@ -225,6 +243,7 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
       try { localStorage.removeItem(LKEY); } catch (e) {}
       setNote("Прогресс хранится в этом браузере (IndexedDB).");
     } catch (e) { idbReady = false; }
+    start();
   })();
 
   // e2e hook: only with ?e2e in the URL, Playwright runs test code inside this scope

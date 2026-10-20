@@ -1089,4 +1089,11 @@ function hintEndings(v,t,p){ // six endings of this tense for this verb group, c
   return ["haber ("+HABER_NAME[t]+"): "+row(HABER[t].split(" "),"")+" + participio"];
 }
 
-export {PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND};
+// the tense checkboxes of the settings panel, grouped by mood: rendered at build time and again by the page script
+function tensesHtml(sel){
+  const moods=[...new Set(TENSES.map(t=>t.mood))];
+  return moods.map(m=>'<div class="mood"><b>'+m+'</b>'+
+    TENSES.filter(t=>t.mood===m).map(t=>'<label class="tchip" style="--tc:var(--t-'+t.k+')"><input type="checkbox" id="tn-'+t.k+'" value="'+t.k+'"'+(sel.includes(t.k)?" checked":"")+'><span>'+(t.short||t.name).replace(/^(subj|imp)\. /,"")+'</span></label>').join("")+'</div>').join("")+
+    '<div class="tbtns"><span class="cap">Быстрый выбор</span><button type="button" data-set="def">Presente + pretérito</button><button type="button" data-set="ind">Весь indicativo</button><button type="button" data-set="all">Все</button></div>';
+}
+export {tensesHtml,PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND};

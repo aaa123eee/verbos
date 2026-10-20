@@ -9,6 +9,7 @@ const { title } = Astro.props;
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <style is:inline>:root{color-scheme:light}body{margin:0;font:14px/1.4 system-ui,-apple-system,"Segoe UI",sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<script is:inline>try{if(JSON.parse(localStorage.getItem("verbos-seen")||"[]").indexOf(location.pathname)>=0)document.documentElement.setAttribute("data-seen","")}catch(e){}</script>
 <title>{title}</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇪🇸</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">

@@ -1,9 +1,10 @@
 ---
 // Accents: where the tilde goes and why — words, verb forms, plurals, and tú / tu in a sentence.
 import TrainerPage from "../components/TrainerPage.astro";
+import { randomTask } from "../lib/es/acentos.js";
 const kinds = [["word", "Слова: cancion → canción"], ["verb", "Формы глаголов: hablo / habló"], ["plural", "Множественное число: joven → jóvenes"], ["diacr", "Тильда различает слова: tú / tu, qué / que"]];
 ---
-<TrainerPage title="Acentos · Conjugación española" brand="Acentos" brandEm="y tildes" current="acentos" placeholder="слово с тильдой или без">
+<TrainerPage title="Acentos · Conjugación española" brand="Acentos" brandEm="y tildes" current="acentos" first={randomTask({ kinds: kinds.map((k) => k[0]), top: "1000" })} placeholder="слово с тильдой или без">
   <Fragment slot="settings">
     <section>
       <h3>Что тренируем</h3>

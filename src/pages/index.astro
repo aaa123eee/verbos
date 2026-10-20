@@ -3,6 +3,7 @@
 import Base from "../layouts/Base.astro";
 import TrainerNav from "../components/TrainerNav.astro";
 import "../styles/conjugacion.css";
+import { tensesHtml, DEFAULT_TENSES } from "../lib/conjugation.js";
 ---
 <Base title="Conjugación española">
 <div class="app">
@@ -19,7 +20,7 @@ import "../styles/conjugacion.css";
     <div class="side-head only-m"><h2>Настройки</h2><button type="button" class="ghost" id="cfgClose" aria-label="Закрыть"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
     <section>
       <h3>Времена</h3>
-      <div class="tenses" id="tenses" role="group" aria-label="Времена"></div>
+      <div class="tenses" id="tenses" role="group" aria-label="Времена" set:html={tensesHtml(DEFAULT_TENSES)}></div>
     </section>
     <section>
       <h3>Глаголы</h3>
@@ -52,7 +53,7 @@ import "../styles/conjugacion.css";
     </section>
     <section>
       <h3>Прогресс</h3>
-      <div class="stats" id="stats"></div>
+      <div class="stats loading" id="stats">{["ответов","верно","серия","на повторении"].map((t) => <span>{t} <b></b></span>)}</div>
       <div class="weak">
         <h3>Сейчас на повторении</h3>
         <div class="chips" id="weak"></div>
@@ -66,9 +67,9 @@ import "../styles/conjugacion.css";
   <div class="scrim" id="scrim" hidden></div>
 
   <main class="main" id="trainer">
-    <div class="trainer">
+    <div class="trainer loading conj-main">
       <div class="prompt" aria-live="polite">
-        <div class="tense"><span class="pill" id="pTense">presente</span><span class="when" id="pWhen">настоящее · сейчас</span><span class="mini" id="mini"></span></div>
+        <div class="tense"><span class="pill" id="pTense">presente</span><span class="when" id="pWhen">настоящее · сейчас</span><span class="mini" id="mini" data-empty>серия <b></b> · верно <b></b></span></div>
         <div class="q"><span class="pron" id="pPron">yo</span><span class="pron" id="pSep"> · </span><span id="pVerb">hablar</span></div>
         <div class="ru" id="pRu">разговаривать</div>
         <div class="tag" id="pTag"></div>
@@ -79,7 +80,7 @@ import "../styles/conjugacion.css";
       </div>
       <div class="drill" id="drill" hidden></div>
       <div class="aux">
-        <div class="acts"><button class="primary" type="button" id="go"></button><button type="button" id="undo" disabled title="Отменить ответ и ответить заново (Esc)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg><span>Отменить</span><kbd>Esc</kbd></button></div>
+        <div class="acts"><button class="primary" type="button" id="go"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span>Проверить</span><kbd>Enter ↵</kbd></button><button type="button" id="undo" disabled title="Отменить ответ и ответить заново (Esc)"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg><span>Отменить</span><kbd>Esc</kbd></button></div>
         <div class="keys" aria-label="Буквы с ударением">
           <button type="button" data-k="á">á</button><button type="button" data-k="é">é</button><button type="button" data-k="í">í</button><button type="button" data-k="ó">ó</button><button type="button" data-k="ú">ú</button><button type="button" data-k="ñ">ñ</button>
         </div>

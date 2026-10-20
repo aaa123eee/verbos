@@ -1,5 +1,5 @@
 // The conjugation trainer page: cheat sheet tables, trainer state, settings, drill, dialog, search.
-import {PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND} from "../lib/conjugation.js";
+import {tensesHtml,PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND} from "../lib/conjugation.js";
 
 // irregular table
 (function(){
@@ -48,16 +48,12 @@ async function flush(){
   if(dirty) flush();
 }
 const $=id=>document.getElementById(id);
+let loaded=false; // set by start() once the saved progress is read
 // tense checkboxes, grouped by mood; selection remembered in this browser
 const TKEY="conj-tenses-v1";
 let selTenses=DEFAULT_TENSES.slice();
 try{const s=JSON.parse(localStorage.getItem(TKEY)||"null"); if(Array.isArray(s)){const ok=s.filter(k=>TMAP[k]); if(ok.length) selTenses=ok;}}catch(e){}
-function renderTenses(){
-  const moods=[...new Set(TENSES.map(t=>t.mood))];
-  $("tenses").innerHTML=moods.map(m=>'<div class="mood"><b>'+m+'</b>'+
-    TENSES.filter(t=>t.mood===m).map(t=>'<label class="tchip" style="--tc:var(--t-'+t.k+')"><input type="checkbox" id="tn-'+t.k+'" value="'+t.k+'"'+(selTenses.includes(t.k)?" checked":"")+'><span>'+(t.short||t.name).replace(/^(subj|imp)\. /,"")+'</span></label>').join("")+'</div>').join("")+
-    '<div class="tbtns"><span class="cap">Быстрый выбор</span><button type="button" data-set="def">Presente + pretérito</button><button type="button" data-set="ind">Весь indicativo</button><button type="button" data-set="all">Все</button></div>';
-}
+function renderTenses(){ $("tenses").innerHTML=tensesHtml(selTenses); }
 function setTenses(list){
   selTenses=list.slice();
   try{localStorage.setItem(TKEY,JSON.stringify(selTenses));}catch(e){}
@@ -109,6 +105,7 @@ function pick(){
   return soon[0]||P[0];
 }
 function show(){
+  if(!loaded) return;
   if(S.drill){ const [dv,dt]=S.drill.split("|"); if(RU[dv]&&TMAP[dt]){ startDrill(); return; } S.drill=null; }
   drilling=false; $("drill").hidden=true; $("drill").innerHTML="";
   document.querySelector(".answer").hidden=false; $("hintbar").hidden=false;
@@ -196,11 +193,15 @@ function check(){
   save(); render(); answered=true; setGo(true);
   return true;
 }
+// the numbers fill the labels already in the markup, and only once the saved progress is read (nothing jumps on load)
+const setB=(el,vals)=>el.querySelectorAll("b").forEach((b,i)=>b.textContent=vals[i]);
 function render(){
+  if(!loaded) return;
   const pct=S.total?Math.round(S.right/S.total*100):0;
   const n=Object.keys(S.review).length;
-  $("stats").innerHTML='<span>ответов <b>'+S.total+'</b></span><span>верно <b>'+pct+'%</b></span><span>серия <b>'+S.streak+'</b></span><span>на повторении <b>'+n+'</b></span>';
-  $("mini").innerHTML=S.total?'серия <b>'+S.streak+'</b> · верно <b>'+pct+'%</b>':'';
+  setB($("stats"),[S.total,pct+"%",S.streak,n]);
+  setB($("mini"),[S.streak,pct+"%"]); $("mini").toggleAttribute("data-empty",!S.total);
+  if(S.total) markSeen();
   const w=$("weak");
   if(!n){w.innerHTML='<span class="empty">Пусто. Ошибки появятся здесь и будут возвращаться, пока не ответишь трижды.</span>';return;}
   w.innerHTML=Object.entries(S.review).sort((a,b)=>a[1].due-b[1].due).map(([k,r])=>{const [v,t,p]=k.split("|");if(!TMAP[t]) return ""; return '<span class="chip">'+esc(persLabel(t,+p).split(" ")[0])+' '+v+' <i>'+esc(TMAP[t].short||TMAP[t].name)+' · ×'+r.need+'</i></span>';}).join("");
@@ -419,21 +420,37 @@ function openFromHash(){
 }
 addEventListener("hashchange",openFromHash);
 
-render(); show(); openFromHash();
+// a page answered on before hides the first-visit hint already in <head> (Base.astro), before the first paint
+function markSeen(){
+  try{ const s=JSON.parse(localStorage.getItem("verbos-seen")||"[]"); if(!s.includes(location.pathname)){ s.push(location.pathname); localStorage.setItem("verbos-seen",JSON.stringify(s)); } }catch(e){}
+}
+// the first task waits for the saved progress (a drill or a review may be due), so the card is drawn once
+function start(){
+  if(loaded) return;
+  const pr=document.querySelector(".prompt"), h0=pr.offsetHeight;
+  loaded=true; render(); show();
+  // the first task is drawn while the card is still hidden: take one that fits the room the markup kept, so nothing below moves
+  // (a due review or a drill comes first anyway)
+  for(let i=0;i<20&&pr.offsetHeight!==h0&&!drilling;i++){ last=null; show(); }
+  document.querySelector(".trainer").classList.remove("loading"); $("stats").classList.remove("loading");
+  openFromHash();
+}
+setTimeout(start,1500);
 
 // load progress from IndexedDB; migrate old localStorage data once
 (async()=>{
   try{
-    if(!window.indexedDB) return;
+    if(!window.indexedDB) return start();
     await IDB.open(); idbReady=true;
     const r=await IDB.get("progress");
     if(r&&r.review&&(r.total||0)>=(S.total||0)){
-      S=Object.assign({t:0,review:{},total:0,right:0,streak:0},r); render(); if(S.drill&&!drilling) show();
+      S=Object.assign({t:0,review:{},total:0,right:0,streak:0},r); render(); if(loaded&&S.drill&&!drilling) show();
     }else if(S.total>0){ dirty=true; await flush(); }
     try{localStorage.removeItem(KEY);}catch(e){}
     if(dirty) flush();
     setNote("Прогресс хранится в этом браузере (IndexedDB).");
   }catch(e){ idbReady=false; }
+  start();
 })();
 
 // e2e hook: only with ?e2e in the URL, Playwright runs test code inside this module's scope
