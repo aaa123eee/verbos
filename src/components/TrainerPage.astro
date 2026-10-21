@@ -7,6 +7,7 @@ import TrainerNav from "./TrainerNav.astro";
 import SearchBox from "./SearchBox.astro";
 import Support from "./Support.astro";
 import WineButton from "./WineButton.astro";
+import { wrapWordsHtml } from "../lib/words-html.js";
 import "../styles/conjugacion.css";
 // first: a task picked at build time and drawn in the markup; the script starts with it (when the settings allow it),
 // so the card looks the same before and after the script runs
@@ -48,7 +49,7 @@ const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true
     <div class="trainer loading" data-first={first?.key} style={first ? `--tc:var(--t-${first.tc || "pres"})` : undefined}>
       <div class="prompt" aria-live="polite">
         <div class="tense"><span class="pill" id="pTag">{first ? first.tag : "\u00a0"}</span><span class="when" id="pWhen">{first?.when || ""}</span><span class="mini" id="mini" data-empty>серия <b></b> · верно <b></b></span></div>
-        <div class="q" id="pMain" set:html={first ? first.main : "&nbsp;"}></div>
+        <div class="q" id="pMain" set:html={first ? wrapWordsHtml(first.main) : "&nbsp;"}></div>
         <div class="ru" id="pSub">{first ? first.sub || "" : "\u00a0"}</div>
         <div class="tag" id="pRev"></div>
       </div>

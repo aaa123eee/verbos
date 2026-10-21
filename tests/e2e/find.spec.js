@@ -66,7 +66,7 @@ test("the words page takes words saved in another tab when it comes back", async
 test("every word of a task sentence shows its translation and goes to my words; the gap is not a word", async ({ page }) => {
   await page.goto("tiempos/?e2e");
   await page.waitForFunction(() => window.__kit);
-  await page.evaluate(() => window.__kit(`cur = fromKey("ayer|comer|2|0"); last = cur.key; $("pMain").innerHTML = cur.main; wrapWords($("pMain"));`));
+  await page.evaluate(() => window.__kit(`cur = fromKey("ayer|comer|2|0"); last = cur.key; $("pMain").innerHTML = wrapWordsHtml(cur.main);`));
   await expect(page.locator(".prompt .gap .w")).toHaveCount(0);
   const ayer = page.locator(".prompt .w", { hasText: /^Ayer$/ });
   await ayer.click();
