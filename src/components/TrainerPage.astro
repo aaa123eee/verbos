@@ -33,7 +33,7 @@ const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true
       <div class="stats loading" id="stats">{["ответов","верно","серия","на повторении"].map((t) => <span>{t} <b></b></span>)}</div>
       <div class="weak"><h3>Сейчас на повторении</h3><div class="chips" id="weak"></div></div>
       <div class="foot">
-        <span class="empty" id="syncNote">Прогресс хранится в этом браузере.</span>
+        <span class="empty" id="syncNote">Прогресс хранится в этом браузере (IndexedDB).</span>
         <span class="resets"><button type="button" id="reset" data-label="Сбросить прогресс"><Fragment set:html={I('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>')} /><span>Сбросить прогресс</span></button><button type="button" id="resetAll" data-label="Сбросить всё"><Fragment set:html={I('<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>')} /><span>Сбросить всё</span></button></span>
       </div>
     </section>
