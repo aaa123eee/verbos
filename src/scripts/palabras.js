@@ -3,7 +3,7 @@ import { IDB, norm, esc } from "../lib/trainer-kit.js";
 import { LEX } from "../lib/es/lexicon.js";
 import { meanings, matches, withArticle, isRu, key, POS_RU, today, newCard, grade, known, status, modeFor, answersFor, synonym, shownMeanings, verbEntry } from "../lib/es/palabras.js";
 import { TIER } from "../lib/conjugation.js";
-import { loadDict, createLookup, txHtml, voice, speak, onVoice, SPK } from "../lib/lookup-ui.js";
+import { loadDict, createLookup, txHtml, canSpeak, speak, onVoice, SPK } from "../lib/lookup-ui.js";
 
 const $ = (id) => document.getElementById(id);
 const deaccent = (s) => s.replace(/[áéíóú]/g, (c) => ({ á: "a", é: "e", í: "i", ó: "o", ú: "u" })[c]);
@@ -67,7 +67,7 @@ function removeWord(id) { delete S.cards[id]; save(); render(); queue = null; if
 
 // the voice note waits a moment: some browsers list their voices late
 let voicesWaited = false;
-const voiceNote = (listed) => { if (listed || voicesWaited) $("voiceNote").hidden = !!voice || !settings().modes.includes("listen"); };
+const voiceNote = (listed) => { if (listed || voicesWaited) $("voiceNote").hidden = canSpeak() || !settings().modes.includes("listen"); };
 onVoice(voiceNote);
 setTimeout(() => { voicesWaited = true; voiceNote(true); }, 1500);
 
@@ -131,7 +131,7 @@ function next(focus = $("rev").contains(document.activeElement)) {
   answered = false; revealed = false;
   if (!id) return showDone(focus);
   const c = S.cards[id] || newCard(id, day());
-  const e = entryOf(c), mode = modeFor(c, settings().modes, !!voice);
+  const e = entryOf(c), mode = modeFor(c, settings().modes, canSpeak());
   cur = { c, e, mode, isNew: c.last === null };
   $("rev").style.setProperty("--tc", "var(--t-" + tc[mode] + ")");
   $("rev").classList.remove("done");
@@ -156,7 +156,7 @@ function next(focus = $("rev").contains(document.activeElement)) {
     setGo("Проверить");
     if (focus) $("ans").focus({ preventScroll: true });
   }
-  hide("spk", !voice || mode === "listen");
+  hide("spk", !canSpeak() || mode === "listen");
   render();
 }
 // see mode and the done card don't use the answer field, but it keeps its place
