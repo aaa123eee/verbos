@@ -13,6 +13,7 @@ A Spanish verb conjugation trainer for Russian speakers. You see a verb, a perso
 
 More trainers on the same site:
 
+- **Какое время?** (`/verbos/tiempos/`): which tense a sentence needs — a marker (*ayer, mientras, esta semana, ojalá, si…, cuando* about the future) and a gap: *Ayer yo ___ (comprar) el pan* → *compré*. Past tenses, future and conditional, subjuntivo or indicativo, imperative; a mistake explains the marker and how the form is built.
 - **Местоимения и герундий** (`/verbos/pronombres/`): object pronouns (*me lo da, dámelo, se lo doy*), reflexive verbs (*me levanto, levántate, no te levantes*) and the gerund (*estoy hablando, estoy duchándome*), with the accent rules for attached pronouns.
 - **Ударения** (`/verbos/acentos/`): write a word with or without its tilde (*cancion → canción*, *examen*), verb forms (*hablo / habló*), plurals (*joven → jóvenes*), and the tilde that tells words apart (*tú / tu, qué / que*); every mistake shows the syllables and the rule. Words and plurals come from a dictionary of ~6,500 frequent words.
 - **Слова** (`/verbos/palabras/`): a Spanish ⇄ Russian dictionary of ~69,000 words and phrases with every translation found, which recognises forms (*fui* → ir, ser) and saves what you look up; saved words come back for review by days (recall the meaning, write the word, listen). MyMemory is asked only for words the dictionary lacks, on request.

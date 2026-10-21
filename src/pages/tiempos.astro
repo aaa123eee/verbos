@@ -1,0 +1,85 @@
+---
+// Which tense: a sentence with a marker (ayer, mientras, ojalá, si…) and a gap; type the verb in the tense it needs.
+import TrainerPage from "../components/TrainerPage.astro";
+import { GROUPS, FR, randomTask } from "../lib/es/tiempos.js";
+import { OBJ, REFL } from "../lib/es/pronombres-data.js";
+const groups = Object.entries(GROUPS);
+const nVerbs = new Set([...Object.keys(OBJ), ...Object.keys(REFL)]).size;
+---
+<TrainerPage title="Tiempos · Conjugación española" brand="Tiempos" brandEm="¿cuál toca?" current="tiempos" first={randomTask({ groups: groups.map((g) => g[0]), vos: true })} placeholder="форма глагола">
+  <Fragment slot="settings">
+    <section>
+      <h3>Что тренируем</h3>
+      <div class="seg">{groups.map(([v, l]) => <label class="check"><input type="checkbox" name="groups" value={v} checked> {l}</label>)}</div>
+      <p class="empty">{FR.length} ситуаций и {nVerbs} глаголов.</p>
+    </section>
+    <section>
+      <h3>Проверка</h3>
+      <div class="seg">
+        <label class="check"><input type="checkbox" name="strict" checked> Ударения считаются</label>
+        <label class="check"><input type="checkbox" name="vos" checked> С vosotros</label>
+      </div>
+    </section>
+  </Fragment>
+
+  <Fragment slot="about">
+    <h2>Как это работает</h2>
+    <p>Тренажёр выбора времени. В предложении есть подсказка-маркер: <b>ayer</b>, <b>mientras</b>, <b>esta semana</b>, <b>ojalá</b>, <b>si…</b>, <b>cuando</b> о будущем. Вместо глагола пропуск, в скобках инфинитив. Напиши форму в том времени, которого требует предложение: <b>Ayer yo ___ (comprar) el pan</b> → <b>compré</b>.</p>
+    <ul>
+      <li><b>Enter</b> — проверить, ещё раз Enter — дальше. <b>Esc</b> — отменить ответ.</li>
+      <li>Пишешь только то, что стоит на месте пропуска: составное время целиком (<b>he comprado</b>), местоимение и <b>no</b> уже в предложении.</li>
+      <li>Где верно несколько вариантов, засчитываются все: pretérito вместо perfecto (так говорят в Латинской Америке), <b>voy a comprar</b> вместо <b>compraré</b>, форма на -se.</li>
+      <li>После ошибки видно, почему здесь это время и как строится форма. Подсказка «Правило» объясняет маркер, но не называет время.</li>
+      <li>Глаголы — все глаголы с дополнением и все возвратные из тренажёра местоимений. Ошибки возвращаются, пока не ответишь правильно три раза. Прогресс хранится только в этом браузере.</li>
+    </ul>
+  </Fragment>
+
+  <Fragment slot="rules">
+    <h2>Какое время выбрать</h2>
+    <div class="grid2">
+      <div class="block">
+        <h3>Прошедшие</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>время</th><th>когда</th><th>маркеры</th></tr></thead>
+          <tbody>
+            <tr><td class="p">indefinido</td><td>законченное действие в закрытом периоде</td><td class="f">ayer, anoche, el año pasado, hace dos días, en 2019, de repente</td></tr>
+            <tr><td class="p">imperfecto</td><td>привычка, фон, описание в прошлом</td><td class="f">antes, siempre, a menudo, todos los días, mientras, cuando era niño</td></tr>
+            <tr><td class="p">perfecto</td><td>период ещё идёт; опыт без даты</td><td class="f">hoy, esta mañana, esta semana, este año, ya, nunca, todavía no</td></tr>
+            <tr><td class="p">pluscuamp.</td><td>раньше другого прошедшего</td><td class="f">cuando llegó… ya; me contó que… unos días antes</td></tr>
+          </tbody></table></div>
+        <div class="note"><span><b>Mientras</b> leía (фон, imperfecto), <b>sonó</b> el teléfono (событие, indefinido).</span><span>В Латинской Америке вместо perfecto часто говорят indefinido: <span class="f">hoy comí</span> = <span class="f">hoy he comido</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Настоящее, будущее, условное</h3>
+        <div class="tbl"><table>
+          <thead><tr><th>время</th><th>когда</th><th>маркеры</th></tr></thead>
+          <tbody>
+            <tr><td class="p">presente</td><td>обычно, регулярно, сейчас</td><td class="f">normalmente, cada semana, todos los días</td></tr>
+            <tr><td class="p">futuro</td><td>будущее</td><td class="f">mañana, el año que viene, dentro de diez años</td></tr>
+            <tr><td class="p">futuro perf.</td><td>будет сделано к моменту</td><td class="f">para el viernes ya, dentro de una hora ya</td></tr>
+            <tr><td class="p">condicional</td><td>«сделал бы»; будущее из прошлого</td><td class="f">con más tiempo, en tu lugar; dijo que…</td></tr>
+            <tr><td class="p">cond. perf.</td><td>«сделал бы тогда»</td><td class="f">con más suerte, ayer…; si hubiera sabido, …</td></tr>
+          </tbody></table></div>
+        <div class="note"><span>О планах говорят и <span class="f">ir a + infinitivo</span>: <span class="f">mañana voy a comprar</span>.</span></div>
+      </div>
+      <div class="block">
+        <h3>Subjuntivo или indicativo</h3>
+        <div class="note">
+          <span><b>Subjuntivo</b> — желание, надежда, сомнение, оценка, цель: <span class="f">quiero que, espero que, ojalá, no creo que, es importante que, para que, antes de que</span>.</span>
+          <span><b>Indicativo</b> — утверждение факта: <span class="f">creo que, es verdad que, sé que</span>.</span>
+          <span><b>Cuando</b> о будущем — subjuntivo: <span class="f">cuando llegues, te llamo</span>. О повторяющемся — indicativo: <span class="f">cuando llego, siempre…</span></span>
+          <span>Главная часть в прошлом (<span class="f">quería que, me pidió que</span>), <span class="f">si</span> с нереальным условием, <span class="f">como si</span> — imperfecto de subjuntivo: <span class="f">si tuviera tiempo, iría</span>.</span>
+          <span>Уже сделанное: perfecto de subjuntivo — <span class="f">espero que ya hayas comido</span>. Нереальное прошлое: pluscuamperfecto — <span class="f">si hubiera sabido…</span></span>
+        </div>
+      </div>
+      <div class="block">
+        <h3>Повелительное</h3>
+        <div class="note"><span>Просьба, приказ: <span class="f">compra el pan</span> (tú), <span class="f">compre</span> (usted). Запрет — no + subjuntivo: <span class="f">no compres</span>.</span><span>Просьба через <span class="f">te pido que</span> — уже не imperativo, а subjuntivo: <span class="f">te pido que compres</span>.</span></div>
+      </div>
+    </div>
+  </Fragment>
+</TrainerPage>
+
+<script>
+import "../scripts/tiempos.js";
+</script>

@@ -18,7 +18,7 @@ async function makeProgress(page, path) {
 }
 
 for (const width of [1280, 400]) {
-  for (const path of ["", "pronombres/", "acentos/", "genero/", "palabras/"]) {
+  for (const path of ["", "tiempos/", "pronombres/", "acentos/", "genero/", "palabras/"]) {
     test(`no layout shifts on load: ${path || "main"} at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.addInitScript(observe);
