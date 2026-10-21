@@ -62,3 +62,30 @@ test("the words page takes words saved in another tab when it comes back", async
   await page.evaluate(() => { Object.defineProperty(document, "visibilityState", { value: "visible", configurable: true }); document.dispatchEvent(new Event("visibilitychange")); });
   await expect.poll(() => page.evaluate(() => window.__words("Object.keys(S.cards)"))).toContain("gato|n");
 });
+
+test("every word of a task sentence shows its translation and goes to my words; the gap is not a word", async ({ page }) => {
+  await page.goto("tiempos/?e2e");
+  await page.waitForFunction(() => window.__kit);
+  await page.evaluate(() => window.__kit(`cur = fromKey("ayer|comer|2|0"); last = cur.key; $("pMain").innerHTML = cur.main; wrapWords($("pMain"));`));
+  await expect(page.locator(".prompt .gap .w")).toHaveCount(0);
+  const ayer = page.locator(".prompt .w", { hasText: /^Ayer$/ });
+  await ayer.click();
+  await expect(page.locator("#wpop")).toContainText("вчера");
+  await expect(page.locator("#wpop .saved")).toBeVisible();
+  await expect(page.locator("#ans")).toBeFocused();
+  // a form leads to its word
+  await page.locator(".prompt .w", { hasText: /^él$/ }).click();
+  await expect(page.locator("#wpop .wp-w")).toHaveText("él");
+  await page.keyboard.press("Escape");
+  await expect(page.locator("#wpop")).toBeHidden();
+  // «подробнее» opens the search on that word
+  await ayer.click();
+  await page.locator("#wpop [data-more]").click();
+  await expect(page.locator("#find")).toBeVisible();
+  await expect(page.locator("#fq")).toHaveValue("ayer");
+  await page.waitForTimeout(300);
+  await page.goto("palabras/?e2e");
+  await page.waitForFunction(() => window.__words && window.__words("loaded"));
+  const ids = await page.evaluate(() => window.__words("Object.keys(S.cards)"));
+  expect(ids.some((id) => id.startsWith("ayer|")) && ids.some((id) => id.startsWith("él|"))).toBe(true);
+});

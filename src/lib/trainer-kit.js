@@ -108,12 +108,28 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
     for (let i = 0; i < 20; i++) { const t = next(st); if (t.key !== last) return t; }
     return next(st);
   }
+  // every word of a task sentence (.sent) or of the objects (.obj) is a button: it shows the translation and saves the
+  // word (word-pop.js, loaded on the first click); the gap is not a word. The answer field keeps the focus.
+  function wrapWords(root) {
+    for (const box of root.querySelectorAll(".sent, .obj")) {
+      const it = document.createTreeWalker(box, NodeFilter.SHOW_TEXT), nodes = [];
+      while (it.nextNode()) if (!it.currentNode.parentElement.closest(".gap")) nodes.push(it.currentNode);
+      for (const n of nodes) {
+        const parts = n.data.split(/([A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)/); if (parts.length < 2) continue;
+        const f = document.createDocumentFragment();
+        parts.forEach((x, i) => { if (!x) return; if (i % 2) { const b = document.createElement("button"); b.type = "button"; b.className = "w"; b.tabIndex = -1; b.title = "Перевод"; b.textContent = x; f.append(b); } else f.append(x); });
+        n.replaceWith(f);
+      }
+    }
+  }
+  $("pMain").addEventListener("mousedown", (e) => { if (e.target.closest(".w")) e.preventDefault(); });
+  $("pMain").addEventListener("click", (e) => { const b = e.target.closest(".w"); if (b) import("./word-pop.js").then((m) => m.showWord(b)); });
   const FB_IDLE = $("fb").textContent;
   function show() {
     if (!loaded) return;
     cur = pick(); last = cur.key; answered = false; prevS = null; undone = false;
     $("pTag").textContent = cur.tag; $("pWhen").textContent = cur.when || "";
-    $("pMain").innerHTML = cur.main; $("pSub").textContent = cur.sub || "";
+    $("pMain").innerHTML = cur.main; $("pSub").textContent = cur.sub || ""; wrapWords($("pMain")); $("wpop")?.setAttribute("hidden", "");
     document.querySelector(".trainer").style.setProperty("--tc", "var(--t-" + (cur.tc || "pres") + ")");
     const r = S.review[cur.key]; $("pRev").textContent = r ? "повтор · осталось верных: " + r.need : "";
     $("ans").value = ""; $("ans").focus({ preventScroll: true });

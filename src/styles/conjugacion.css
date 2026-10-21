@@ -350,3 +350,18 @@ html[data-seen] .trainer.loading .feedback.idle{display:none}
 .find .panel{display:flex;flex-direction:column;gap:14px}
 .find-note{font-size:13px}
 .find-note a{color:var(--cobalt);font-weight:600}
+
+/* words of a task sentence: each one shows its translation (word-pop.js) */
+.prompt button.w{all:unset;cursor:pointer;border-radius:2px;text-decoration:underline dotted 1px color-mix(in srgb,var(--muted) 55%,transparent);text-underline-offset:.22em}
+.prompt button.w:hover{text-decoration-color:var(--tc);text-decoration-style:solid}
+.prompt button.w.on{text-decoration:underline solid 2px var(--tc)}
+.prompt button.w:focus-visible{outline:2px solid var(--tc)}
+.wpop{position:absolute;z-index:30;width:min(320px,calc(100vw - 32px));box-sizing:border-box;padding:12px 14px;background:var(--surface);color:var(--ink);border:2px solid var(--edge);border-left:6px solid var(--cobalt);border-radius:var(--r);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;font-size:14px}
+.wp-head{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}
+.wp-w{font-family:var(--f-display);font-size:21px;line-height:1.1;overflow-wrap:anywhere}
+.wpop .how{margin:0;font-size:13px}
+.wpop ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:2px;font-size:16px;font-weight:600}
+.wp-foot{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;margin:2px 0 0;font-size:13px}
+.wp-foot [data-more]{margin-left:auto}
+.wp-none{margin:0;color:var(--muted)}
+.wp-also{margin:0;font-size:12.5px;color:var(--muted)}
