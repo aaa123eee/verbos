@@ -31,7 +31,7 @@ describe("tense tasks", () => {
       const vs = Object.keys(OBJ).map((v) => [v, 0]).concat(f.obj ? [] : Object.keys(REFL).map((v) => [v, "r"]));
       for (const p of ps) for (const [v, o] of vs) {
         const k = [f.id, v, p, o].join("|"), t = fromKey(k), m = strip(t.main);
-        if (t.key !== k || !m.includes("_____") || /[{}]/.test(m) || !t.answers.length || t.answers.some((a) => !a || a.startsWith("no "))) bad.push("task " + k);
+        if (t.key !== k || !t.main.includes('<span class="gap">') || /[{}]/.test(m) || !t.answers.length || t.answers.some((a) => !a || a.startsWith("no "))) bad.push("task " + k);
         const h = t.rule.join(" ");
         if (t.answers.some((a) => new RegExp("(^|[^a-záéíóúñ])" + a + "([^a-záéíóúñ]|$)").test(h))) bad.push("hint leaks " + k);
         if (names.some((n) => h.toLowerCase().includes(n.toLowerCase()))) bad.push("hint names the tense " + k);

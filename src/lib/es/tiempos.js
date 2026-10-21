@@ -87,7 +87,7 @@ function build({ f: fid, v, p, o }) {
   const f = FRAMES[fid], refl = o === "r", ob = refl ? null : OBJ[v].objs[+o];
   const cl = refl ? CL[p] + " " : "";
   const subj = isImpT(f.t) ? "" : SUBJ[p];
-  const main = f.es.replace("{S}", subj).replace("{V}", cl + '<span class="gap">_____</span> <span class="pron">(' + v + (refl ? "se" : "") + ")</span>").replace("{O}", ob ? ob.ph : "")
+  const main = f.es.replace("{S}", subj).replace("{V}", cl + '<span class="gap"></span> <span class="pron">(' + v + (refl ? "se" : "") + ")</span>").replace("{O}", ob ? ob.ph : "")
     .replace(/\s+([.,])/g, "$1").replace(/\s+/g, " ").trim().replace(/^([a-záéíóúñ])/, (c) => c.toUpperCase());
   const answers = [gapForm(v, f.t, p)];
   const alt = altForm(v, f.t, p); if (alt) answers.push(alt);
