@@ -1,0 +1,6 @@
+---
+// The wine button at the right end of the top bar; it opens dialog#wine of Support.astro. Hidden without payment details.
+import { hasWine } from "../lib/support.js";
+const ico = '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-.5 6a3.5 3.5 0 0 1-7 0z"/><path d="M8.2 7h7.6"/><path d="M12 12.5V20M8.5 21h7"/></svg>';
+---
+{hasWine() && <button type="button" class="vinobtn" id="wineOpen" aria-haspopup="dialog" aria-controls="wine" title="Поблагодарить автора"><Fragment set:html={ico} /><span>Поблагодарить</span></button>}

@@ -2,6 +2,8 @@
 // Words: a Spanish ⇄ Russian dictionary that remembers what you look up, and a day-based review of those words.
 import Base from "../layouts/Base.astro";
 import TrainerNav from "../components/TrainerNav.astro";
+import Support from "../components/Support.astro";
+import WineButton from "../components/WineButton.astro";
 import "../styles/conjugacion.css";
 const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
 const ICO = {
@@ -28,6 +30,7 @@ const modes = [R("modes", "see", "Вспомнить перевод", true), R("
     <span class="sep" aria-hidden="true"></span>
     <a class="ghost fyi" href="#about" title="Как это работает"><Fragment set:html={I(ICO.info)} /><span>Что это?</span></a>
     <button type="button" class="ghost only-m" id="cfgOpen" aria-controls="side" aria-expanded="false" title="Настройки"><Fragment set:html={I(ICO.cfg)} /><span>Настройки</span></button>
+    <WineButton />
   </header>
   <TrainerNav current="palabras" />
 
@@ -73,6 +76,7 @@ const modes = [R("modes", "see", "Вспомнить перевод", true), R("
       <div class="lres" id="res" aria-live="polite"></div>
     </section>
 
+    <Support />
     <div class="trainer loading" id="rev">
       <div class="prompt" aria-live="polite">
         <div class="tense"><span class="pill" id="pTag">вспомни перевод</span><span class="when" id="pWhen"></span><span class="mini" id="mini">осталось <b></b> · дней подряд <b></b></span></div>

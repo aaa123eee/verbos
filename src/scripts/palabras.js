@@ -134,6 +134,7 @@ function next(focus = $("rev").contains(document.activeElement)) {
   const c = S.cards[id] || newCard(id, day());
   const e = entryOf(c), mode = modeFor(c, settings().modes, canSpeak());
   cur = { c, e, mode, isNew: c.last === null };
+  $("rev").dataset.key = id + "|" + mode;
   $("rev").style.setProperty("--tc", "var(--t-" + tc[mode] + ")");
   $("rev").classList.remove("done");
   $("pTag").textContent = { see: "вспомни перевод", write: "напиши по-испански", listen: "на слух" }[mode];

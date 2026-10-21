@@ -130,7 +130,8 @@ export function createTrainer({ id, next, fromKey, allowed = () => true }) {
     cur = pick(); last = cur.key; answered = false; prevS = null; undone = false;
     $("pTag").textContent = cur.tag; $("pWhen").textContent = cur.when || "";
     $("pMain").innerHTML = cur.main; $("pSub").textContent = cur.sub || ""; wrapWords($("pMain")); $("wpop")?.setAttribute("hidden", "");
-    document.querySelector(".trainer").style.setProperty("--tc", "var(--t-" + (cur.tc || "pres") + ")");
+    const card = document.querySelector(".trainer"); card.dataset.key = cur.key;
+    card.style.setProperty("--tc", "var(--t-" + (cur.tc || "pres") + ")");
     const r = S.review[cur.key]; $("pRev").textContent = r ? "повтор · осталось верных: " + r.need : "";
     $("ans").value = ""; $("ans").focus({ preventScroll: true });
     resetHints(); setGo(false);

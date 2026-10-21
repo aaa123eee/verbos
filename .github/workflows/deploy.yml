@@ -28,6 +28,9 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+        env: # the feedback bot; it ends up in the page anyway, but not in git
+          PUBLIC_TG_TOKEN: ${{ secrets.PUBLIC_TG_TOKEN }}
+          PUBLIC_TG_CHAT: ${{ secrets.PUBLIC_TG_CHAT }}
       - run: npx playwright install --with-deps chromium
       - run: npx playwright test
       - uses: actions/upload-pages-artifact@v3

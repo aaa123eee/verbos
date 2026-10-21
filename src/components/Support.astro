@@ -1,0 +1,90 @@
+---
+// Above the trainer card on every page: report a mistake (with what is on the screen), write feedback; the dialogs of
+// those and of the wine button in the top bar (WineButton.astro); the logic is in scripts/support.js, the addresses in lib/support.js.
+import QR from "qrcode";
+import { WINE, hasWine } from "../lib/support.js";
+const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICO = {
+  flag: '<path d="M5 21V4"/><path d="M5 4h11l-2 4 2 4H5"/>',
+  msg: '<path d="M4 5h16v11H9l-5 4z"/>',
+  wine: '<path d="M8 3h8l-.5 6a3.5 3.5 0 0 1-7 0z"/><path d="M8.2 7h7.6"/><path d="M12 12.5V20M8.5 21h7"/>',
+  x: '<path d="M18 6 6 18M6 6l12 12"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="1"/><path d="M5 15V4h11"/>',
+  out: '<path d="M14 4h6v6"/><path d="M20 4 10 14"/><path d="M18 14v6H4V6h6"/>',
+};
+const ver = (process.env.GITHUB_SHA || "dev").slice(0, 7);
+const wine = hasWine();
+const { sbp, bizum, revolut, crypto } = WINE;
+// QR codes drawn at build time; their two colors come from tokens (.qr in the styles)
+const toQr = async (s: string) => s ? (await QR.toString(s, { type: "svg", margin: 0, errorCorrectionLevel: "M" })).replace(/ (fill|stroke)="#[0-9a-f]+"/gi, "") : "";
+const qr = await toQr(sbp.url), rqr = await toQr(revolut);
+const cqr = await Promise.all(crypto.map((c) => toQr(c.addr)));
+---
+<div class="support" data-ver={ver}>
+  <button type="button" class="ghost" data-report="bug"><Fragment set:html={I(ICO.flag)} /><span>Ошибка в задании?</span></button>
+  <button type="button" class="ghost" data-report="idea"><Fragment set:html={I(ICO.msg)} /><span>Отзыв</span></button>
+</div>
+
+<dialog class="sheet small" id="report" aria-label="Сообщить об ошибке или написать отзыв">
+  <div class="sheet-head">
+    <div class="tabs" role="tablist"><button type="button" role="tab" data-kind="bug"><Fragment set:html={I(ICO.flag)} /><span>Ошибка</span></button><button type="button" role="tab" data-kind="idea"><Fragment set:html={I(ICO.msg)} /><span>Отзыв</span></button></div>
+    <button type="button" class="close" id="reportClose" aria-label="Закрыть"><Fragment set:html={I(ICO.x)} /></button>
+  </div>
+  <div class="sheet-body"><section class="panel rp">
+    <p class="empty" id="rpIntro"></p>
+    <textarea id="rpText" rows="4" aria-label="Сообщение"></textarea>
+    <input id="rpContact" type="text" autocomplete="off" placeholder="Telegram или почта — если ждёшь ответа (необязательно)" aria-label="Как ответить">
+    <div class="rp-ctx" id="rpCtxBox">
+      <label class="check"><input type="checkbox" id="rpAttach" checked> Приложить то, что сейчас на экране</label>
+      <details><summary>Что уйдёт вместе с сообщением</summary><pre id="rpCtx"></pre></details>
+    </div>
+    <div class="acts"><button class="primary" type="button" id="rpSend"><span>Отправить</span><kbd>Ctrl Enter</kbd></button></div>
+    <p class="rp-note" id="rpNote" aria-live="polite"></p>
+  </section></div>
+</dialog>
+
+{wine && <dialog class="sheet small wide vino" id="wine" aria-label="Поблагодарить автора">
+  <div class="sheet-head">
+    <div class="tabs"><button type="button" aria-selected="true"><Fragment set:html={I(ICO.wine)} /><span>Поблагодарить</span></button></div>
+    <button type="button" class="close" id="wineClose" aria-label="Закрыть"><Fragment set:html={I(ICO.x)} /></button>
+  </div>
+  <div class="sheet-body"><section class="panel">
+    <h2>tú invitas, él bebe</h2>
+    <p>Тренажёр бесплатный, без рекламы и регистрации. Если он помогает — угости автора бокалом вина.</p>
+    <div class="pay">
+      {(sbp.url || sbp.phone) && <article class="paycard sbp">
+        {qr && <div class="qr" aria-hidden="true" set:html={qr}></div>}
+        <div class="pbody">
+          <span class="pill">СБП</span>
+          {sbp.phone && <div class="pval"><code>{sbp.phone}</code><button type="button" class="copy" data-copy={sbp.phone.replace(/[\s-]+/g, "")}><Fragment set:html={I(ICO.copy)} /><span>Скопировать</span></button></div>}
+          <small>из любого российского банка{sbp.bank && <span class="nw"> · получатель в {sbp.bank}е</span>}</small>
+          {sbp.url && <a class="payopen" href={sbp.url} target="_blank" rel="noopener"><Fragment set:html={I(ICO.out)} /><span>Открыть банк</span></a>}
+          {qr && <small class="qrnote">или наведи камеру на код</small>}
+        </div>
+      </article>}
+      {bizum && <article class="paycard"><div class="qr tile" aria-hidden="true"><b>bizum</b><small>по номеру телефона</small></div><div class="pbody">
+        <span class="pill">Bizum</span>
+        <div class="pval"><code>{bizum}</code><button type="button" class="copy" data-copy={bizum.replace(/[\s-]+/g, "")}><Fragment set:html={I(ICO.copy)} /><span>Скопировать</span></button></div>
+        <small>в приложении банка → Bizum → Enviar dinero</small>
+      </div></article>}
+      {revolut && <article class="paycard">
+        <div class="qr" aria-hidden="true" set:html={rqr}></div>
+        <div class="pbody">
+          <span class="pill">Revolut</span>
+          <div class="pval"><code>{revolut.replace(/^https?:\/\/(www\.)?/, "")}</code></div>
+          <a class="payopen" href={revolut} target="_blank" rel="noopener"><Fragment set:html={I(ICO.out)} /><span>Открыть Revolut</span></a>
+          <small class="qrnote">или наведи камеру на код</small>
+        </div>
+      </article>}
+      {crypto.map((c, i) => <article class="paycard"><div class="qr" aria-hidden="true" set:html={cqr[i]}></div><div class="pbody">
+        <span class="pill">{c.name}</span>
+        <div class="pval"><code class="addr">{c.addr}</code><button type="button" class="copy" data-copy={c.addr}><Fragment set:html={I(ICO.copy)} /><span>Скопировать</span></button></div>
+        {c.net && <small>{c.net} · или код кошельком</small>}
+              </div></article>)}
+    </div>
+  </section></div>
+</dialog>}
+
+<script>
+import "../scripts/support.js";
+</script>

@@ -127,6 +127,7 @@ function show(){
   $("pTense").textContent=T.name;
   $("pWhen").textContent=T.ru;
   document.querySelector(".trainer").style.setProperty("--tc","var(--t-"+T.k+")");
+  document.querySelector(".trainer").dataset.key=cur;
   // Russian prompts exist only for presente and pretérito; other tenses fall back to Spanish
   const m=opt().mode, ruOk=(t==="pres"||t==="pret")&&isRuPrompt(v), ru=ruOk&&(m==="ru"||(m==="mix"&&Math.random()<.5));
   curRu=ru; $("pPron").hidden=ru; $("pSep").hidden=ru;
@@ -237,6 +238,7 @@ function startDrill(){
   drilling=true; answered=false; cur=null; prevS=null; curRu=false;
   $("pTense").textContent=T.name; $("pWhen").textContent=T.ru;
   document.querySelector(".trainer").style.setProperty("--tc","var(--t-"+t+")");
+  document.querySelector(".trainer").dataset.key="drill:"+S.drill;
   $("pPron").hidden=true; $("pSep").hidden=true; $("pVerb").textContent=v; $("pRu").textContent=RU[v][0];
   $("pTag").textContent="две ошибки в этом времени · напиши все формы";
   $("drill").innerHTML=[0,1,2,3,4,5].filter(p=>hasPerson(t,p)&&(o.vos||p!==4)).map(p=>

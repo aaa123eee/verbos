@@ -8,7 +8,8 @@
   /* one color per tense, never red or green (those mean wrong / right); compound tenses are a deeper shade of their family */
   --t-pres:#1d3bd6; --t-pret:#c25400; --t-imp:#8f6200; --t-perf:#8a4b2a; --t-plus:#6b5a3a; --t-fut:#0072a3; --t-futp:#004f73; --t-cond:#007c84; --t-condp:#00585d; --t-sp:#7b2fd0; --t-si:#a12fb0; --t-spf:#55209a; --t-spl:#741f80; --t-impa:#c2187a; --t-ant:#5a4630; --t-fs:#6b3fb8; --t-fps:#3f2878; --t-impn:#8e1459;
   --flag-r:#c60b1e; --flag-y:#ffc400; --flag-ink:#111014; /* Spanish flag, same in both themes: logo only */
-  --backdrop:rgba(17,16,20,.55);
+  --qr-ink:#111014; --qr-bg:#ffffff; --bizum:#05a6c3; /* QR codes stay dark on white in both themes, or cameras miss them; --bizum: its wordmark on such a plate */
+  --backdrop:rgba(17,16,20,.55); --wine:#8c1c3a; /* the wine button only */
   --f-display:"Archivo Black","Arial Black",Impact,system-ui,sans-serif;
   --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -18,13 +19,13 @@
   --cobalt:#8a9dff; --cobalt-soft:#1d2352; --saffron:#ffc93c; --saffron-soft:#3d3010;
   --ok:#4ee08f; --ok-soft:#0f3322; --bad:#ff5a45; --bad-soft:#3d1410;
   --t-pres:#8a9dff; --t-pret:#ff9a4d; --t-imp:#f2c14e; --t-perf:#d9a07a; --t-plus:#bfae8a; --t-fut:#5cc4f5; --t-futp:#3a9fd1; --t-cond:#4fd4dc; --t-condp:#35a8ae; --t-sp:#b98cff; --t-si:#e08cf0; --t-spf:#9c7bff; --t-spl:#c770d8; --t-impa:#ff6fb5; --t-ant:#a8916f; --t-fs:#a98af0; --t-fps:#8d79d6; --t-impn:#f0559a;
-  --backdrop:rgba(0,0,0,.72); color-scheme:dark}}
+  --backdrop:rgba(0,0,0,.72); --wine:#f28aa6; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0c0b10; --surface:#17161d; --ink:#f5f0e6; --muted:#aaa5b4; --line:#34313d; --edge:#f5f0e6; --shadow:6px 6px 0 #000;
   --cobalt:#8a9dff; --cobalt-soft:#1d2352; --saffron:#ffc93c; --saffron-soft:#3d3010;
   --ok:#4ee08f; --ok-soft:#0f3322; --bad:#ff5a45; --bad-soft:#3d1410;
   --t-pres:#8a9dff; --t-pret:#ff9a4d; --t-imp:#f2c14e; --t-perf:#d9a07a; --t-plus:#bfae8a; --t-fut:#5cc4f5; --t-futp:#3a9fd1; --t-cond:#4fd4dc; --t-condp:#35a8ae; --t-sp:#b98cff; --t-si:#e08cf0; --t-spf:#9c7bff; --t-spl:#c770d8; --t-impa:#ff6fb5; --t-ant:#a8916f; --t-fs:#a98af0; --t-fps:#8d79d6; --t-impn:#f0559a;
-  --backdrop:rgba(0,0,0,.72); color-scheme:dark}
+  --backdrop:rgba(0,0,0,.72); --wine:#f28aa6; color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 h1{font-family:var(--f-display);font-weight:400;margin:0}
 h1 em{font-style:normal}
@@ -339,7 +340,7 @@ html[data-seen] .trainer.loading .feedback.idle{display:none}
 .trainer[data-first] .prompt .tag:empty,.conj-main .prompt .tag:empty{display:block;min-height:1lh}
 
 /* the search of the top bar: a field-like button, the lookup in a dialog */
-.findbtn{display:inline-flex;align-items:center;gap:8px;width:230px;padding:7px 10px;font-size:13px;font-weight:500;color:var(--muted);background:var(--surface);border:2px solid var(--edge);border-radius:var(--r);margin:0 4px 0 8px}
+.findbtn{display:inline-flex;align-items:center;gap:8px;width:190px;padding:7px 10px;font-size:13px;font-weight:500;color:var(--muted);background:var(--surface);border:2px solid var(--edge);border-radius:var(--r);margin:0 4px 0 8px}
 .findbtn span{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .findbtn:hover{color:var(--ink)}
 @media (max-width:1000px){.findbtn{width:auto}}
@@ -371,3 +372,63 @@ html[data-seen] .trainer.loading .feedback.idle{display:none}
 /* the speaker next to a form in a table (src/scripts/say.js) */
 button.spk.say{position:fixed;z-index:60;margin:0;padding:3px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);box-shadow:none;transform:none}
 button.spk.say .ico{width:16px;height:16px}
+
+/* report a mistake, feedback; their dialogs. The wine button sits at the right end of the top bar */
+.vinobtn{flex:none;margin-left:4px;padding:7px 10px;font-size:13px;background:var(--wine);border-color:var(--edge);color:var(--surface);box-shadow:3px 3px 0 var(--edge);white-space:nowrap}
+button.vinobtn:not(:disabled):hover{box-shadow:5px 5px 0 var(--edge)}
+.top .fyi span{display:none} /* the about link is an icon (its title says what it is), so the wine button fits */
+@media (max-width:1240px){.vinobtn span{display:none}.vinobtn{padding:6px 8px}}
+/* phones: the about link goes (the footer is a scroll away), so the logo keeps its room */
+@media (max-width:480px){.vinobtn{margin-left:4px;box-shadow:2px 2px 0 var(--edge)}.top .fyi{display:none}}
+/* above the card: the card grows after the saved progress is read, so nothing under it may stay in view */
+.support{max-width:720px;width:100%;box-sizing:border-box;margin:-8px auto -6px;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:2px 4px}
+.support .ghost{font-size:12.5px;padding:6px 9px}
+dialog.sheet.small{width:min(600px,calc(100% - 32px));height:fit-content;max-height:calc(100% - 48px)}
+@media (max-width:560px){dialog.sheet.small{width:calc(100% - 16px);max-height:calc(100% - 16px);border:2px solid var(--edge);border-radius:var(--r)}.small .tabs button span{display:inline!important}}
+dialog.sheet.small .sheet-body{padding:18px 16px 22px}
+.small .panel{display:flex;flex-direction:column;gap:12px}
+#report{--tc:var(--cobalt)}
+.rp textarea,.rp input[type=text]{width:100%;box-sizing:border-box;font-family:var(--f-body);font-size:16px;padding:10px 12px;border:2px solid var(--edge);border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.rp textarea{resize:vertical;min-height:96px}
+.rp textarea:focus,.rp input[type=text]:focus{outline:none;border-color:var(--cobalt)}
+.rp-ctx{display:flex;flex-direction:column;gap:6px}
+.rp-ctx input{accent-color:var(--ink);width:16px;height:16px;margin:0}
+.rp-ctx summary{font-size:13px;color:var(--muted);cursor:pointer}
+.rp-ctx pre{margin:6px 0 0;max-height:220px;overflow:auto;padding:10px 12px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);font-family:var(--f-mono);font-size:12px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--muted)}
+.rp-note{font-size:14px;color:var(--muted);min-height:1lh;margin:0}
+.rp-note.ok{color:var(--ok);font-weight:600}
+.rp-note.bad{color:var(--bad)}
+dialog.vino{--tc:var(--wine)}
+dialog.vino h2{color:var(--wine)}
+/* payment cards: a pill with the method, the number or address, copy next to it; a QR (or the Bizum plate) on the left
+   on wider screens; two columns from 760px so everything fits without scrolling */
+@media (min-width:561px){dialog.sheet.small.wide{width:min(900px,calc(100% - 32px))}}
+dialog.vino h2{font-size:24px}
+.vino .panel{gap:10px}
+.pay{display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:4px 6px 6px 0}
+@media (min-width:760px){.pay{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.paycard{display:flex;gap:14px;align-items:center;padding:12px 14px;border:2px solid var(--edge);border-radius:var(--r);background:var(--surface);box-shadow:4px 4px 0 var(--edge)}
+.paycard.sbp{box-shadow:5px 5px 0 var(--wine)}
+.pbody{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.pval{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;width:100%}
+.pval code{font-family:var(--f-mono);font-size:17px;font-weight:600;color:var(--ink);white-space:nowrap}
+.pval code.addr{font-size:12.5px;font-weight:400;white-space:normal;overflow-wrap:anywhere}
+.paycard small{color:var(--muted);font-size:12px;line-height:1.35}
+.paycard .nw{white-space:nowrap}
+button.copy{font-size:12px;font-weight:600;padding:4px 8px;gap:5px;color:var(--wine);border-color:var(--wine);background:transparent}
+button.copy .ico{width:13px;height:13px}
+.payopen{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;font-size:13px;font-weight:700;text-decoration:none;color:var(--surface);background:var(--wine);border:2px solid var(--edge);border-radius:var(--r);transition:transform .08s,box-shadow .08s}
+.payopen .ico{width:14px;height:14px}
+.payopen:hover{transform:translate(-2px,-2px);box-shadow:3px 3px 0 var(--edge)}
+.payopen:focus-visible{outline:2px solid var(--saffron);outline-offset:2px}
+.qr{flex:none;width:104px;padding:7px;background:var(--qr-bg);border:2px solid var(--edge);border-radius:var(--r);box-shadow:3px 3px 0 var(--edge);line-height:0}
+.qr svg{width:100%;height:auto}
+.qr svg path:first-child{fill:var(--qr-bg)}
+.qr svg path:last-child{stroke:var(--qr-ink)}
+/* Bizum has no QR: its wordmark on a plate of the same size */
+.qr.tile{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;line-height:1.1;text-align:center}
+.qr.tile b{font-family:var(--f-body);font-weight:700;font-size:28px;letter-spacing:-.04em;color:var(--bizum)}
+.qr.tile small{font-size:10.5px;color:var(--qr-ink);opacity:.7}
+/* phones: the bank opens by the button, a QR on the same screen is no use */
+@media (max-width:560px),(hover:none){.qr,.qr.tile,.qrnote{display:none}}
+@media (max-width:480px){.paycard{padding:12px;box-shadow:3px 3px 0 var(--edge)}.paycard.sbp{box-shadow:4px 4px 0 var(--wine)}.payopen{align-self:stretch;justify-content:center;padding:10px 14px}}
