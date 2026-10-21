@@ -10,8 +10,11 @@ Rows: `[word, part of speech, gender, meanings, flags, forms]`, most frequent fi
 
 `lookup.json` — the full dictionary of the words page, from the same script: rows `[word, part of speech, gender, meanings, more translations]`, most frequent first (part of speech also `phr` — a phrase, `part` — a particle). "More translations" are the Russian words that translate the Spanish one in other entries, the best supported first.
 
-Sources and licenses — the file is a derived work and is distributed under **CC BY-SA 4.0**:
+`verbs.json` — every Spanish verb of the English Wiktionary that the conjugation engine doesn't have (~8.4k), from `npm run build:verbs` (`scripts/build-verbs.mjs`; run it after `build:dict`, it reads the meanings from `lookup.json`). Rows: `[verb, how, meanings, flags]`. `how` is `""` (regular), a model verb of the engine (conjugated like it with another beginning: recontar like contar), or the verb's own entries (`p` presente, `t` pretérito, `f` future stem, `pa` participle, `tu` imperative tú, `im` imperfecto, `o` present subjunctive, `n` / `ni` nosotros subjunctive). The script keeps a way only if the engine then gives every form of the Wiktionary conjugation table. Meanings: the Russian Wiktionary entry (via `lookup.json`), else the Russian translations of the English glosses' verbs (English Wiktionary translation tables), else the English gloss marked «англ.:». Flags: `s` — used as -se (arrepentirse), `d` — defective (atañer).
+
+Sources and licenses — the files are derived works and is distributed under **CC BY-SA 4.0**:
 - Spanish entries of the Russian Wiktionary (ru.wiktionary.org), CC BY-SA, via the machine-readable extract of [kaikki.org](https://kaikki.org/ruwiktionary/) (wiktextract by Tatu Ylonen).
+- Spanish verbs of the English Wiktionary (conjugation tables, glosses), CC BY-SA, via [kaikki.org](https://kaikki.org/dictionary/Spanish/) — `verbs.json`.
 - Spanish nouns and adjectives of the English Wiktionary (en.wiktionary.org), CC BY-SA, via [kaikki.org](https://kaikki.org/dictionary/Spanish/): gender where the Russian Wiktionary has none, common gender (el / la estudiante), plurals, adjective forms.
 - Translations read backwards from the Russian entries of the Russian Wiktionary, and from the translation tables of the English Wiktionary (English entries), both CC BY-SA, via kaikki.org.
 - Word frequencies: [FrequencyWords](https://github.com/hermitdave/FrequencyWords) by Hermit Dave, OpenSubtitles 2018, CC BY-SA 4.0.

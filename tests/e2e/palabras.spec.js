@@ -27,6 +27,17 @@ test("looks up a Spanish word with all its translations, and a form leads to its
   await expect(page.locator(".wcard .ww").first()).toHaveText("el problema");
 });
 
+test("every verb conjugates in its card: a form of a rare verb leads to it, even one the dictionary lacks", async ({ page }) => {
+  await page.fill("#q", "recuento");
+  await expect(page.locator('.wcard [data-conj="recontar"]')).toHaveCount(1);
+  await page.locator('.wcard [data-conj="recontar"]').click();
+  await expect(page.locator(".wcard .wconj .ln.found").first()).toContainText("recuento");
+  // madrugar has no Russian Wiktionary entry: the card comes from the engine's meanings
+  await page.fill("#q", "madrugué");
+  await expect(page.locator('.wcard [data-conj="madrugar"]').first()).toBeVisible();
+  await expect(page.locator(".wcard .how").first()).toContainText("pretérito, yo");
+});
+
 test("a Russian query lists Spanish words; a click opens the word and saves it", async ({ page }) => {
   await page.fill("#q", "собака");
   await expect(page.locator(".wrow .f").first()).toBeVisible();

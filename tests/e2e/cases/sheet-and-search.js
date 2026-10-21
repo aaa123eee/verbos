@@ -6,7 +6,7 @@ try{
  t("opens on tab",sheet.open&&!$("irregular").hidden&&$("regular").hidden&&document.querySelector('[data-tab=irregular]').getAttribute("aria-selected")==="true");
  document.querySelector('[data-tab=other]').click(); t("tab switch",!$("other").hidden&&$("irregular").hidden);
  document.querySelector('[data-tab=search]').click();
- t("empty search lists all",$("results").querySelectorAll("button").length===ALL.length&&$("verbCard").innerHTML==="");
+ t("empty search lists all",$("results").querySelectorAll("button").length===OWN.size&&$("verbCard").innerHTML==="");
  const q=v=>{$("q").value=v;$("q").dispatchEvent(new Event("input"));};
  q("tuve"); t("form search → tener card",selVerb==="tener"&&$("verbCard").querySelector(".found .f").textContent==="tuve");
  q("иметь"); t("russian search",[...$("results").querySelectorAll("button")].some(b=>b.dataset.v==="tener"));

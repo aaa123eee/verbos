@@ -1,7 +1,8 @@
 // Words page: the dictionary lookup (Spanish ⇄ Russian), "my words" saved from it, and their day-based review.
 import { IDB, norm, esc } from "../lib/trainer-kit.js";
 import { LEX } from "../lib/es/lexicon.js";
-import { meanings, matches, withArticle, isRu, key, POS_RU, today, newCard, grade, known, status, modeFor, answersFor, synonym, shownMeanings } from "../lib/es/palabras.js";
+import { meanings, matches, withArticle, isRu, key, POS_RU, today, newCard, grade, known, status, modeFor, answersFor, synonym, shownMeanings, verbEntry } from "../lib/es/palabras.js";
+import { TIER } from "../lib/conjugation.js";
 import { loadDict, createLookup, txHtml, voice, speak, onVoice, SPK } from "../lib/lookup-ui.js";
 
 const $ = (id) => document.getElementById(id);
@@ -53,7 +54,7 @@ const dictReady = loadDict().then((d) => { D = d; }, () => { $("res").innerHTML 
 // an entry for a card: from the dictionary, or the card's own meanings (a MyMemory translation)
 function entryOf(c) {
   if (c.m) return { w: c.id.split("|")[0], p: "x", g: "", base: c.m, more: [], id: c.id, rank: 1e9 };
-  return D && D.byId.get(c.id);
+  return D && (D.byId.get(c.id) || (c.id.endsWith("|v") && TIER[c.id.slice(0, -2)] ? verbEntry(c.id.slice(0, -2)) : undefined));
 }
 const has = (id) => !!S.cards[id];
 function addWord(e, m) {

@@ -1,5 +1,6 @@
 // The conjugation trainer page: cheat sheet tables, trainer state, settings, drill, dialog, search.
-import {tensesHtml,PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND} from "../lib/conjugation.js";
+import {tensesHtml,PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND,irr,LIKE,MORE,SE,DEFECTIVE,addVerbs,allVerbs,isRuPrompt} from "../lib/conjugation.js";
+import VERBS_URL from "../data/verbs.json?url";
 
 // irregular table
 (function(){
@@ -61,12 +62,20 @@ function setTenses(list){
   show();
 }
 const opt=()=>({mode:document.querySelector('input[name=mode]:checked').value,tenses:selTenses,group:document.querySelector('input[name=group]:checked').value,tier:document.querySelector('input[name=tier]:checked').value,vos:$("vos").checked,strict:$("strict").checked});
-function pool(){
-  const o=opt(),items=[];
-  const verbs=(o.group==="reg"?REGULAR:o.group==="irr"?Object.keys(IRR):REGULAR.concat(Object.keys(IRR)))
-    .filter(v=>o.tier==="all"||TIER[v]===+o.tier);
-  for(const v of verbs)for(const t of o.tenses)for(let p=0;p<6;p++){ if(p===4&&!o.vos)continue; if(!hasPerson(t,p))continue; items.push(v+"|"+t+"|"+p); }
-  return items;
+// the verbs of the chosen type and level; level 5 (every other verb) is there once verbs.json is loaded
+let VL=null,VLkey="";
+function verbList(o){
+  const k=o.group+"|"+o.tier+"|"+MORE.length;
+  if(k===VLkey) return VL;
+  const inGroup=v=>o.group==="all"||(o.group==="irr")===!!irr(v);
+  VL=allVerbs().filter(v=>!DEFECTIVE[v]&&inGroup(v)&&(o.tier==="all"||TIER[v]===+o.tier)); // a defective verb (atañer) lacks persons
+  if(!VL.length) VL=REGULAR.concat(Object.keys(IRR)).filter(inGroup); // level 5 before verbs.json has arrived
+  VLkey=k; return VL;
+}
+// does a card fit the current settings (a review card comes back only then)
+function allowedKey(k,o){
+  const [v,t,p]=k.split("|");
+  return !!TIER[v]&&(o.tier==="all"||TIER[v]===+o.tier)&&(o.group==="all"||(o.group==="irr")===!!irr(v))&&o.tenses.includes(t)&&hasPerson(t,+p)&&(o.vos||p!=="4");
 }
 let cur=null,last=null,answered=false,prevS=null,curRu=false,undone=false; // undone: this prompt's answer was undone once
 const ICO={check:'<path d="M20 6 9 17l-5-5"/>',next:'<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>'};
@@ -95,14 +104,17 @@ function useHint(k){
   h.hidden=false; syncHints(); $("ans").focus({preventScroll:true});
 }
 function pick(){
-  const P=pool(),set=new Set(P);
-  const due=Object.entries(S.review).filter(([k,r])=>set.has(k)&&r.due<=S.t&&k!==last).sort((a,b)=>a[1].due-b[1].due);
+  const o=opt(),V=verbList(o),rnd=a=>a[Math.floor(Math.random()*a.length)];
+  const mine=Object.entries(S.review).filter(([k])=>k!==last&&allowedKey(k,o));
+  const due=mine.filter(([,r])=>r.due<=S.t).sort((a,b)=>a[1].due-b[1].due);
   if(due.length) return due[0][0];
-  // prefer fresh cards; if everything is under review and not yet due, take the soonest one
-  const fresh=P.filter(k=>k!==last&&!(S.review[k]&&S.review[k].due>S.t));
-  if(fresh.length) return fresh[Math.floor(Math.random()*fresh.length)];
-  const soon=P.filter(k=>k!==last).sort((a,b)=>S.review[a].due-S.review[b].due);
-  return soon[0]||P[0];
+  // a fresh card: a random verb, tense and person (not one under review that isn't due yet)
+  for(let i=0;i<60;i++){
+    const t=rnd(o.tenses),ps=[0,1,2,3,4,5].filter(p=>hasPerson(t,p)&&(o.vos||p!==4)),k=rnd(V)+"|"+t+"|"+rnd(ps);
+    if(k!==last&&!S.review[k]) return k;
+  }
+  // everything left is under review and not due yet: the soonest one
+  return mine.sort((a,b)=>a[1].due-b[1].due).map(x=>x[0])[0]||V[0]+"|"+o.tenses[0]+"|"+(isImp(o.tenses[0])?1:0);
 }
 function show(){
   if(!loaded) return;
@@ -116,10 +128,10 @@ function show(){
   $("pWhen").textContent=T.ru;
   document.querySelector(".trainer").style.setProperty("--tc","var(--t-"+T.k+")");
   // Russian prompts exist only for presente and pretérito; other tenses fall back to Spanish
-  const m=opt().mode, ruOk=t==="pres"||t==="pret", ru=ruOk&&(m==="ru"||(m==="mix"&&Math.random()<.5));
+  const m=opt().mode, ruOk=(t==="pres"||t==="pret")&&isRuPrompt(v), ru=ruOk&&(m==="ru"||(m==="mix"&&Math.random()<.5));
   curRu=ru; $("pPron").hidden=ru; $("pSep").hidden=ru;
   if(ru){ $("pVerb").textContent=ruPhrase(v,t,+p); $("pRu").textContent=RU[v][3]||"переведи на испанский"; }
-  else { $("pPron").textContent=persLabel(t,+p); $("pVerb").textContent=v; $("pRu").textContent=RU[v][0]; }
+  else { $("pPron").textContent=persLabel(t,+p); $("pVerb").textContent=v; $("pRu").textContent=RU[v][0]+(SE[v]?" · обычно "+v+"se":""); }
   const r=S.review[cur];
   $("pTag").textContent=r?"повтор · осталось верных: "+r.need:"";
   $("ans").value=""; $("ans").focus({preventScroll:true});
@@ -140,7 +152,7 @@ function diff(u,c){
 }
 function trLine(v,t,p,c){
   const head=v+" · "+persLabel(t,p)+" → "+c;
-  return (t==="pres"||t==="pret")? head+" — "+ruPhrase(v,t,p) : head+" — "+RU[v][0]+" ("+TMAP[t].name+")";
+  return (t==="pres"||t==="pret")&&isRuPrompt(v)? head+" — "+ruPhrase(v,t,p) : head+" — "+RU[v][0]+" ("+TMAP[t].name+")";
 }
 const whyHtml=(v,t,p)=>'<div class="why"><h3>Как получается</h3>'+explain(v,t,p).map(l=>'<div>'+l+'</div>').join("")+'</div>';
 // the whole tense for this verb; the asked person is highlighted, forms off the general rule are colored
@@ -156,7 +168,7 @@ function tenseHtml(v,t,p){
 // Russian prompts can be ambiguous (начинать = empezar / comenzar): any verb with the same Russian phrase counts
 function synonymFor(v,t,p,same){
   const ph=ruPhrase(v,t,p);
-  return REGULAR.concat(Object.keys(IRR)).find(w=>w!==v&&RU[w]&&ruPhrase(w,t,p)===ph&&same(form(w,t,p)))||"";
+  return REGULAR.concat(Object.keys(IRR)).find(w=>w!==v&&isRuPrompt(w)&&ruPhrase(w,t,p)===ph&&same(form(w,t,p)))||"";
 }
 function check(){
   const [v,t,p]=cur.split("|"),c=form(v,t,+p),u=norm($("ans").value);
@@ -306,7 +318,7 @@ $("tenses").addEventListener("click",e=>{
   setTenses(s==="def"?DEFAULT_TENSES:s==="ind"?TENSES.filter(t=>t.mood==="Indicativo").map(t=>t.k):TENSES.map(t=>t.k));
 });
 // the other settings (verb type, level, prompt language, accents, vosotros) survive reloads too
-const SKEY="conj-settings-v1",SET_IDS=["g-all","g-reg","g-irr","l-1","l-2","l-3","l-4","l-all","m-es","m-ru","m-mix","strict","vos"];
+const SKEY="conj-settings-v1",SET_IDS=["g-all","g-reg","g-irr","l-1","l-2","l-3","l-4","l-5","l-all","m-es","m-ru","m-mix","strict","vos"];
 const saveSettings=()=>{ try{localStorage.setItem(SKEY,JSON.stringify(SET_IDS.filter(id=>$(id).checked)));}catch(e){} };
 try{ const on=JSON.parse(localStorage.getItem(SKEY)||"null"); if(Array.isArray(on)) SET_IDS.forEach(id=>$(id).checked=on.includes(id)); }catch(e){}
 document.querySelectorAll('input[name=group],input[name=tier],input[name=mode],#vos').forEach(x=>x.addEventListener("change",()=>{ saveSettings(); show(); }));
@@ -344,28 +356,36 @@ sheet.addEventListener("click",e=>{ if(e.target===sheet) sheet.close(); }); // c
 sheet.addEventListener("close",()=>$("ans").focus({preventScroll:true}));
 
 // ---- verb search: by infinitive, Russian translation or any conjugated form ----
-const ALL=REGULAR.concat(Object.keys(IRR)).sort((a,b)=>a.localeCompare(b,"es"));
+// the engine's own verbs, and every other verb once verbs.json is loaded
+let ALL=REGULAR.concat(Object.keys(IRR)).sort((a,b)=>a.localeCompare(b,"es"));
+const OWN=new Set(ALL);
 const skey=s=>deacc(s.toLowerCase().trim()).replace(/\s+/g," ");
-let FORMS=null; // deaccented form → [{v,t,p}], built on first search
-function formIndex(){
-  if(FORMS) return FORMS;
-  FORMS=new Map(); const add=(k,x)=>{ if(!FORMS.has(k)) FORMS.set(k,[]); FORMS.get(k).push(x); };
-  for(const v of ALL){
-    for(const T of TENSES) for(let p=0;p<6;p++){ const f=form(v,T.k,p); if(f!=null) add(skey(f),{v,t:T.k,p}); }
-    add(skey(part(v)),{v,part:true});
-  }
+// deaccented form → [{v,t,p}]: the engine's verbs on the first search; the other verbs by first letter, when a query needs it
+// (a prefix keeps the first letter: their forms start like the infinitive)
+let FORMS=null; const LETTERS=new Set();
+function addForms(v){
+  const add=(k,x)=>{ if(!FORMS.has(k)) FORMS.set(k,[]); FORMS.get(k).push(x); };
+  for(const T of TENSES) for(let p=0;p<6;p++){ const f=form(v,T.k,p); if(f!=null){ add(skey(f),{v,t:T.k,p}); if(f.includes(" ")) add(skey(f.split(" ").pop()),{v,t:T.k,p}); } }
+  add(skey(part(v)),{v,part:true});
+}
+function formIndex(k){
+  if(!FORMS){ FORMS=new Map(); for(const v of OWN) addForms(v); }
+  const l=skey(k.split(" ").pop())[0];
+  if(l&&!LETTERS.has(l)&&MORE.length){ LETTERS.add(l); for(const v of MORE) if(skey(v)[0]===l) addForms(v); }
   return FORMS;
 }
 // Russian side: every meaning (MEAN) plus the Russian forms used in prompts, so «сказал» finds decir
 const rwords=s=>s.toLowerCase().replace(/ё/g,"е").split(/[^а-яa-zñáéíóú]+/).filter(Boolean);
 let RUIDX=null;
 function ruIndex(){
-  if(RUIDX) return RUIDX;
-  RUIDX=new Map(ALL.map(v=>[v,{gloss:rwords(RU[v][0]),mean:rwords(MEAN[v]||""),forms:rwords(RU[v][1]+" "+RU[v][2].join(" "))}]));
+  if(RUIDX&&RUIDX.size===ALL.length) return RUIDX;
+  RUIDX=new Map(ALL.map(v=>[v,{gloss:rwords(RU[v][0]),mean:rwords(MEAN[v]||""),forms:isRuPrompt(v)?rwords(RU[v][1]+" "+RU[v][2].join(" ")):[]}]));
   return RUIDX;
 }
+// the order of results: the score, then the engine's own (frequent) verbs before the others, then alphabetically
+const byScore=(a,b)=>a.sc-b.sc||OWN.has(b.v)-OWN.has(a.v)||a.v.localeCompare(b.v,"es");
 function searchVerbs(q){
-  const k=skey(q); if(!k) return ALL.map(v=>({v,sc:9}));
+  const k=skey(q); if(!k) return [...OWN].sort((a,b)=>a.localeCompare(b,"es")).map(v=>({v,sc:9}));
   const hits=new Map(),hit=(v,sc,x)=>{ const o=hits.get(v); if(!o||sc<o.sc) hits.set(v,{v,sc,x}); };
   if(/[а-яё]/i.test(q)){ // Russian: every query word must start a word of the meanings (or of the Russian forms)
     const qw=rwords(q),all=(ws,f)=>qw.every(w=>ws.some(x=>f(x,w)));
@@ -375,14 +395,14 @@ function searchVerbs(q){
       else if(all(I.gloss,pre)) hit(v,3.2); else if(all(I.mean,pre)) hit(v,3.3);
       else if(all(I.forms,pre)) hit(v,3.6);
     }
-    return [...hits.values()].sort((a,b)=>a.sc-b.sc||a.v.localeCompare(b.v,"es")).slice(0,40);
+    return [...hits.values()].sort(byScore).slice(0,40);
   }
   for(const v of ALL){
     const kv=skey(v);
     if(kv===k) hit(v,0); else if(kv.startsWith(k)) hit(v,1); else if(kv.includes(k)) hit(v,4);
   }
-  (formIndex().get(k)||[]).forEach(x=>hit(x.v,2,x));
-  return [...hits.values()].sort((a,b)=>a.sc-b.sc||a.v.localeCompare(b.v,"es")).slice(0,30);
+  (formIndex(k).get(k)||[]).forEach(x=>hit(x.v,2,x));
+  return [...hits.values()].sort(byScore).slice(0,30);
 }
 // all meanings of a verb; the ones that match the Russian query are bold
 function meanHtml(v,q){
@@ -397,13 +417,14 @@ function renderSearch(){
   if(!R.some(r=>r.v===selVerb)) selVerb=null;
   $("results").classList.toggle("rows",!!k); // with a query: one row per verb with all its meanings
   $("results").innerHTML=R.length?R.map(r=>'<button type="button" data-v="'+r.v+'" aria-pressed="'+(r.v===selVerb)+'"><span class="f">'+r.v+'</span>'+
-    (k?'<small>'+(r.x?'<i>'+esc(formLabel(r.x))+'</i> · ':'')+meanHtml(r.v,q)+'</small>':'')+'</button>').join(""):'<span class="empty">Ничего не нашлось. Попробуй инфинитив, перевод или любую форму.</span>';
+    (k?'<small>'+(r.x?'<i>'+esc(formLabel(r.x))+'</i> · ':'')+meanHtml(r.v,q)+'</small>':'')+'</button>').join("")+(!k&&MORE.length?'<span class="empty">И ещё '+MORE.length.toLocaleString("ru")+' глаголов — найдутся поиском.</span>':''):'<span class="empty">Ничего не нашлось. Попробуй инфинитив, перевод или любую форму.</span>';
   renderVerb(selVerb,k);
 }
 function renderVerb(v,k){
   if(!v){ $("verbCard").innerHTML=""; return; }
   const found=f=>k&&(skey(f)===k||skey(f.split(" ").pop())===k);
-  $("verbCard").innerHTML='<div class="vhead"><span class="vname">'+v+'</span><span class="badge">'+(IRR[v]?"с особенностями":"правильный")+' · '+TIER_NAME[TIER[v]]+'</span><p class="means">'+meanHtml(v,$("q").value)+'</p></div>'+
+  $("verbCard").innerHTML='<div class="vhead"><span class="vname">'+v+'</span><span class="badge">'+(irr(v)?"с особенностями":"правильный")+' · '+TIER_NAME[TIER[v]]+'</span>'+(LIKE[v]?'<span class="badge">как '+LIKE[v]+'</span>':'')+'<p class="means">'+meanHtml(v,$("q").value)+'</p>'+
+    (SE[v]||DEFECTIVE[v]?'<p class="note">'+[SE[v]?"Обычно с se: "+v+"se.":"",DEFECTIVE[v]?"Неполный глагол: используется не во всех лицах (чаще только él / ellos).":""].filter(Boolean).join(" ")+'</p>':'')+'</div>'+
     '<p class="note">Цветом выделены формы, которые не строятся по общему правилу.</p><div class="conj">'+
     TENSES.map(T=>'<div class="card" style="--tc:var(--t-'+T.k+')"><h4>'+T.name+'</h4>'+[0,1,2,3,4,5].filter(p=>hasPerson(T.k,p)).map(p=>{
       const f=form(v,T.k,p);
@@ -416,7 +437,7 @@ $("results").addEventListener("click",e=>{ const b=e.target.closest("button[data
 // a link like /verbos/#verbo=ir (from the words page) opens that verb's card in the search
 function openFromHash(){
   const m=location.hash.match(/^#verbo=(.+)$/), v=m&&decodeURIComponent(m[1]);
-  if(v&&ALL.includes(v)){ $("q").value=v; selVerb=v; openSheet("search"); }
+  if(v&&TIER[v]){ $("q").value=v; selVerb=v; openSheet("search"); }
 }
 addEventListener("hashchange",openFromHash);
 
@@ -437,6 +458,12 @@ function start(){
 }
 setTimeout(start,1500);
 
+// every other verb (level 5) is a separate file, fetched right away; the first task waits for it as for the progress
+const verbsReady=fetch(VERBS_URL).then(r=>r.json()).then(rows=>{
+  addVerbs(rows); ALL=allVerbs().sort((a,b)=>a.localeCompare(b,"es"));
+  if(sheet.open&&!$("search").hidden) renderSearch();
+  if(loaded) openFromHash();
+}).catch(()=>{});
 // load progress from IndexedDB; migrate old localStorage data once
 (async()=>{
   try{
@@ -450,6 +477,7 @@ setTimeout(start,1500);
     if(dirty) flush();
     setNote("Прогресс хранится в этом браузере (IndexedDB).");
   }catch(e){ idbReady=false; }
+  await verbsReady;
   start();
 })();
 

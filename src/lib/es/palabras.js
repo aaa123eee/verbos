@@ -1,6 +1,6 @@
 // Words page: lookup in both directions, recognising verb and noun / adjective forms, the day-based review schedule,
 // and the review tasks. Pure: the page gives it the rows of lookup.json.
-import { REGULAR, IRR, TENSES, TMAP, form, part, persLabel } from "../conjugation.js";
+import { REGULAR, IRR, TENSES, TMAP, form, part, persLabel, MORE, MEAN } from "../conjugation.js";
 import { LEX } from "./lexicon.js";
 import { article } from "./genero.js";
 
@@ -23,34 +23,48 @@ export function makeDict(rows) {
 // every meaning of an entry as one list: its own first, then the others
 export const meanings = (e) => e.base.concat(e.more);
 
-// forms that lead to a word: every form of the engine's verbs, plurals of nouns and forms of adjectives from the dictionary
+// forms that lead to a word: every form of every verb, plurals of nouns and forms of adjectives from the dictionary.
+// The engine's own verbs go in at once; the other verbs (level 5, once the page has added them) by first letter, when a
+// query needs it — a prefix keeps the first letter, so their forms start like the infinitive.
 let FORMS = null;
-function forms() {
-  if (FORMS) return FORMS;
+const LETTERS = new Set();
+const addTo = (f, x) => { const k = key(f); (FORMS.get(k) || FORMS.set(k, []).get(k)).push(x); };
+function addVerb(v) {
+  for (const T of TENSES) for (let p = 0; p < 6; p++) { const f = form(v, T.k, p); if (f) addTo(f, { w: v, p: "v", how: (T.short || T.name) + ", " + persLabel(T.k, p).split(" ")[0] }); }
+  addTo(part(v), { w: v, p: "v", how: "participio" });
+}
+function forms(q = "") {
+  const l = q[0];
+  if (FORMS) { if (l && MORE.length && !LETTERS.has(l)) { LETTERS.add(l); for (const v of MORE) if (key(v)[0] === l) addVerb(v); } return FORMS; }
   FORMS = new Map();
-  const add = (f, x) => { const k = key(f); (FORMS.get(k) || FORMS.set(k, []).get(k)).push(x); };
-  for (const v of REGULAR.concat(Object.keys(IRR))) {
-    for (const T of TENSES) for (let p = 0; p < 6; p++) { const f = form(v, T.k, p); if (f) add(f, { w: v, p: "v", how: (T.short || T.name) + ", " + persLabel(T.k, p).split(" ")[0] }); }
-    add(part(v), { w: v, p: "v", how: "participio" });
-  }
+  const add = addTo;
+  for (const v of REGULAR.concat(Object.keys(IRR))) addVerb(v);
   for (const e of LEX) {
     if (!e.forms) continue;
     if (e.p === "n" && e.forms !== e.w) add(e.forms, { w: e.w, p: "n", how: "мн. ч." });
     if (e.p === "a") { const [f, mp, fp] = e.forms.split(" "); const lab = { [f]: "ж. р.", [mp]: "мн. ч.", [fp]: "ж. р., мн. ч." }; for (const x of [f, mp, fp]) if (x !== e.w) add(x, { w: e.w, p: "a", how: lab[x] }); }
   }
-  return FORMS;
+  return forms(q);
 }
+// a verb the dictionary doesn't have (level 5 with only an English gloss): an entry from the engine's meanings
+let VKEY = null;
+function verbByKey(k) {
+  if (!VKEY || VKEY.size !== MORE.length) VKEY = new Map(MORE.map((v) => [key(v), v]));
+  return VKEY.get(k);
+}
+export const verbEntry = (v) => ({ w: v, p: "v", g: "", base: MEAN[v].split("; "), more: [], rank: 1e8, id: v + "|v" });
 // a negative imperative or a compound tense is several words: "no hables", "he hablado" — the last word is enough
 const lastWord = (q) => q.split(" ").pop();
 
 // Spanish query: the word itself, words this is a form of, then words that start with it
 export function lookupEs(D, q, max = 8) {
   const k = key(q); if (!k) return { exact: [], formOf: [], more: [] };
-  const exact = D.byKey.get(k) || [];
-  const fx = (forms().get(k) || forms().get(lastWord(k)) || []).filter((x) => x.w !== exact[0]?.w);
+  const exact = (D.byKey.get(k) || []).slice(), vk = verbByKey(k);
+  if (vk && !exact.some((e) => e.p === "v")) exact.push(D.byId.get(vk + "|v") || verbEntry(vk));
+  const fx = (forms(k).get(k) || forms(lastWord(k)).get(lastWord(k)) || []).filter((x) => x.w !== exact[0]?.w);
   const seen = new Set(), formOf = [];
   for (const x of fx) {
-    const e = D.byId.get(x.w + "|" + x.p) || (D.byKey.get(key(x.w)) || [])[0];
+    const e = D.byId.get(x.w + "|" + x.p) || (D.byKey.get(key(x.w)) || [])[0] || (x.p === "v" && MEAN[x.w] ? verbEntry(x.w) : null);
     if (!e) continue;
     const id = e.id + x.how; if (seen.has(id)) continue; seen.add(id);
     formOf.push({ e, how: x.how });

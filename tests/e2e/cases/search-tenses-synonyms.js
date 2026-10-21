@@ -3,7 +3,7 @@ const R=[];const t=(n,c)=>R.push((c?"ok ":"FAIL ")+n);
 try{
  const q=v=>{$("q").value=v;$("q").dispatchEvent(new Event("input"));return [...$("results").querySelectorAll("button")].map(b=>b.dataset.v);};
  openSheet("search");
- t("all 286 verbs listed",q("").length===286&&ALL.length===286);
+ t("empty query lists the 286 engine verbs",q("").length===286&&OWN.size===286);
  let r=q("говорить"); t("говорить → hablar & decir",r.includes("hablar")&&r.includes("decir"));
  t("rows show all meanings",$("results").classList.contains("rows")&&$("results").querySelector('[data-v=hablar] small').textContent.includes("беседовать"));
  t("matched meaning bold",!!$("results").querySelector('[data-v=decir] small b'));

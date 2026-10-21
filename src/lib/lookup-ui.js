@@ -3,17 +3,18 @@
 import { esc } from "./trainer-kit.js";
 import { LEX } from "./es/lexicon.js";
 import { makeDict, lookupEs, lookupRu, meanings, ruWords, matches, OBSCENE, withArticle, isRu, key, POS_RU } from "./es/palabras.js";
-import { REGULAR, IRR, TENSES, form, regularForm, persLabel, hasPerson } from "./conjugation.js";
+import { TIER, TENSES, form, regularForm, persLabel, hasPerson, addVerbs } from "./conjugation.js";
 import LOOKUP_URL from "../data/lookup.json?url";
+import VERBS_URL from "../data/verbs.json?url";
 
-const ENGINE = new Set(REGULAR.concat(Object.keys(IRR)));
 const LEXF = new Map(); for (const e of LEX) if (!LEXF.has(e.w + "|" + e.p)) LEXF.set(e.w + "|" + e.p, e);
 
-// ---- the dictionary: lookup.json is big (~1.5 MB gzipped), so it is a separate file, fetched (once) when needed ----
+// ---- the dictionary: lookup.json is big (~1.5 MB gzipped), so it is a separate file, fetched (once) when needed;
+// with it every other verb (level 5 of the engine): its conjugation in the card, and its forms in the lookup ----
 let D = null, dictP = null;
 export const dict = () => D;
 export function loadDict() {
-  return (dictP ||= fetch(LOOKUP_URL).then((r) => r.json()).then((rows) => (D = makeDict(rows))).catch((e) => { dictP = null; throw e; }));
+  return (dictP ||= Promise.all([fetch(LOOKUP_URL).then((r) => r.json()), fetch(VERBS_URL).then((r) => r.json()).then(addVerbs)]).then(([rows]) => (D = makeDict(rows))).catch((e) => { dictP = null; throw e; }));
 }
 
 // ---- voice: a Spanish voice of speechSynthesis, only when the learner presses a speaker ----
@@ -64,7 +65,7 @@ export function createLookup({ input, res, store, onQuery = () => {}, back = nul
 
   function formsLine(e, i) {
     const x = LEXF.get(e.id);
-    if (e.p === "v" && ENGINE.has(e.w)) return '<button type="button" class="lnk vlink" data-conj="' + esc(e.w) + '" aria-expanded="' + isOpen(e.w, i) + '">' + (isOpen(e.w, i) ? "скрыть спряжение" : "спряжение ↓") + "</button>";
+    if (e.p === "v" && !!TIER[e.w]) return '<button type="button" class="lnk vlink" data-conj="' + esc(e.w) + '" aria-expanded="' + isOpen(e.w, i) + '">' + (isOpen(e.w, i) ? "скрыть спряжение" : "спряжение ↓") + "</button>";
     if (!x || !x.forms) return "";
     if (e.p === "n") return x.only ? "только мн. ч." : "мн. ч. <b>" + esc(x.forms) + "</b>";
     if (e.p === "a") return "<b>" + esc([e.w, ...x.forms.split(" ")].join(" · ")) + "</b>";
@@ -73,7 +74,7 @@ export function createLookup({ input, res, store, onQuery = () => {}, back = nul
   function card(e, q, how, i) {
     const mean = (m) => (q && isRu(q) && matches(m, q) ? "<b>" + esc(m) + "</b>" : esc(m)) + (OBSCENE.test(m) ? ' <span class="vulg">груб.</span>' : "");
     const g = e.p === "n" && e.g ? ({ m: "м. р.", f: "ж. р.", c: "общий род", mf: "м. и ж. р." })[e.g] : "";
-    const fl = formsLine(e, i), verb = e.p === "v" && ENGINE.has(e.w);
+    const fl = formsLine(e, i), verb = e.p === "v" && !!TIER[e.w];
     return '<article class="wcard" data-id="' + esc(e.id) + '"><div class="whead"><span class="ww">' + esc(withArticle(e)) + "</span>" +
       (voice ? '<button type="button" class="spk" data-say="' + esc(e.w) + '" title="Произнести">' + SPK + "</button>" : "") +
       '<span class="badge">' + [POS_RU[e.p], g].filter(Boolean).join(", ") + "</span>" + (how ? '<span class="how">' + esc(how) + "</span>" : "") +

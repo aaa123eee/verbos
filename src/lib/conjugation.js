@@ -1,4 +1,5 @@
 // Verb data, the conjugation engine, explanations and hints. Pure: no DOM, imported by the page and by tests.
+import {syllables,withStress} from "./es/syllables.js";
 const PERS=["yo","tú","él / ella / Ud.","nosotros","vosotros","ellos / Uds."];
 const REG={
  ar:{pres:["o","as","a","amos","áis","an"],pret:["é","aste","ó","amos","asteis","aron"]},
@@ -55,7 +56,7 @@ const RU={
 };
 // tiers: 1 = основные (above), 2 = частые, 3 = регулярно используемые, 4 = расширенные
 const TIER={}; REGULAR.concat(Object.keys(IRR)).forEach(v=>TIER[v]=1);
-const TIER_NAME={1:"Основные",2:"Частые",3:"Регулярно используемые",4:"Расширенные"};
+const TIER_NAME={1:"Основные",2:"Частые",3:"Регулярно используемые",4:"Расширенные",5:"Все остальные"};
 function addTier(n,reg,irr,ru){
   reg.forEach(v=>{REGULAR.push(v);TIER[v]=n;});
   for(const v in irr){IRR[v]={pres:irr[v][0],pret:irr[v][1]};TIER[v]=n;}
@@ -794,8 +795,11 @@ const hasPerson=(t,p)=>!(isImp(t)&&p===0);
 // ---- conjugation engine ----
 const vt=v=>v.endsWith("ar")?"ar":v.endsWith("er")?"er":"ir"; // oír → ir
 const base=v=>v.slice(0,-2);
+// irregular presente / pretérito of every verb: the engine's own (IRR) and those added by addVerbs (XIRR)
+const XIRR={};
+const irr=v=>IRR[v]||XIRR[v];
 function basic(v,t,p){ // presente / pretérito: explicit forms for irregulars, endings for regulars
-  if(IRR[v]) return IRR[v][t].split(" ")[p];
+  if(irr(v)) return irr(v)[t].split(" ")[p];
   return base(v)+REG[vt(v)][t][p];
 }
 const IMPF_IRR={ser:"era eras era éramos erais eran",ir:"iba ibas iba íbamos ibais iban",ver:"veía veías veía veíamos veíais veían"};
@@ -860,6 +864,63 @@ function form(v,t,p){
   }
   return null;
 }
+// ---- every other Spanish verb (src/data/verbs.json, level 5), added by addVerbs ----
+// A verb is regular, or conjugated like a model verb of the engine with another beginning (recontar like contar:
+// re- instead of nothing, mantener like tener), or comes with its own presente / pretérito and exception entries.
+// The build script (scripts/build-verbs.mjs) picks the way that gives every form of the Wiktionary table.
+const LIKE={}, MORE=[];
+const commonEnd=(a,b)=>{ let i=0; while(i<a.length&&i<b.length&&a[a.length-1-i]===b[b.length-1-i]) i++; return i; };
+// the model's beginning q becomes pre; a one-syllable form gets the written accent it needs once it is longer (ten → retén, vio → previó)
+function swap(x,q,pre){
+  return x.split(" ").map(w=>{
+    if(!w.startsWith(q)) throw new Error("model form "+w+" doesn't start with "+q);
+    const r=pre+w.slice(q.length);
+    return syllables(w).length===1&&syllables(r).length>1?withStress(r,syllables(r).length-1):r;
+  }).join(" ");
+}
+// what verb v takes over from model m: the same exception entries, with v's beginning
+function likeSpec(v,m){
+  const n=commonEnd(v,m),q=m.slice(0,m.length-n),pre=v.slice(0,v.length-n),sw=x=>x==null?undefined:swap(x,q,pre);
+  return {like:m,irr:IRR[m]&&{pres:sw(IRR[m].pres),pret:sw(IRR[m].pret)},fut:sw(FUT_STEM[m]),part:sw(PART_IRR[m]),tu:sw(IMP_TU[m]),
+    impf:sw(IMPF_IRR[m]),ovr:sw(SP_OVR[m]),nosIr:sw(SP_NOS_IR[m]),nosInf:SP_NOS_INF.has(m)};
+}
+// a row's "how": "" regular, a model verb, or own entries {p: presente, t: pretérito, f: future stem, pa: participle,
+// tu: imperative tú, im: imperfecto, o: whole present subjunctive, n: 1 = nosotros subjunctive from the infinitive, ni: its -ir stem}
+function specOf(v,how){
+  if(!how) return {};
+  if(typeof how==="string") return likeSpec(v,how);
+  return {irr:how.p&&{pres:how.p,pret:how.t},fut:how.f,part:how.pa,tu:how.tu,impf:how.im,ovr:how.o,nosIr:how.ni,nosInf:!!how.n};
+}
+function register(v,S){
+  if(S.like) LIKE[v]=S.like;
+  if(S.irr) XIRR[v]=S.irr;
+  if(S.fut) FUT_STEM[v]=S.fut;
+  if(S.part) PART_IRR[v]=S.part;
+  if(S.tu) IMP_TU[v]=S.tu;
+  if(S.impf) IMPF_IRR[v]=S.impf;
+  if(S.ovr) SP_OVR[v]=S.ovr;
+  if(S.nosIr) SP_NOS_IR[v]=S.nosIr;
+  if(S.nosInf) SP_NOS_INF.add(v);
+}
+function unregister(v){
+  for(const T of [LIKE,XIRR,FUT_STEM,PART_IRR,IMP_TU,IMPF_IRR,SP_OVR,SP_NOS_IR]) delete T[v];
+  SP_NOS_INF.delete(v);
+}
+// rows: [verb, how, meanings "a; b; c", flags: s — used as -se (arrepentirse), d — defective (atañer: only él / ellos)];
+// every verb gets level 5 and a short gloss
+const SE={},DEFECTIVE={};
+function addVerbs(rows){
+  for(const [v,how,mean,flags=""] of rows){
+    if(TIER[v]) continue;
+    register(v,specOf(v,how)); TIER[v]=5; MORE.push(v);
+    MEAN[v]=mean; RU[v]=[mean.split("; ")[0]];
+    if(flags.includes("s")) SE[v]=1;
+    if(flags.includes("d")) DEFECTIVE[v]=1;
+  }
+}
+// every verb the engine conjugates: its own and the added ones
+const allVerbs=()=>REGULAR.concat(Object.keys(IRR),MORE);
+const isRuPrompt=v=>RU[v]&&RU[v].length>2; // Russian prompts need the Russian forms: the engine's own verbs only
 // ---- explanation: the rule and the steps from the infinitive to the form; mirrors form() ----
 const F=s=>'<b class="f">'+s+'</b>';
 const PN=["yo","tú","él","nosotros","vosotros","ellos"];
@@ -891,7 +952,7 @@ function kindBasic(v,t,p){ // classify a presente/pretérito form; drives both t
       if(st2===st+"y") return r("y",{st2});
     }
   }else{
-    const P=IRR[v].pret.split(" ");
+    const P=irr(v).pret.split(" ");
     if(v==="dar"||v==="ver") return r("darver");
     if(/[^é]e$/.test(P[0])&&/o$/.test(P[2])){ const s2=P[0].slice(0,-1); return r("strong",{s2,j:/j$/.test(s2)}); } // new stem + unstressed endings
     if(p===0&&SPELL_RULE(v)) return r("spell");
@@ -902,10 +963,10 @@ function kindBasic(v,t,p){ // classify a presente/pretérito form; drives both t
   return r("memo");
 }
 function whyBasic(v,t,p){
-  const K=kindBasic(v,t,p),{c,st,g,end,reg}=K,tn=t==="pres"?"presente":"pretérito",all=IRR[v]&&IRR[v][t];
+  const K=kindBasic(v,t,p),{c,st,g,end,reg}=K,tn=t==="pres"?"presente":"pretérito",all=irr(v)&&irr(v)[t];
   const how="основа "+F(st+"-")+" + окончание "+F("-"+end)+" ("+tn+", -"+g+", "+PN[p]+")";
   switch(K.k){
-    case "reg": return ["Отрезаем -"+g+": "+how+" = "+F(c)+"."].concat(IRR[v]?["В этой форме "+v+" спрягается по правилу."]:[]);
+    case "reg": return ["Отрезаем -"+g+": "+how+" = "+F(c)+"."].concat(irr(v)?["В этой форме "+v+" спрягается по правилу."]:[]);
     case "zco": return ["-cer / -cir после гласной → -zco в yo: c превращается в zc: "+F(c)+". Остальные формы обычные."];
     case "gj": return ["Перед o буква g превращается в j, чтобы сохранить звук [х]"+(K.ch?", и корень меняется "+K.ch:"")+": "+F(c)+"."];
     case "guir": return ["Смена корня e → i и орфография: перед o пишется g, а не gu (u нужна только перед e и i): "+F(c)+"."];
@@ -945,12 +1006,18 @@ function whySp(v,p){
   return out;
 }
 const HABER_NAME={perf:"presente",plus:"imperfecto",ant:"pretérito indefinido",futp:"futuro",condp:"condicional",spf:"presente de subjuntivo",spl:"imperfecto de subjuntivo",fps:"futuro de subjuntivo"};
+// a verb conjugated like a model starts with the model's form, where the plain rules don't give it
 function explain(v,t,p){
+  const m=LIKE[v],c=form(v,t,p);
+  const like=m&&c!==regularForm(v,t,p)?["Спрягается как "+m+": "+F(form(m,t,p))+" → "+F(c)+"."]:[];
+  return like.concat(explainForm(v,t,p));
+}
+function explainForm(v,t,p){
   const c=form(v,t,p);
   switch(t){
     case "pres": case "pret": return whyBasic(v,t,p);
     case "imp":
-      if(IMPF_IRR[v]) return ["В imperfecto неправильных всего три: ser, ir, ver. Формы надо запомнить: "+listF(IMPF_IRR[v],p)+"."];
+      if(IMPF_IRR[v]) return [(LIKE[v]?"Как у "+LIKE[v]+" — одного из трёх неправильных в imperfecto (ser, ir, ver): ":"В imperfecto неправильных всего три: ser, ir, ver. Формы надо запомнить: ")+listF(IMPF_IRR[v],p)+"."];
       return ["Отрезаем -"+vt(v)+": основа "+F(base(v)+"-")+" + окончание "+F("-"+IMPF[vt(v)][p])+" = "+F(c)+".","У -ar окончания на -aba, у -er/-ir на -ía."+(p===3&&vt(v)==="ar"?" В nosotros ударение: -ábamos.":"")];
     case "fut": case "cond": {
       const e=(t==="fut"?FUT:COND)[p],nm=t==="fut"?"futuro":"condicional";
@@ -1006,7 +1073,7 @@ function regularForm(v,t,p){ // what the plain rules give, ignoring every except
   return HABER[t].split(" ")[p]+" "+b+(g==="ar"?"ado":"ido");
 }
 function hintRegular(v,t,p){
-  return [IRR[v]?"Глагол с особенностями (в списке неправильных).":"Глагол правильный.",
+  return [irr(v)?"Глагол с особенностями (в списке неправильных).":"Глагол правильный.",
     form(v,t,p)===regularForm(v,t,p)?"Эта форма строится по общему правилу.":"В этой форме есть особенность: общее правило не сработает как есть."];
 }
 function hintBasic(v,t,p){
@@ -1043,7 +1110,7 @@ function hintSp(v,p){
 function hintRule(v,t,p){
   switch(t){
     case "pres": case "pret": return hintBasic(v,t,p);
-    case "imp": return [IMPF_IRR[v]?"Один из трёх неправильных глаголов в imperfecto: форму надо помнить.":"Основа + окончание imperfecto (-aba у -ar, -ía у -er/-ir). Исключений нет."];
+    case "imp": return [IMPF_IRR[v]?(LIKE[v]?"Imperfecto неправильный, как у глагола без приставки.":"Один из трёх неправильных глаголов в imperfecto: форму надо помнить."):"Основа + окончание imperfecto (-aba у -ar, -ía у -er/-ir). Исключений нет."];
     case "fut": case "cond": return [v==="oír"?"Основа — инфинитив, но без ударения на i.":FUT_STEM[v]?"Основа особая, укороченная — не целый инфинитив.":"Основа — целый инфинитив, к нему окончание."];
     case "sp": return hintSp(v,p);
     case "si": {
@@ -1073,8 +1140,8 @@ function hintEndings(v,t,p){ // six endings of this tense for this verb group, c
   const row=(arr,pre)=>arr.map((e,i)=>hasPerson(t,i)?'<span class="nw">'+(i===p?"<b>":"")+pl[i]+" "+(pre??"-")+e+(i===p?"</b>":"")+'</span>':"").filter(Boolean).join(" · ");
   switch(t){
     case "pres": case "pret": {
-      if(IRR[v]&&kindBasic(v,t,p).k==="memo") return ["Форма неправильная: общие окончания тут не помогут."];
-      if(t==="pret"&&IRR[v]&&kindBasic(v,t,p).k==="strong") return ["Сильный pretérito: "+row(["e","iste","o","imos","isteis",kindBasic(v,t,p).j?"eron":"ieron"])];
+      if(irr(v)&&kindBasic(v,t,p).k==="memo") return ["Форма неправильная: общие окончания тут не помогут."];
+      if(t==="pret"&&irr(v)&&kindBasic(v,t,p).k==="strong") return ["Сильный pretérito: "+row(["e","iste","o","imos","isteis",kindBasic(v,t,p).j?"eron":"ieron"])];
       return [(t==="pres"?"Presente":"Pretérito")+", -"+g+": "+row(REG[g][t])];
     }
     case "imp": return ["Imperfecto, -"+g+": "+row(IMPF[g])];
@@ -1096,4 +1163,4 @@ function tensesHtml(sel){
     TENSES.filter(t=>t.mood===m).map(t=>'<label class="tchip" style="--tc:var(--t-'+t.k+')"><input type="checkbox" id="tn-'+t.k+'" value="'+t.k+'"'+(sel.includes(t.k)?" checked":"")+'><span>'+(t.short||t.name).replace(/^(subj|imp)\. /,"")+'</span></label>').join("")+'</div>').join("")+
     '<div class="tbtns"><span class="cap">Быстрый выбор</span><button type="button" data-set="def">Presente + pretérito</button><button type="button" data-set="ind">Весь indicativo</button><button type="button" data-set="all">Все</button></div>';
 }
-export {tensesHtml,PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND};
+export {XIRR,irr,LIKE,MORE,SE,DEFECTIVE,commonEnd,swap,likeSpec,specOf,register,unregister,addVerbs,allVerbs,isRuPrompt,tensesHtml,PERS,REG,REGULAR,IRR,RU,TIER,TIER_NAME,addTier,MEAN,RUP,ruPhrase,TENSES,TMAP,DEFAULT_TENSES,IMP_PERS,isImp,persLabel,hasPerson,vt,base,basic,IMPF_IRR,IMPF,FUT_STEM,FUT,PART_IRR,part,HABER,HABER_SE,SP_OVR,SP_NOS_IR,SP_NOS_INF,spell,SP_END,subjPres,raForm,subjImpf,altForm,IMP_TU,IMP_ROOT,imperative,form,F,PN,ACC,plain,listF,SPELL_RULE,stemChange,kindBasic,whyBasic,whySp,HABER_NAME,explain,regularForm,hintRegular,hintBasic,hintSp,hintRule,hintEndings,COND};
