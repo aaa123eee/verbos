@@ -1,7 +1,7 @@
 // runs inside the page module (see the e2e hook); pushes "ok …" / "FAIL …" into R and writes them to document.title
 const R=[];const t=(n,c)=>R.push((c?"ok ":"FAIL ")+n);
 try{
- t("panels hidden, sheet closed",!sheet.open&&[...document.querySelectorAll(".panel")].every(x=>x.hidden));
+ t("panels hidden, sheet closed",!sheet.open&&[...document.querySelectorAll("#sheet .panel")].every(x=>x.hidden));
  document.querySelector('[data-open=irregular]').click();
  t("opens on tab",sheet.open&&!$("irregular").hidden&&$("regular").hidden&&document.querySelector('[data-tab=irregular]').getAttribute("aria-selected")==="true");
  document.querySelector('[data-tab=other]').click(); t("tab switch",!$("other").hidden&&$("irregular").hidden);

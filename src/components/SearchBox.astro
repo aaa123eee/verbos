@@ -1,0 +1,22 @@
+---
+// The search of the top bar on every page except the words page (which has it on the page): a field-like button
+// (or "/") opens a dialog with the dictionary lookup; a verb opens its conjugation right there, words go to "my words".
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+const I = (d: string) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const SEARCH = '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>';
+---
+<button type="button" class="findbtn" id="findOpen" aria-haspopup="dialog" aria-controls="find" title="Найти слово или глагол (/)"><Fragment set:html={I(SEARCH)} /><span>Слово или глагол</span><kbd>/</kbd></button>
+<dialog class="sheet find" id="find" aria-label="Поиск слова или глагола">
+  <div class="sheet-head">
+    <div class="lookbar"><Fragment set:html={I(SEARCH)} /><input id="fq" type="search" autocomplete="off" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="Слово или глагол, по-испански или по-русски" aria-label="Найти слово или глагол"></div>
+    <button type="button" class="close" id="findClose" aria-label="Закрыть"><Fragment set:html={I('<path d="M18 6 6 18M6 6l12 12"/>')} /></button>
+  </div>
+  <div class="sheet-body"><section class="panel">
+    <div class="lres" id="fres" aria-live="polite"></div>
+    <p class="empty find-note">Найденное слово само попадает в «Мои слова» и потом приходит на повторение на странице <a href={base + "palabras/"}>«Слова»</a>. У глагола сразу открыто спряжение. Esc — очистить, ещё раз Esc — закрыть.</p>
+  </section></div>
+</dialog>
+
+<script>
+import "../scripts/find.js";
+</script>

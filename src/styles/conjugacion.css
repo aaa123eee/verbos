@@ -335,3 +335,18 @@ html[data-seen] .trainer.loading .feedback.idle{display:none}
 .trainer.loading[data-first] .prompt>*{visibility:visible}
 .trainer.loading[data-first] .prompt .mini{visibility:hidden}
 .trainer[data-first] .prompt .tag:empty,.conj-main .prompt .tag:empty{display:block;min-height:1lh}
+
+/* the search of the top bar: a field-like button, the lookup in a dialog */
+.findbtn{display:inline-flex;align-items:center;gap:8px;width:230px;padding:7px 10px;font-size:13px;font-weight:500;color:var(--muted);background:var(--surface);border:2px solid var(--edge);border-radius:var(--r);margin:0 4px 0 8px}
+.findbtn span{flex:1;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.findbtn:hover{color:var(--ink)}
+@media (max-width:1000px){.findbtn{width:auto}}
+@media (max-width:760px){.findbtn span,.findbtn kbd{display:none}.findbtn{padding:6px;margin:0 2px}}
+@media (min-width:561px){dialog.find{width:min(820px,calc(100% - 32px))}}
+.find .sheet-head .lookbar{flex:1;min-width:0;box-shadow:none;padding:0 12px}
+.find .sheet-head .lookbar:focus-within{border-color:var(--cobalt);box-shadow:none}
+#fq{flex:1;min-width:0;border:0;padding:11px 0;font-family:var(--f-body);font-size:18px;background:transparent;color:var(--ink)}
+#fq:focus{outline:none}
+.find .panel{display:flex;flex-direction:column;gap:14px}
+.find-note{font-size:13px}
+.find-note a{color:var(--cobalt);font-weight:600}

@@ -84,7 +84,7 @@ test("the review card hides while searching; Esc or the link brings it back", as
   await expect(page.locator("#q")).toHaveValue("");
   await expect(page.locator("#rev")).toBeVisible();
   await page.fill("#q", "gato");
-  await page.click("#back");
+  await page.click("[data-act=back]");
   await expect(page.locator("#rev")).toBeVisible();
 });
 
