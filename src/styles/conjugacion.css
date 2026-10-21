@@ -365,3 +365,7 @@ html[data-seen] .trainer.loading .feedback.idle{display:none}
 .wp-foot [data-more]{margin-left:auto}
 .wp-none{margin:0;color:var(--muted)}
 .wp-also{margin:0;font-size:12.5px;color:var(--muted)}
+
+/* the speaker next to a form in a table (src/scripts/say.js) */
+button.spk.say{position:fixed;z-index:60;margin:0;padding:3px;border:1px solid var(--edge);background:var(--surface);color:var(--ink);box-shadow:none;transform:none}
+button.spk.say .ico{width:16px;height:16px}

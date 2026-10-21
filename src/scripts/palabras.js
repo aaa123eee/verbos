@@ -3,7 +3,8 @@ import { IDB, norm, esc } from "../lib/trainer-kit.js";
 import { LEX } from "../lib/es/lexicon.js";
 import { meanings, matches, withArticle, isRu, key, POS_RU, today, newCard, grade, known, status, modeFor, answersFor, synonym, shownMeanings, verbEntry } from "../lib/es/palabras.js";
 import { TIER } from "../lib/conjugation.js";
-import { loadDict, createLookup, txHtml, canSpeak, speak, onVoice, SPK } from "../lib/lookup-ui.js";
+import { loadDict, createLookup, txHtml } from "../lib/lookup-ui.js";
+import { canSpeak, speak, onVoice, SPK } from "../lib/voice.js";
 
 const $ = (id) => document.getElementById(id);
 const deaccent = (s) => s.replace(/[áéíóú]/g, (c) => ({ á: "a", é: "e", í: "i", ó: "o", ú: "u" })[c]);

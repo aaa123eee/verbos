@@ -1,7 +1,8 @@
 // A word clicked in a task sentence: a small card under it with the translation, and the word goes to "my words"
 // (a look is a sign it is worth learning). Loaded on the first click; the dictionary is fetched then too.
 import { esc } from "./trainer-kit.js";
-import { loadDict, speak, canSpeak, SPK } from "./lookup-ui.js";
+import { loadDict } from "./lookup-ui.js";
+import { speak, canSpeak, SPK } from "./voice.js";
 import { lookupEs, withArticle, POS_RU, OBSCENE } from "./es/palabras.js";
 import { store, refresh } from "./words-store.js";
 
